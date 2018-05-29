@@ -11,6 +11,18 @@
   <div class="site-content">
     <div class="tab-content-1" id="tab-content-1">
       <div class="tab-item" v-for="(tablecount, index) in gridList">
+        <div class="account-information">
+          <div class="account-msg">
+            <span class="layui-badge-dot layui-bg-green"></span>
+            <span>账户 ：</span>
+           <span>13223</span>
+          </div>
+          <div class="account-msg">
+            <span class="layui-badge-dot layui-bg-green"></span>
+            <span>余额 ：</span>
+            <span>123</span>
+          </div>
+        </div>
         <div class="site-title">
           <fieldset>
             <legend><a name="default">Recent Operations</a></legend>
@@ -26,6 +38,7 @@
                 <col width="10%">
                 <col width="10%">
                 <col width="8%">
+                <col width="8%">
               </colgroup>
               <thead>
               <tr>
@@ -35,18 +48,24 @@
                 <th>Date</th>
                 <th>Direction</th>
                 <th>Operation</th>
+                <th>Search</th>
               </tr>
               </thead>
               <tbody v-for="table in tablecount" :key="table.id">
                 <tr style="height: 39px;overflow-x: hidden">
                   <td>{{table.id}}</td>
                   <td>{{table.coinType}}</td>
-                  <td>{{table.count}}</td>
+                  <td v-bind:class="[table.count<0?active:'']">{{table.count}}</td>
                   <td>{{table.date}}</td>
                   <td>{{table.direction}}</td>
                   <td>
-                    <a title="详情" href="#" @click="getDescription(table)">
+                    <a title="详情" href="#" @click="getDescription(table); sendMsg()">
                     <i class="layui-icon">&#xe63c;</i> 详情
+                    </a>
+                  </td>
+                  <td>
+                    <a title="查询" href="#">
+                      <i class="layui-icon">&#xe615;</i> 查询
                     </a>
                   </td>
                 </tr>
@@ -98,6 +117,7 @@
 </template>
 
 <script>
+import Bus from '../../common/js/bus'
 // eslint-disable-next-line
 const $ = layui.jquery
 // eslint-disable-next-line
@@ -128,7 +148,7 @@ export default {
       ],
       gridList: [
         [
-          {id: 1, coinType: '1s', count: 100, date: '2018-5-18', direction: 'asdasdgasasddddddddddddddddgksadddddddddddajsdglasgdajhdgajk21154dsadasdsadasdasdasdsad6666'},
+          {id: 1, coinType: '1s', count: -100, date: '2018-5-18', direction: 'asdasdgasasddddddddddddddddgksadddddddddddajsdglasgdajhdgajk21154dsadasdsadasdasdasdsad6666'},
           {id: 10, coinType: '1', count: 100, date: '2018-5-18', direction: ''}
         ],
         [
@@ -140,7 +160,8 @@ export default {
         [
           {id: 4, coinType: 'litcoin', count: 400, date: '2018-5-18', direction: ''}
         ]
-      ]
+      ],
+      active: 'active-count'
     }
   },
   mounted () {
@@ -154,6 +175,9 @@ export default {
       this.$set(this.gridList, id, [
         {id: 100, coinType: 'litcoin', count: 400, date: '2018-5-18', direction: ''}
       ])
+    },
+    sendMsg () {
+      Bus.$emit('test', '123')
     },
     pageList (i) {
       let total = 12
@@ -226,6 +250,27 @@ export default {
     padding-left: 15px;
     padding-right: 15px;
   }
+  .account-information {
+    display: block;
+    height: 52px;
+    margin-bottom: 15px;
+    padding: 15px;
+    background-color: #f6f6f6;
+    border-radius: 5px;
+    border: 1px solid #f0f0f0;
+    box-shadow: 1px 4px 8px 0 rgba(0,0,0,0.15);
+  }
+  .account-msg {
+    display: inline-block;
+    max-width: 200px;
+    max-height: 19px;
+    margin-right: 30px;
+    overflow: hidden;
+    white-space:nowrap;
+  }
+  .layui-badge-dot {
+    margin-right: 4px;
+  }
   table{
     table-layout:fixed;
   }
@@ -285,5 +330,8 @@ export default {
     vertical-align: top;
     word-break: break-all;
     white-space: pre-wrap;
+  }
+  .active-count {
+    color: #e74c3c;
   }
 </style>

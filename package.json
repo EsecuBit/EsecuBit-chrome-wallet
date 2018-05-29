@@ -11,6 +11,9 @@
     "build": "node build/build.js"
   },
   "dependencies": {
+    "bitcoinjs-lib": "^3.3.2",
+    "chai": "^4.1.2",
+    "ecurve": "^1.0.6",
     "jquery": "^3.3.1",
     "layui-layer": "^1.0.9",
     "layui-src": "^2.2.5",

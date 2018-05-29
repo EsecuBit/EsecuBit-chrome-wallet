@@ -197,9 +197,9 @@ body .layui-layer-dir .layui-layer-content{padding: 10px;}
 .site-fix-footer .site-tree{/*margin-bottom: 120px;*/}
 
 
-.site-title{ margin: 0 0 20px;}
+.site-title{ margin: 0 0 10px;}
 .site-title fieldset{border: none; padding: 0; border-top: 1px solid #eee;}
-.site-title fieldset legend{margin-left: 20px;  padding: 0 10px; font-size: 22px; font-weight: 300;}
+.site-title fieldset legend{margin-left: 20px;  padding: 0 10px; font-size: 16px; font-weight: 300;}
 
 .site-text a{color: #01AAED;}
 .site-h1{margin-bottom: 20px; line-height: 60px; padding-bottom: 10px; color: #393D49; border-bottom: 1px solid #eee;  font-size: 28px; font-weight: 300;}

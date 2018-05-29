@@ -19,7 +19,7 @@
         <p>
         <span class="layui-breadcrumb" style="visibility: visible;">
           <a href="#">{{$t('message.home')}}</a><span lay-separator="">&gt;</span>
-          <a href="#" id="message">Accounts</a>
+          <a href="#" id="message" class="message">Accounts</a>
         </span>
         </p>
       </div>
@@ -132,5 +132,8 @@ export default {
     border-bottom: 1px solid #4b505d;
     border-right: 1px solid #4b505d;
     color: #fff;
+  }
+  .layui-breadcrumb a:hover {
+    color: #01AAED!important;
   }
 </style>

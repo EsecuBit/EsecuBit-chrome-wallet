@@ -34,6 +34,7 @@
 </template>
 
 <script>
+import Bus from '../../common/js/bus'
 // eslint-disable-next-line
 const form = layui.form
 export default {
@@ -47,6 +48,9 @@ export default {
   mounted () {
     form.render('select', 'form2')
     this.generateQRCode()
+    Bus.$on('test', function (msg) {
+      console.log(msg)
+    })
   },
   methods: {
     generateQRCode () {
