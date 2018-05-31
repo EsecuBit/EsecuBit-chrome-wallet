@@ -31,25 +31,33 @@
 <script>
 export default {
   name: 'Login',
+  props: ['status'],
   data () {
     return {
       promptMsg: 'Please insert your key on your computer and unlock your wallet',
+      loadingMsg1: 'Please insert your key on your computer and unlock your wallet',
+      loadingMsg2: 'Loading... please wait a moment',
       isLoadingIcon: false
     }
   },
+  watch: {
+    status: {
+      handler (newValue, oldValue) {
+        if (newValue === 1) this.loading()
+        if (newValue === 99) this.quitLoading()
+      }
+    }
+  },
   mounted () {
-    setTimeout(this.login, 5000)
   },
   methods: {
-    login () {
-      const loadingMsg = 'Loading... please wait a moment'
-      this.promptMsg = loadingMsg
+    loading () {
+      this.promptMsg = this.loadingMsg2
       this.isLoadingIcon = !this.isLoadingIcon
-      setTimeout(this.sendLoginMsg, 3000)
     },
-    sendLoginMsg () {
-      let data = true
-      this.$emit('loginSystem', data)
+    quitLoading () {
+      this.promptMsg = this.loadingMsg1
+      this.isLoadingIcon = !this.isLoadingIcon
     }
   }
 }

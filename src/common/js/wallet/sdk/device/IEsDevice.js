@@ -1,14 +1,12 @@
 
-const D = require('../D').default.class
+import D from '../D'
 
-const IEsDevice = function () {
-}
-export default {class: IEsDevice}
+export default class IEsDevice {
+  async listenPlug (callback) {
+    throw D.ERROR_NOT_IMPLEMENTED
+  }
 
-IEsDevice.prototype.listenPlug = function (callback) {
-  setTimeout(() => callback(D.ERROR_NOT_IMPLEMENTED), 0)
-}
-
-IEsDevice.prototype.sendAndReceive = async function (apdu) {
-  throw D.ERROR_NOT_IMPLEMENTED
+  async sendAndReceive (apdu) {
+    throw D.ERROR_NOT_IMPLEMENTED
+  }
 }

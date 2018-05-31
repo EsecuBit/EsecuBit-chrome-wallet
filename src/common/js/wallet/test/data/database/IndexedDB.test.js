@@ -1,10 +1,10 @@
 
-const D = require('../../../sdk/D').class
-const IndexedDB = require('../../../sdk/data/database/IndexedDB').class
-require('chai').should()
+import chai from 'chai'
+import D from '../../../sdk/D'
+import IndexedDB from '../../../sdk/data/database/IndexedDB'
 
+chai.should()
 const indexedDB = new IndexedDB(D.TEST_WALLET_ID)
-
 describe('IndexedDB', function () {
   let account1 = {
     accountId: '123',
@@ -58,12 +58,16 @@ describe('IndexedDB', function () {
     value: txInfo.outputs[0].value
   }
 
-  it('delete database', async () => {
-    await indexedDB.deleteDatabase()
-  })
+  // it('delete database', async () => {
+  //   await indexedDB.deleteDatabase()
+  // })
 
   it('init', async () => {
     await indexedDB.init()
+  })
+
+  it('clearDatabase', async () => {
+    await indexedDB.clearDatabase()
   })
 
   it('getAccounts', async () => {
@@ -152,7 +156,5 @@ describe('IndexedDB', function () {
     await indexedDB.newTx(addressInfo, txInfo, utxo)
   })
 
-  it('release', async () => {
-    await indexedDB.release()
-  })
+  // TODO test newTx with invalid utxo or txInfo
 })

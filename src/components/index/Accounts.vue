@@ -15,12 +15,17 @@
           <div class="account-msg">
             <span class="layui-badge-dot layui-bg-green"></span>
             <span>账户 ：</span>
-           <span>13223</span>
+           <span >{{newAccount[index].info.label}}</span>
           </div>
           <div class="account-msg">
             <span class="layui-badge-dot layui-bg-green"></span>
             <span>余额 ：</span>
-            <span>123</span>
+            <span >{{newAccount[index].info.balance}}</span>
+          </div>
+          <div class="account-msg">
+            <a title="刷新" href="#" class="refresh-data" @click="refresh">
+              <i class="layui-icon layui-icon-refresh-2" :class="loadingClass"></i>
+            </a>
           </div>
         </div>
         <div class="site-title">
@@ -32,32 +37,32 @@
           <div class="layui-col-xs12 ">
             <table class="layui-table">
               <colgroup>
-                <col width="5%">
+                <col width="8%">
                 <col width="10%">
-                <col width="10%">
-                <col width="10%">
-                <col width="10%">
+                <col width="8%">
+                <col width="12%">
+                <col width="6%">
                 <col width="8%">
                 <col width="8%">
               </colgroup>
               <thead>
               <tr>
-                <th>Id</th>
-                <th>CoinType</th>
-                <th>Count</th>
-                <th>Date</th>
-                <th>Direction</th>
+                <th>txId</th>
+                <th>coinType</th>
+                <th>blockNumber</th>
+                <th>time</th>
+                <th>direction</th>
                 <th>Operation</th>
                 <th>Search</th>
               </tr>
               </thead>
-              <tbody v-for="table in tablecount" :key="table.id">
+              <tbody v-for="table in tablecount" >
                 <tr style="height: 39px;overflow-x: hidden">
-                  <td>{{table.id}}</td>
+                  <td>{{table.txId}}</td>
                   <td>{{table.coinType}}</td>
-                  <td v-bind:class="[table.count<0?active:'']">{{table.count}}</td>
-                  <td>{{table.date}}</td>
-                  <td>{{table.direction}}</td>
+                  <td :class="[table.blockNumber<0?active:'']">{{table.blockNumber}}</td>
+                  <td>{{getFormatTime(table.time)}}</td>
+                  <td :class ="[table.direction === 'in'?green:red]">{{table.direction}}</td>
                   <td>
                     <a title="详情" href="#" @click="getDescription(table); sendMsg()">
                     <i class="layui-icon">&#xe63c;</i> 详情
@@ -91,20 +96,20 @@
       </thead>
       <tbody>
         <tr>
-          <td>id</td>
-          <td>{{description.id}}</td>
+          <td>txId</td>
+          <td>{{description.txId}}</td>
         </tr>
         <tr>
           <td>coinType</td>
           <td>{{description.coinType}}</td>
         </tr>
         <tr>
-          <td>count</td>
-          <td>{{description.count}}</td>
+          <td>blockNumber</td>
+          <td>{{description.blockNumber}}</td>
         </tr>
         <tr>
-          <td>date</td>
-          <td>{{description.date}}</td>
+          <td>time</td>
+          <td>{{getFormatTime(description.time)}}</td>
         </tr>
         <tr>
           <td>direction</td>
@@ -126,63 +131,124 @@ const layer = layui.layer
 const laypage = layui.laypage
 export default {
   name: 'accouts',
+  props: ['accountInfo'],
   data () {
     return {
       grid_pager: 'grid_pager',
       description: {
-        id: '',
+        txId: '',
         coinType: '',
-        count: '',
-        date: '',
+        blockNumber: '',
+        time: '',
         direction: ''
       },
+      loadingClass: {
+        'layui-anim': false,
+        'layui-anim-rotate': false,
+        'layui-anim-loop': false
+      },
+      newAccount: [{info: {label: '', balance: 0}}],
       wallet: [
         {
           label: 'bitcoin',
-          account: ['account1', 'account2']
-        },
-        {
-          label: 'litcoin',
-          account: ['account3', 'account4']
+          account: ['account1']
         }
       ],
       gridList: [
         [
-          {id: 1, coinType: '1s', count: -100, date: '2018-5-18', direction: 'asdasdgasasddddddddddddddddgksadddddddddddajsdglasgdajhdgajk21154dsadasdsadasdasdasdsad6666'},
-          {id: 10, coinType: '1', count: 100, date: '2018-5-18', direction: ''}
-        ],
-        [
-          {id: 2, coinType: 'bitcoin', count: 200, date: '2018-5-18', direction: ''}
-        ],
-        [
-          {id: 3, coinType: 'litcoin', count: 300, date: '2018-5-18', direction: ''}
-        ],
-        [
-          {id: 4, coinType: 'litcoin', count: 400, date: '2018-5-18', direction: ''}
+          {txId: '', coinType: 'asd', blockNumber: -100, time: 1527665599, direction: 'in'}
         ]
       ],
-      active: 'active-count'
+      totalNum: [],
+      active: 'active-count',
+      green: 'green-font',
+      red: 'red-font',
+      test: 0
+    }
+  },
+  watch: {
+    accountInfo: {
+      handler (newValue, oldValue) {
+        this.test++
+        console.log(this.test,'this is a test')
+        const arr = []
+        const accountList = []
+        for (let elem of newValue) {
+          if (!arr.includes(elem.info.coinType)) {
+            arr.push(elem.info.coinType)
+            accountList.push({label: elem.info.coinType, account: [elem.info.label]})
+          } else {
+            for (let val of accountList) {
+              if (val.label === elem.info.coinType) {
+                val.account.push(elem.info.label)
+                break
+              }
+            }
+          }
+        }
+        // 拼接成理想数据类型
+        this.wallet = accountList
+        this.newAccount = this.orderArr(newValue)
+        let newGridList = []
+        let total = []
+        let txInfoPromise = this.newAccount.map(item => item.getTxInfos(0, 3))
+        Promise.all(txInfoPromise).then(data => {
+          for (let value of data) {
+            newGridList.push(value[1])
+            total.push(value[0])
+          }
+          this.gridList = newGridList
+          this.totalNum = total
+          for (let index of this.gridList.keys()) {
+            this.pageList(index, total[index])
+          }
+        })
+      }
     }
   },
   mounted () {
     this.createTab()
-    for (let index of this.gridList.keys()) {
-      this.pageList(index)
-    }
   },
   methods: {
-    changeTableData (id) {
-      this.$set(this.gridList, id, [
-        {id: 100, coinType: 'litcoin', count: 400, date: '2018-5-18', direction: ''}
-      ])
+    refresh () {
+      this.loadingClass['layui-anim'] = true
+      this.loadingClass['layui-anim-rotate'] = true
+      this.loadingClass['layui-anim-loop'] = true
+      setTimeout(() => {
+        this.loadingClass['layui-anim'] = false
+        this.loadingClass['layui-anim-rotate'] = false
+        this.loadingClass['layui-anim-loop'] = false
+      }, 3000)
+    },
+    orderArr (targetArr) {
+      const arr = []
+      const accountList = []
+      for (let val of targetArr) {
+        if (!arr.includes(val.info.coinType)) {
+          arr.push(val.info.coinType)
+          accountList.push({type: val.info.coinType, list: [val]})
+        } else {
+          for (let item of accountList) {
+            if (item.type === val.info.coinType) {
+              item.list.push(val)
+              break
+            }
+          }
+        }
+      }
+      let a = []
+      for (let val of accountList) {
+        a = a.concat(val.list)
+      }
+      return a
     },
     sendMsg () {
       Bus.$emit('test', '123')
     },
-    pageList (i) {
-      let total = 12
+    pageList (i, totalCount) {
+      let total = totalCount
       let page = 1
-      let limit = 10
+      let limit = 3
       let that = this
       laypage.render({
         elem: 'grid_pager' + i,
@@ -202,10 +268,17 @@ export default {
           if (!first) {
             limit = obj.limit
             page = obj.curr
-            console.log(that)
-            that.changeTableData(i)
+            that.changeTableData(i, limit, page)
           }
         }
+      })
+    },
+    changeTableData (id, limit, page) {
+      // 分页参数
+      const startItem = limit * (page - 1)
+      const endItem = limit * (page - 1) + limit
+      this.newAccount[id].getTxInfos(startItem, endItem).then(data => {
+        this.$set(this.gridList, id, data[1])
       })
     },
     createTab () {
@@ -222,10 +295,10 @@ export default {
       })
     },
     getDescription (table) {
-      this.description.id = table.id
+      this.description.txId = table.txId
       this.description.coinType = table.coinType
-      this.description.count = table.count
-      this.description.date = table.date
+      this.description.blockNumber = table.blockNumber
+      this.description.time = table.time
       this.description.direction = table.direction
       layer.open({
         type: 1,
@@ -235,12 +308,38 @@ export default {
         btn: ['关闭'],
         content: $('.content')
       })
+    },
+    getFormatTime (time) {
+      let date = new Date(time * 1000)
+      let yyyy = date.getFullYear()
+      let moth = date.getMonth() + 1
+      let MM = parseInt(moth / 10) ? moth : '0' + moth
+      let dd = parseInt(date.getDate() / 10) ? date.getDate() : '0' + date.getDate()
+      let HH = parseInt(date.getHours() / 10) ? date.getHours() : '0' + date.getHours()
+      let mm = parseInt(date.getMinutes() / 10) ? date.getMinutes() : '0' + date.getMinutes()
+      let ss = parseInt(date.getSeconds() / 10) ? date.getSeconds() : '0' + date.getSeconds()
+      let arr = []
+      arr.push(yyyy)
+      arr.push('-')
+      arr.push(MM)
+      arr.push('-')
+      arr.push(dd)
+      arr.push(' ')
+      arr.push(HH)
+      arr.push(':')
+      arr.push(mm)
+      arr.push(':')
+      arr.push(ss)
+      return arr.join('')
     }
   }
 }
 </script>
 
 <style scoped>
+  .site-title {
+    margin-top:30px;
+  }
   .content {
     font-size: 13px;
     min-height: 100px;
@@ -267,6 +366,9 @@ export default {
     margin-right: 30px;
     overflow: hidden;
     white-space:nowrap;
+  }
+  .account-msg a.refresh-data:hover {
+    color: #009688;
   }
   .layui-badge-dot {
     margin-right: 4px;
@@ -332,6 +434,12 @@ export default {
     white-space: pre-wrap;
   }
   .active-count {
+    color: #e74c3c;
+  }
+  .green-font {
+    color: #009a61;
+  }
+  .red-font {
     color: #e74c3c;
   }
 </style>

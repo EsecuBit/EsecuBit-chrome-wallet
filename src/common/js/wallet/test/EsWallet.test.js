@@ -1,28 +1,35 @@
 
-const Wallet = require('../sdk/EsWallet').class
-const D = require('../sdk/D').class
+import chai from 'chai'
+import EsWallet from '../sdk/EsWallet'
+import D from '../sdk/D'
+import IndexedDB from '../sdk/data/database/IndexedDB'
 
-const wallet = new Wallet()
-
-// TODO test
+chai.should()
 describe('EsWallet', function () {
-  this.timeout(100000)
+  this.timeout(30000)
+  D.TEST_SYNC = true
+  let esWallet = null
 
-  it('delete database', async () => {
-    let IndexedDB = require('../sdk/data/database/IndexedDB').class
+  it('clearDatabase', async () => {
     let indexedDB = new IndexedDB(D.TEST_WALLET_ID)
-    await indexedDB.deleteDatabase()
+    await indexedDB.clearDatabase()
   })
 
+  // new EsWallet will have heavy work, so do the lazy work
+  it('new wallet', async () => {
+    esWallet = new EsWallet()
+  })
+
+  // FIXME why still has new tx without deleting database?
   it('listenStatus', (done) => {
     const statusList = [D.STATUS_PLUG_IN, D.STATUS_INITIALIZING, D.STATUS_SYNCING, D.STATUS_SYNC_FINISH]
     let currentStatusIndex = 0
 
-    wallet.listenTxInfo((error, txInfo) => {
+    esWallet.listenTxInfo((error, txInfo) => {
       console.log('detect new tx', error, txInfo)
     })
-    wallet.listenStatus((error, status) => {
-      console.log('status', status)
+    esWallet.listenStatus((error, status) => {
+      console.log('error, status', error, status)
       error.should.equal(D.ERROR_NO_ERROR)
       status.should.equal(statusList[currentStatusIndex])
       currentStatusIndex++
@@ -33,7 +40,7 @@ describe('EsWallet', function () {
   })
 
   it('getAccounts', async () => {
-    let accounts = await wallet.getAccounts()
+    let accounts = await esWallet.getAccounts()
     accounts.length.should.equal(1)
   })
 
@@ -42,7 +49,7 @@ describe('EsWallet', function () {
   })
 
   it('getWalletInfo', async () => {
-    let info = await wallet.getWalletInfo()
+    let info = esWallet.getWalletInfo()
     info.should.not.equal(undefined)
   })
 })

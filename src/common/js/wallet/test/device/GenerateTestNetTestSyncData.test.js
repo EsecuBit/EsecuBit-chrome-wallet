@@ -1,11 +1,12 @@
 
-require('chai').should()
-const wallet = require('../../sdk/device/JsWallet').instance
+import chai from 'chai'
+import D from '../../sdk/D'
+import JsWallet from '../../sdk/device/JsWallet'
 
-const OTHER_SEED = 'aa49342d805682f345135afcba79ffa7d50c2999944b91d88e01e1d300000000'
-
+chai.should()
 describe('Generate Testnet Test Sync Data', function () {
   this.timeout('1000000')
+  const jsWallet = new JsWallet()
 
   // transaction 1: otherguy address 0 -> extend address 0 (other -> you)
   // -> 69432710
@@ -71,24 +72,27 @@ describe('Generate Testnet Test Sync Data', function () {
   this.extendAddress44 = 'mzzXogigLmnCfisTgGYg956dRwB2PyZwKx' // 195718254, 71677952
 
   this.changeAddress0 = 'n1ZeY35ALhicxFi4PYc4Nc77B9zzzzfAzM' // 69431710 -> 0
-  this.changeAddress1 = 'mxFYnrJoMHP5jnFpTwvoEi2SmN2kNB6Cmr' // 59431210 -> 53431110 -> 0
+  this.changeAddress1 = 'm' +
+    'xFYnrJoMHP5jnFpTwvoEi2SmN2kNB6Cmr' // 59431210 -> 53431110 -> 0
   this.changeAddress21 = 'n2QUFCMrJ9jPqSbmpD9jkDLEs3GHBmQthE' // 5650000 -> 19061110
 
   it('generateAddress', async () => {
-    await wallet.init(OTHER_SEED)
-    let otherAddress0 = await wallet.getAddress("m/44'/0'/0'/0/0")
-    let otherAddress1 = await wallet.getAddress("m/44'/0'/0'/0/1")
-    let otherAddress2 = await wallet.getAddress("m/44'/0'/0'/0/2")
+    D.TEST_SYNC = false
+    await jsWallet.init()
+    let otherAddress0 = await jsWallet.getAddress("m/44'/0'/0'/0/0")
+    let otherAddress1 = await jsWallet.getAddress("m/44'/0'/0'/0/1")
+    let otherAddress2 = await jsWallet.getAddress("m/44'/0'/0'/0/2")
 
-    await wallet.init()
-    let extendAddress0 = await wallet.getAddress("m/44'/0'/0'/0/0")
-    let extendAddress4 = await wallet.getAddress("m/44'/0'/0'/0/4")
-    let extendAddress24 = await wallet.getAddress("m/44'/0'/0'/0/24")
-    let extendAddress44 = await wallet.getAddress("m/44'/0'/0'/0/44")
+    D.TEST_SYNC = true
+    await jsWallet.init()
+    let extendAddress0 = await jsWallet.getAddress("m/44'/0'/0'/0/0")
+    let extendAddress4 = await jsWallet.getAddress("m/44'/0'/0'/0/4")
+    let extendAddress24 = await jsWallet.getAddress("m/44'/0'/0'/0/24")
+    let extendAddress44 = await jsWallet.getAddress("m/44'/0'/0'/0/44")
 
-    let changeAddress0 = await wallet.getAddress("m/44'/0'/0'/1/0")
-    let changeAddress1 = await wallet.getAddress("m/44'/0'/0'/1/1")
-    let changeAddress21 = await wallet.getAddress("m/44'/0'/0'/1/21")
+    let changeAddress0 = await jsWallet.getAddress("m/44'/0'/0'/1/0")
+    let changeAddress1 = await jsWallet.getAddress("m/44'/0'/0'/1/1")
+    let changeAddress21 = await jsWallet.getAddress("m/44'/0'/0'/1/21")
 
     otherAddress0.should.equal(this.otherAddress0)
     otherAddress1.should.equal(this.otherAddress1)
@@ -118,8 +122,8 @@ describe('Generate Testnet Test Sync Data', function () {
   })
 
   it('generateTx2', async () => {
-    await wallet.init()
-    let transaction2 = await wallet.signTransaction({
+    await jsWallet.init()
+    let transaction2 = await jsWallet.signTransaction({
       inputs: [{
         prevAddress: this.extendAddress0,
         prevAddressPath: "m/44'/0'/0'/0/0",
@@ -136,8 +140,8 @@ describe('Generate Testnet Test Sync Data', function () {
   })
 
   it('generateTx3', async () => {
-    await wallet.init()
-    let transaction3 = await wallet.signTransaction({
+    await jsWallet.init()
+    let transaction3 = await jsWallet.signTransaction({
       inputs: [{
         prevAddress: this.changeAddress0,
         prevAddressPath: "m/44'/0'/0'/1/0",
@@ -157,8 +161,8 @@ describe('Generate Testnet Test Sync Data', function () {
   })
 
   it('generateTx4', async () => {
-    await wallet.init()
-    let transaction4 = await wallet.signTransaction({
+    await jsWallet.init()
+    let transaction4 = await jsWallet.signTransaction({
       inputs: [{
         prevAddress: this.changeAddress1,
         prevAddressPath: "m/44'/0'/0'/1/1",
@@ -178,8 +182,8 @@ describe('Generate Testnet Test Sync Data', function () {
   })
 
   it('generateTx5', async () => {
-    await wallet.init()
-    let transaction5 = await wallet.signTransaction({
+    await jsWallet.init()
+    let transaction5 = await jsWallet.signTransaction({
       inputs: [{
         prevAddress: this.changeAddress1,
         prevAddressPath: "m/44'/0'/0'/1/1",
@@ -204,8 +208,8 @@ describe('Generate Testnet Test Sync Data', function () {
   })
 
   it('generateTx7', async () => {
-    await wallet.init()
-    let transaction7 = await wallet.signTransaction({
+    await jsWallet.init()
+    let transaction7 = await jsWallet.signTransaction({
       inputs: [{
         prevAddress: this.extendAddress24,
         prevAddressPath: "m/44'/0'/0'/0/24",
@@ -222,8 +226,8 @@ describe('Generate Testnet Test Sync Data', function () {
   })
 
   it('generateTx8', async () => {
-    await wallet.init()
-    let transaction8 = await wallet.signTransaction({
+    await jsWallet.init()
+    let transaction8 = await jsWallet.signTransaction({
       inputs: [{
         prevAddress: this.extendAddress24,
         prevAddressPath: "m/44'/0'/0'/0/24",
@@ -238,9 +242,9 @@ describe('Generate Testnet Test Sync Data', function () {
     transaction8.should.deep.equal(this.transaction8)
     console.log('transaction8', transaction8)
 
-    // const BlockChainInfo = require('../../sdk/data/network/BlockChainInfo').class
-    // let network = new BlockChainInfo()
-    // await network.init(D.COIN_BIT_COIN_TEST)
+    // import BlockChainInfo from '../../sdk/data/network/BlockChainInfo'
+    // let network = new BlockChainInfo(D.COIN_BIT_COIN_TEST)
+    // await network.init()
     // let response = await network.sendTransaction(transaction8.hex)
     // console.log('response', response)
   })

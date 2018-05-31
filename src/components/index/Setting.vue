@@ -58,7 +58,7 @@
             <tbody v-for="item in hardwareList">
               <tr>
                 <td>{{item.name}}</td>
-                <td>{{item.information}}</td>
+                <td>{{item.value}}</td>
               </tr>
             </tbody>
           </table>
@@ -75,11 +75,11 @@ const form = layui.form
 const $ = layui.jquery
 export default {
   name: 'Setting',
+  props: ['walletInfo'],
   data () {
     return {
       hardwareList: [
-        {name: 'CPU', information: 'HDASajdasknawikn'},
-        {name: 'version', information: 'v 1.0.0'}
+        {name: '', value: ''}
       ],
       skinColor: [
         {name: 'black', colorClass: 'black-skin'},
@@ -87,6 +87,14 @@ export default {
         {name: 'blue', colorClass: 'blue-skin'},
         {name: 'red', colorClass: 'red-skin'}
       ]
+    }
+  },
+  watch: {
+    walletInfo: {
+      handler (newValue, oldValue) {
+        this.hardwareList = newValue
+      },
+      deep: true
     }
   },
   mounted () {

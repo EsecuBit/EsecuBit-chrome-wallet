@@ -3,14 +3,7 @@
 import Vue from 'vue'
 import App from './App'
 import VueI18n from 'vue-i18n'
-
-const Wallet = require('./common/js/wallet/sdk/EsWallet').default.class
-const wallet = new Wallet()
-
-console.log(wallet)
-
 Vue.config.productionTip = false
-
 Vue.use(VueI18n)
 const i18n = new VueI18n({
   locale: 'en-us',
