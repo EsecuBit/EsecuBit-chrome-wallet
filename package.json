@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "bitcoinjs-lib": "^3.3.2",
-    "chai": "^4.1.2",
+    "bitpony": "0.0.1",
     "ecurve": "^1.0.6",
     "jquery": "^3.3.1",
     "layui-layer": "^1.0.9",

@@ -215,7 +215,7 @@ body .layui-layer-dir .layui-layer-content{padding: 10px;}
 .site-table td{padding: 6px 15px; min-height: 20px; line-height: 20px; border:1px solid #ddd; font-size: 14px; font-weight: 400;}
 .site-table tr:nth-child(even){background: #fbfbfb;}
 
-.site-block{padding: 20px; border: 1px solid #eee;height: 500px;overflow-y: scroll}
+.site-block{padding: 20px; border: 1px solid #eee;height: 470px;overflow-y: scroll}
 .site-block .layui-form{margin-right: 200px;}
 
 /*自定义的tab*/
@@ -224,27 +224,6 @@ body .layui-layer-dir .layui-layer-content{padding: 10px;}
 }
 .tab-item {
   display: none;
-}
-/*自定义的qrcode*/
-.qrcode{
-  display: block;
-  width: 210px;
-  height: 210px;
-  margin: 20px auto 10px;
-
-}
-.address-btn {
-  margin: 0 auto;
-  text-align: center ;
-
-}
-.description{
-  padding: 9px 0!important;
-  margin: 0 auto;
-  display: block;
-  line-height: 20px;
-  color: #999!important;
-  text-align: center ;
 }
 /*修改表单样式*/
 .site-block .layui-form {
@@ -296,7 +275,7 @@ legend{
   width:160px
 }
 .layui-input-block {
-  margin-left: 150px;
+  margin-left: 160px;
 }
 blockquote{
   font-size: 14px;
