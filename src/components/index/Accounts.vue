@@ -15,7 +15,7 @@
           <div class="account-msg">
             <span class="layui-badge-dot layui-bg-green"></span>
             <span>账户 ：</span>
-           <span >{{newAccount[index].info.label}}</span>
+           <span style="color: #e74c3c">{{newAccount[index].info.label}}</span>
           </div>
           <div class="account-msg">
             <span class="layui-badge-dot layui-bg-green"></span>
@@ -169,8 +169,6 @@ export default {
   watch: {
     accountInfo: {
       handler (newValue, oldValue) {
-        this.test++
-        console.log(this.test,'this is a test')
         const arr = []
         const accountList = []
         for (let elem of newValue) {
@@ -287,11 +285,14 @@ export default {
       $('.tab-item:first').addClass('layui-show')
       // 独立各tab操作
       $('.tab-title-1 a').click(function () {
+        if ($(this).parent('li').hasClass('layui-this')) return false
         $('li.tab-title-1').removeClass('layui-this')
         $(this).parent('li').addClass('layui-this')
         let tabIndex = $(this).parent().index('.tab-title-1')
         $('.tab-content-1 .layui-show').removeClass('layui-show')
         $('.tab-content-1 .tab-item').eq(tabIndex).addClass('layui-show')
+        // 切换qrcode
+        Bus.$emit('switchAccount', tabIndex)
       })
     },
     getDescription (table) {

@@ -35,10 +35,10 @@
                 <Accounts :account-info ="accounts"/>
               </div>
               <div class="main-tab-item">
-                <Send/>
+                <Send :account-info ="accounts"/>
               </div>
               <div class="main-tab-item">
-                <Accept/>
+                <Accept :account-info ="accounts"/>
               </div>
               <div class="main-tab-item">
                 <Setting @switchSetting = "switchSetting" @settingColor = "settingColor" :wallet-info="WalletInfo"/>
@@ -81,6 +81,7 @@ export default {
     this.listenLoginStatus()
     // 菜单点击事件
     $('.menu-switch li a').click(function () {
+      if ($(this).parent('li').hasClass('layui-this')) return false
       let tabIndex = $(this).parent().index()
       $('#message').text($(this).text())
       $('.menu-switch li.layui-this').removeClass('layui-this')

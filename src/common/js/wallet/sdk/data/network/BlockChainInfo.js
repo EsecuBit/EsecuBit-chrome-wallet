@@ -7,16 +7,13 @@ const MAIN_URL = 'https://blockchain.info'
 
 export default class BlockchainInfo extends ICoinNetwork {
   constructor (coinType) {
-    super()
+    super(coinType)
     // noinspection JSUnusedGlobalSymbols
     this._supportMultiAddresses = true
-    this.coinType = 'undefined'
-    this._blockHeight = -1
     this.coinType = coinType
   }
 
   async init () {
-    await super.init()
     switch (this.coinType) {
       case D.COIN_BIT_COIN:
         this._apiUrl = MAIN_URL
@@ -27,10 +24,45 @@ export default class BlockchainInfo extends ICoinNetwork {
       default:
         throw D.ERROR_COIN_NOT_SUPPORTED
     }
+    return super.init()
+  }
 
-    let response = await this.get([this._apiUrl, 'q', 'getblockcount?cors=true'].join('/'))
-    this._blockHeight = parseInt(response)
-    return {blockHeight: this._blockHeight}
+  get (url) {
+    return new Promise((resolve, reject) => {
+      console.debug('get', url)
+      let xmlhttp = new XMLHttpRequest()
+      xmlhttp.onreadystatechange = () => {
+        if (xmlhttp.readyState === 4) {
+          if (xmlhttp.status === 200) {
+            try {
+              resolve(JSON.parse(xmlhttp.responseText))
+            } catch (e) {
+              resolve({response: xmlhttp.responseText})
+            }
+          } else if (xmlhttp.status === 500) {
+            let response = xmlhttp.responseText
+            switch (response) {
+              case 'Transaction not found':
+                reject(D.ERROR_TX_NOT_FOUND)
+                return
+              default:
+                console.warn('BlockChainInfo get', xmlhttp)
+                reject(D.ERROR_NETWORK_PROVIDER_ERROR)
+            }
+          } else {
+            console.warn(url, xmlhttp)
+            reject(D.ERROR_NETWORK_UNVAILABLE)
+          }
+        }
+      }
+      xmlhttp.open('GET', url, true)
+      xmlhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded')
+      xmlhttp.send()
+    })
+  }
+
+  async getBlockHeight () {
+    return parseInt(await this.get([this._apiUrl, 'q', 'getblockcount?cors=true'].join('/')))
   }
 
   async queryAddresses (addresses) {
@@ -46,37 +78,49 @@ export default class BlockchainInfo extends ICoinNetwork {
       info.txCount = rAddress.n_tx
       info.txs = response.txs
         .filter(rTx => rTx.inputs.some(exist) || rTx.out.some(exist))
-        .map(rTx => BlockchainInfo.wrapTx(rTx))
+        .map(rTx => this.wrapTx(rTx))
       addressInfos.push(info)
     }
     return addressInfos
   }
 
-  async queryTransaction (txId) {
+  async queryTx (txId) {
     let response = await this.get([this._apiUrl, 'rawtx', txId].join('/') + '?cors=true')
-    return BlockchainInfo.wrapTx(response)
+    return this.wrapTx(response)
   }
 
-  async sendTransaction (rawTransaction) {
-    console.log('send', rawTransaction)
-    let response = await this.post([this._apiUrl, 'pushtx'].join('/'), 'tx=' + rawTransaction)
+  async queryRawTx (txId) {
+    let response = await this.get([this._apiUrl, 'rawtx', txId].join('/') + '?cors=true&format=hex')
+    return D.parseRawTx(response.response)
+  }
+
+  async sendTx (rawTransaction) {
+    // TODO uncomment after testing EsAccount
+    // let response = await this.post([this._apiUrl, 'pushtx'].join('/'), 'tx=' + rawTransaction)
     // TODO wrap
-    return response
+    // return response
+    console.info('blockchain.info send', rawTransaction)
+    return {}
   }
 
-  static wrapTx (rTx) {
+  wrapTx (rTx) {
+    let confirmations = this._blockHeight - (rTx.block_height || this._blockHeight)
     let tx = {
       txId: rTx.hash,
       version: rTx.ver,
-      blockNumber: rTx.block_height,
-      confirmations: rTx.weight,
-      lockTime: rTx.lock_time,
-      time: rTx.time,
+      blockNumber: rTx.block_height || -1,
+      confirmations: confirmations,
+      time: rTx.time * 1000,
       hasDetails: true
     }
+    let index = 0
     tx.inputs = rTx.inputs.map(input => {
       return {
         prevAddress: input.prev_out.addr,
+        prevTxId: null, // blockchain.info don't have this field, need query tx raw hex
+        prevOutIndex: input.prev_out.n,
+        prevOutScript: input.prev_out.script,
+        index: index++,
         value: input.prev_out.value
       }
     })

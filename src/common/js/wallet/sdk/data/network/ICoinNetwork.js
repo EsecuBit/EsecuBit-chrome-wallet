@@ -4,26 +4,70 @@ import D from '../../D'
 const TYPE_ADDRESS = 'address'
 const TYPE_TRANSACTION_INFO = 'transaction_info'
 // TODO check block height to restart request
-let ADDRESS_REQUEST_PERIOD = 600 // seconds per request
-let TRANSACTION_REQUEST_PERIOD = 60 // seconds per request
+// seconds per request
+let BLOCK_HEIGHT_REQUEST_PERIOD = 60
 
 if (D.TEST_NETWORK_REQUEST) {
-  ADDRESS_REQUEST_PERIOD = 10 // seconds per request
-  TRANSACTION_REQUEST_PERIOD = 10 // seconds per request
+  BLOCK_HEIGHT_REQUEST_PERIOD = 20
 }
 
 export default class ICoinNetwork {
-  constructor () {
+  constructor (coinType) {
+    this.coinType = coinType
     this._startQueue = false
     this._blockHeight = -1
     this._supportMultiAddresses = false
-    this._requestRate = 2 // seconds per request
+    this._requestRate = 1 // seconds per request
+    this._requestList = []
+  }
+
+  async init () {
+    this._blockHeight = await this.getBlockHeight()
+    console.info(this.coinType + ' current block height ' + this._blockHeight)
+
+    // start the request loop
+    this._startQueue = true
+    let queue = () => {
+      for (let request of this._requestList) {
+        if (!request) {
+          // TODO one time
+          console.warn('a removed request')
+          continue
+        }
+        if (request.currentBlock < this._blockHeight) {
+          request.currentBlock = this._blockHeight
+          request.request()
+          break
+        }
+      }
+      if (this._startQueue) {
+        setTimeout(queue, this._requestRate * 1000)
+      }
+    }
+    setTimeout(queue, 0)
+
+    // start the blockHeight loop
+    let blockHeightRequest = async () => {
+      let newBlockHeight = await this.getBlockHeight()
+      if (newBlockHeight !== this._blockHeight) {
+        this._blockHeight = newBlockHeight
+        console.debug(this.coinType + ' has new block height ' + this._blockHeight)
+      }
+      setTimeout(blockHeightRequest, BLOCK_HEIGHT_REQUEST_PERIOD * 1000)
+    }
+    setTimeout(blockHeightRequest, BLOCK_HEIGHT_REQUEST_PERIOD * 1000)
+
+    return {blockHeight: this._blockHeight}
+  }
+
+  async release () {
+    this._startQueue = false
     this._requestList = []
   }
 
   get (url) {
     return new Promise((resolve, reject) => {
-      console.log('get', url)
+      console.debug('get', url)
       let xmlhttp = new XMLHttpRequest()
       xmlhttp.onreadystatechange = () => {
         if (xmlhttp.readyState === 4) {
@@ -49,7 +93,7 @@ export default class ICoinNetwork {
   }
 
   post (url, args) {
-    console.log('post', url, args)
+    console.debug('post', url, args)
     return new Promise((resolve, reject) => {
       const xmlhttp = new XMLHttpRequest()
       xmlhttp.onreadystatechange = () => {
@@ -89,19 +133,27 @@ export default class ICoinNetwork {
     this._requestList.push({
       type: TYPE_TRANSACTION_INFO,
       txInfo: txInfo,
-      nextTime: 0,
+      response: null,
+      currentBlock: -1,
+      nextTime: 0, // TODO check transaction from miners memory pool
       request: async function () {
-        this.nextTime = new Date().getTime() + TRANSACTION_REQUEST_PERIOD * 1000
         try {
-          let response = that.queryTransaction(this.txInfo.txId)
-          this.txInfo.confirmations = response.confirmations
-          if (response.confirmations >= D.TX_BTC_MATURE_CONFIRMATIONS) {
-            console.info('confirmations enough, remove', this)
-            remove(that._requestList, this)
-          }
-          callback(D.ERROR_NO_ERROR, this.txInfo)
+          if (!this.response) this.response = await that.queryTx(this.txInfo.txId)
         } catch (e) {
-          callback(e)
+          if (e === D.ERROR_TX_NOT_FOUND) {
+            console.info('tx not found in network, continue. id: ', txInfo.txId)
+            return
+          }
+          callback(e, this.txInfo)
+        }
+        let confirmations = this.response.confirmations === 0 ? 0 : this._blockHeight - this.response.blockNumber
+        if (confirmations >= D.TX_BTC_MATURE_CONFIRMATIONS) {
+          console.info('confirmations enough, remove', this)
+          remove(that._requestList, this)
+        }
+        if (this.response.confirmations !== confirmations) {
+          this.response.confirmations = confirmations
+          callback(D.ERROR_NO_ERROR, this.txInfo)
         }
       }
     })
@@ -119,11 +171,10 @@ export default class ICoinNetwork {
     }
 
     let checkNewTx = (response, addressInfo) => {
-      let newTransaction = (addressInfo, tx) => {
-        console.log('newTransaction', addressInfo, tx)
-        addressInfo.txs.push(tx.txId)
-        let output = tx.outputs.find(output => addressInfo.address === output.address)
-        let direction = output ? D.TX_DIRECTION_IN : D.TX_DIRECTION_OUT
+      let newTransaction = async (addressInfo, tx) => {
+        console.info('newTransaction', addressInfo, tx)
+        let input = tx.inputs.find(input => addressInfo.address === input.address)
+        let direction = input ? D.TX_DIRECTION_OUT : D.TX_DIRECTION_IN
         let txInfo = {
           accountId: addressInfo.accountId,
           coinType: addressInfo.coinType,
@@ -131,18 +182,15 @@ export default class ICoinNetwork {
           version: tx.version,
           blockNumber: tx.blockNumber,
           confirmations: tx.confirmations,
-          lockTime: tx.lockTime,
           time: tx.time,
           direction: direction,
-          inputs: tx.inputs.map(input => {
-            return {prevAddress: input.prevAddress, value: input.value}
-          }),
-          outputs: tx.outputs.map(output => {
-            return {address: output.address, value: output.value}
-          })
+          inputs: tx.inputs,
+          outputs: tx.outputs
         }
-        if (direction === D.TX_DIRECTION_IN) {
-          let utxo = {
+        let utxos = []
+        let unspentOutputs = tx.outputs.filter(output => addressInfo.address === output.address)
+        let unspentUtxos = unspentOutputs.map(output => {
+          return {
             accountId: addressInfo.accountId,
             coinType: addressInfo.coinType,
             address: addressInfo.address,
@@ -150,19 +198,46 @@ export default class ICoinNetwork {
             txId: tx.txId,
             index: output.index,
             script: output.script,
-            value: output.value
+            value: output.value,
+            spent: D.TX_UNSPENT
           }
-          callback(D.ERROR_NO_ERROR, addressInfo, txInfo, utxo)
-        } else {
-          callback(D.ERROR_NO_ERROR, addressInfo, txInfo)
+        })
+        utxos.push(...unspentUtxos)
+
+        let spentInputs = tx.inputs.filter(input => addressInfo.address === input.prevAddress)
+        if (spentInputs.length > 0) {
+          if (!spentInputs[0].prevTxId) {
+            let formatTx = await this.queryRawTx(txInfo.txId)
+            spentInputs.forEach(input => {
+              input.prevTxId = formatTx.in[input.index].hash
+            })
+          }
+          let spentUtxos = spentInputs.map(input => {
+            return {
+              accountId: addressInfo.accountId,
+              coinType: addressInfo.coinType,
+              address: addressInfo.address,
+              path: addressInfo.path,
+              txId: input.prevTxId,
+              index: input.prevOutIndex,
+              script: input.prevOutScript,
+              value: input.value,
+              spent: tx.confirmations === 0 ? D.TX_SPENT_PENDING : D.TX_SPENT
+            }
+          })
+          utxos.push(...spentUtxos)
         }
+
+        // TODO test address1 + address1 => address1 + address1
+        callback(D.ERROR_NO_ERROR, addressInfo, txInfo, utxos)
       }
 
-      let newTxs = response.txs.filter(tx => !addressInfo.txs.some(aTx => aTx.txId === tx.txId))
+      let newTxs = response.txs.filter(tx => !addressInfo.txs.some(txId => txId === tx.txId))
+      newTxs.forEach(tx => { if (tx.confirmations > 0) addressInfo.txs.push(tx.txId) })
       // noinspection JSCheckFunctionSignatures
       newTxs.filter(tx => tx.hasDetails).forEach(tx => newTransaction(addressInfo, tx))
       newTxs.filter(tx => !tx.hasDetails).forEach(
-        tx => that._network[addressInfo.coinType].queryTransaction(tx.txId)
+        tx => that._network[addressInfo.coinType].queryTx(tx.txId)
           .then(tx => newTransaction(addressInfo, tx))
           .catch(callback))
     }
@@ -170,16 +245,13 @@ export default class ICoinNetwork {
     const that = this
     if (this._supportMultiAddresses) {
       let addressMap = {}
-      addressInfos.forEach(addressInfo => {
-        addressMap[addressInfo.address] = addressInfo
-      })
+      addressInfos.forEach(addressInfo => { addressMap[addressInfo.address] = addressInfo })
       this._requestList.push({
         type: TYPE_ADDRESS,
         addressMap: addressMap,
         oneTime: oneTime,
-        nextTime: 0,
+        currentBlock: -1,
         request: function () {
-          this.nextTime = new Date().getTime() + ADDRESS_REQUEST_PERIOD * 1000
           let addresses = Object.keys(addressMap)
           that.queryAddresses(addresses)
             .then(multiResponses => {
@@ -196,12 +268,11 @@ export default class ICoinNetwork {
         this._requestList.push({
           type: TYPE_ADDRESS,
           addressInfo: addressInfo,
-          nextTime: 0,
+          currentBlock: -1,
           request: async function () {
-            this.nextTime = new Date().getTime() + ADDRESS_REQUEST_PERIOD * 1000
             that.queryAddress(this.addressInfo.address)
-              .then(response => {
-                checkNewTx(response, this.addressInfo)
+              .then(async response => {
+                await checkNewTx(response, this.addressInfo)
                 oneTime && remove(that._requestList, this)
               })
               .catch(callback)
@@ -209,34 +280,6 @@ export default class ICoinNetwork {
         })
       }
     }
-  }
-
-  async init () {
-    this._startQueue = true
-    // start the request loop
-    let queue = () => {
-      const timeStamp = new Date().getTime()
-      for (let request of this._requestList) {
-        if (!request) {
-          // TODO one time
-          console.warn('a removed request')
-        }
-        if (request.nextTime <= timeStamp) {
-          request.request()
-          break
-        }
-      }
-      if (this._startQueue) {
-        setTimeout(queue, this._requestRate * 1000)
-      }
-    }
-    setTimeout(queue, 0)
-    return {}
-  }
-
-  async release () {
-    this._startQueue = false
-    this._requestList = []
   }
 
   /**
@@ -255,7 +298,7 @@ export default class ICoinNetwork {
    *    txs: tx array
    * }
    *
-   * @see queryTransaction
+   * @see queryTx
    *
    */
   async queryAddress (address) {
@@ -270,7 +313,6 @@ export default class ICoinNetwork {
    *    version: int,
    *    blockNumber: int,
    *    confirmations: int,
-   *    lockTime: long
    *    time: long,
    *    hasDetails: bool,   // for queryAddress only, whether the tx has inputs and outputs. e.g. blockchain.info -> true, chain.so -> false
    *    intputs: [{prevAddress, value(bitcoin -> santoshi)}],
@@ -278,11 +320,19 @@ export default class ICoinNetwork {
    * }
    *
    */
-  async queryTransaction (txId) {
+  async queryTx (txId) {
     throw D.ERROR_NOT_IMPLEMENTED
   }
 
-  async sendTrnasaction (rawTx) {
+  async queryRawTx (txId) {
+    throw D.ERROR_NOT_IMPLEMENTED
+  }
+
+  async sendTx (rawTx) {
+    throw D.ERROR_NOT_IMPLEMENTED
+  }
+
+  async getBlockHeight () {
     throw D.ERROR_NOT_IMPLEMENTED
   }
 }

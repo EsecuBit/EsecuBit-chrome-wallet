@@ -7,7 +7,7 @@ import CoinData from './data/CoinData'
 // TODO surrounded with try catch
 export default class EsWallet {
   constructor () {
-    console.log('constructor eswallet')
+    console.info('constructor eswallet')
     if (EsWallet.prototype.Instance) {
       return EsWallet.prototype.Instance
     }
@@ -114,7 +114,7 @@ export default class EsWallet {
     return JsWallet.getWalletInfo()
   }
 
-  getFloatFee (coinType, fee) {
-    return CoinData.getFloatFee(coinType, fee)
+  getFloatValue (coinType, fee) {
+    return D.getFloatValue(coinType, fee)
   }
 }
