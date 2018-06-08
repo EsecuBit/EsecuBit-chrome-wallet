@@ -11,38 +11,79 @@
               <a class="logo" href="#"> <img src="./common/imgs/logo.png" alt="Wallet Bitcion"></a>
               <!-- 头部区域（可配合layui已有的水平导航） -->
               <ul class="layui-nav fly-nav layui-hide-xs menu-switch">
-                <li class="layui-nav-item layui-this"><a href="#" id="set_jqgrid_width"><i class="icon iconfont icon-zhanghu1"></i>{{$t('message.accounts')}}</a></li>
-                <li class="layui-nav-item"><a href="#" ><i class="icon iconfont icon-msnui-cloud-upload bigger"></i>{{$t('message.send')}}</a></li>
-                <li class="layui-nav-item"><a href="#" ><i class="icon iconfont icon-msnui-cloud-download bigger"></i>{{$t('message.accept')}}</a></li>
-                <li class="layui-nav-item"><a href="#" ><i class="icon iconfont icon-shezhi2"></i>{{$t('message.setting')}}</a></li>
+                <li class="layui-nav-item layui-this"><a href="#" id="set_jqgrid_width" @click="showAddAccount"><i class="icon iconfont icon-zhanghu1"></i>{{$t('message.accounts')}}</a></li>
+                <li class="layui-nav-item"><a href="#" @click="hiddenAddAccount"><i class="icon iconfont icon-msnui-cloud-upload bigger"></i>{{$t('message.send')}}</a></li>
+                <li class="layui-nav-item"><a href="#" @click="hiddenAddAccount"><i class="icon iconfont icon-msnui-cloud-download bigger"></i>{{$t('message.accept')}}</a></li>
+                <li class="layui-nav-item"><a href="#" @click="hiddenAddAccount"><i class="icon iconfont icon-shezhi2"></i>{{$t('message.setting')}}</a></li>
                 <span class="layui-nav-bar" style="left: 0; top: 55px; width: 0; opacity: 0;"></span>
               </ul>
             </div>
           </div>
           <div class="fly-panel fly-column">
             <div class="layui-container">
-              <p>
-        <span class="layui-breadcrumb" style="visibility: visible;">
-          <a href="#">{{$t('message.home')}}</a><span lay-separator="">&gt;</span>
-          <a href="#" id="message" class="message">Accounts</a>
-        </span>
+              <p style="height: 40px;line-height: 40px">
+                <span class="layui-breadcrumb" style="visibility: visible;">
+                  <a href="#">{{$t('message.home')}}</a><span lay-separator="">&gt;</span>
+                  <a href="#" id="message" class="message">Accounts</a>
+                  <div class="add-btn-wrapper clearfix" v-show="isAddAccounts">
+                    <a href="#" class="add-btn" @click="addAccountContent"><i class="layui-icon ">&#xe770;</i> Add Accounts</a>
+                  </div>
+                 </span>
               </p>
             </div>
           </div>
           <div class="layui-container page-content ">
             <div class="main-tab-content">
               <div class="main-tab-item layui-show">
-                <Accounts :account-info ="accounts"/>
+                <Accounts :account-info ="accounts" :current-unit="currentUnit" :current-exchange-rate="currentExchangeRate"/>
               </div>
               <div class="main-tab-item">
-                <Send :account-info ="accounts"/>
+                <Send :account-info ="accounts" :current-unit="currentUnit" :current-exchange-rate="currentExchangeRate"/>
               </div>
               <div class="main-tab-item">
                 <Accept :account-info ="accounts"/>
               </div>
               <div class="main-tab-item">
-                <Setting @switchSetting = "switchSetting" @settingColor = "settingColor" :wallet-info="WalletInfo"/>
+                <Setting @switchSetting = "switchSetting" @settingColor = "settingColor" @setUnit="setUnit" :account-info ="accounts" :wallet-info="WalletInfo"/>
               </div>
+            </div>
+          </div>
+        </div>
+        <div class="add-accounts-content" id="account-content">
+          <div class="content-wrapper">
+            <div class="form-content" v-show="isHasAccount">
+              <p class="description">
+                <i class="layui-icon" style="color: #dd4b39;">&#xe702;</i>&nbsp;
+                <span>请选择你想创建的账户的类型！！</span>
+              </p>
+              <form class="layui-form" lay-filter="form1">
+                <div class="layui-form-item" >
+                  <label class="layui-form-label" style="width: 130px">Account Type</label>
+                  <div class="layui-input-inline" style="width: 350px">
+                    <select lay-verify="required" lay-filter="addAccount" >
+                      <option v-for="item in accountType" :value="item">{{item}}</option>
+                    </select>
+                  </div>
+                </div>
+              </form>
+            </div>
+            <div class="msg-wrapper" v-show="!isHasAccount">
+              <div class="msg-content">
+                <p class="error-msg">
+                  <i class="layui-icon" style="color: #dd4b39;font-size: 26px">&#xe702;</i>&nbsp;
+                  <span>
+                    The current account does not have permission to create an account !!
+                  </span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="add-accounts-content" id="loading">
+          <div class="loading-center">
+            <div class="loading-wrapper">
+              <i class="layui-icon layui-anim layui-anim-rotate layui-anim-loop" style="font-size: 30px;"> </i>
+              <span>正在初始化您的账户，请稍候片刻...</span>
             </div>
           </div>
         </div>
@@ -58,12 +99,16 @@ import Send from './components/index/Send'
 import Setting from './components/index/Setting'
 import Accept from './components/index/Accept'
 import EsWallet from './common/js/wallet/sdk/EsWallet'
-
-const wallet = new EsWallet()
+import D from './common/js/wallet/sdk/D'
+const esWallet = new EsWallet()
 // eslint-disable-next-line
 const element = layui.element
 // eslint-disable-next-line
 const $ = layui.jquery
+// eslint-disable-next-line
+const layer = layui.layer
+// eslint-disable-next-line
+const form = layui.form
 
 export default {
   name: 'App',
@@ -74,10 +119,31 @@ export default {
       loginStatus: null,
       WalletInfo: null,
       accounts: null,
-      heardColor: ''
+      heardColor: '',
+      isAddAccounts: true,
+      selected: '',
+      isHasAccount: true,
+      accountType: [],
+      currentUnit: D.UNIT_BTC_M,
+      currentExchangeRate: 'USD'
+    }
+  },
+  watch: {
+    accountType: {
+      handler (newValue, oldValue) {
+        this.selected = newValue[0]
+        this.$nextTick(() => {
+          form.render('select', 'form1')
+          form.on('select(addAccount)', data => {
+            this.selected = data.value
+          })
+        })
+      }
     }
   },
   mounted () {
+    // 监听选择事件
+    form.render('select', 'form1')
     this.listenLoginStatus()
     // 菜单点击事件
     $('.menu-switch li a').click(function () {
@@ -96,27 +162,101 @@ export default {
     settingColor (...data) {
       this.heardColor = data[0] + '-skin'
     },
-    test () {
+    setUnit (...data) {
+      this.currentUnit = data[0]
+    },
+    changelang () {
       // console.log(this.$t('message.hello'))
     },
     listenLoginStatus () {
-      wallet.listenStatus((errorNum, status) => {
+      esWallet.listenStatus((errorNum, status) => {
         if (status === 1) this.loginStatus = 1
+        if (status === 2) this.loginStatus = 2
+        if (status === 3) this.loginStatus = 3
         if (status === 10) {
           this.isLogin = !this.isLogin
-          wallet.getWalletInfo().then(value => {
+          esWallet.getWalletInfo().then(value => {
             this.WalletInfo = value
-          })
-          wallet.getAccounts().then(value => {
-            this.accounts = value
-            console.log('ok')
-          })
+          }).catch(value => { console.log(value, '获取钱包信息失败') })
+          esWallet.getAccounts().then(value => {
+            if (value) this.accounts = this.orderArr(value)
+          }).catch(value => { console.log(value, '获取用户数据失败') })
         }
         if (status === 99) {
           this.loginStatus = 99
           this.isLogin = !this.isLogin
         }
       })
+    },
+    addAccountContent () {
+      let btnDisplay = ['submit', 'cancel']
+      // 获取可用的币类型
+      esWallet.availableNewAccountCoinTypes().then(value => {
+        if (Array.isArray(value) && value.length > 0) {
+          this.accountType = value
+          this.isHasAccount = true
+        } else {
+          this.isHasAccount = false
+          btnDisplay = null
+        }
+        const that = this
+        layer.open({
+          type: 1,
+          area: ['530px', '315px'],
+          shadeClose: true,
+          title: 'Add Accounts',
+          btn: btnDisplay,
+          content: $('#account-content'),
+          yes (index) {
+            let loadingIndex = layer.open({
+              type: 1,
+              anim: 2,
+              closeBtn: 0,
+              title: false,
+              maxmin: false,
+              area: ['315px', '100px'],
+              content: $('#loading')
+            })
+            esWallet.newAccount(that.selected).then(value => {
+              layer.close(loadingIndex)
+              layer.close(index)
+              layer.msg('successful', { icon: 1 })
+              if (Array.isArray(that.accounts) && that.accounts.length > 0) that.accounts.push(value)
+            }).catch(value => {
+              layer.closeAll()
+              console.log(value, '添加用户失败')
+            })
+          }
+        })
+      }).catch(value => console.log(value, '获取币失败'))
+    },
+    showAddAccount () {
+      this.isAddAccounts = true
+    },
+    hiddenAddAccount () {
+      this.isAddAccounts = false
+    },
+    orderArr (targetArr) {
+      const arr = []
+      const accountList = []
+      for (let val of targetArr) {
+        if (!arr.includes(val.coinType)) {
+          arr.push(val.coinType)
+          accountList.push({type: val.coinType, list: [val]})
+        } else {
+          for (let item of accountList) {
+            if (item.type === val.coinType) {
+              item.list.push(val)
+              break
+            }
+          }
+        }
+      }
+      let a = []
+      for (let val of accountList) {
+        a = a.concat(val.list)
+      }
+      return a
     }
   },
   components: {
@@ -135,6 +275,9 @@ export default {
 </style>
 
 <style scoped>
+  div{
+    font: 14px Helvetica Neue,Helvetica,PingFang SC,\5FAE\8F6F\96C5\9ED1,Tahoma,Arial,sans-serif;
+  }
   .bg-black{
     background-color:#263238;
   }
@@ -180,6 +323,68 @@ export default {
     color: #fff;
   }
   .layui-breadcrumb a:hover {
-    color: #01AAED!important;
+    color: #999!important
+  }
+  .add-btn-wrapper{
+    display: inline-block;
+    height: 40px;
+    line-height:40px;
+    font-size: 12px;
+    float: right;
+    margin-right: 10px;
+    font-weight: 600;
+  }
+  .clearfix:before{
+    clear: both;
+    content: '';
+    height: 0;
+    line-height: 0;
+  }
+  .add-btn-wrapper a:hover {
+    color: #009688!important
+  }
+  .add-accounts-content {
+    display: none;
+  }
+  .content-wrapper{
+    margin: 30px 12px 10px
+  }
+  .description {
+    text-indent: 2em;
+    font-size:16px;
+    height: 36px;
+    line-height: 36px;
+    color: #333;
+    background-color: #F8F8F8;
+    border-radius: 6px;
+    margin: 0 20px 20px;
+  }
+  .msg-wrapper{
+    display: inline-block;
+    text-indent: 2em;
+    margin: 0 10px 0;
+    background-color: #f8f8f8;
+    height: 150px;
+    border-radius: 8px;
+    border: 1px solid #f0f0f0;
+    box-shadow: 1px 4px 8px 0 rgba(0,0,0,0.1);
+    color: #888;
+  }
+  .msg-content .error-msg{
+    padding: 12px;
+    font-size: 26px;
+    font-weight: 600;
+    word-break: break-all;
+    word-spacing: 0.1em;
+  }
+  .loading-center {
+    padding: 32px 0;
+  }
+  .loading-wrapper{
+    margin: auto 12px;
+    height: 36px;
+    line-height: 36px;
+    text-align: center;
+    font-size: 14px;
   }
 </style>

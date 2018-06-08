@@ -22,6 +22,7 @@ const D = {
   ERROR_DATABASE_EXEC_FAILED: 202,
 
   ERROR_LAST_ACCOUNT_NO_TRANSACTION: 301,
+  ERROR_ACCOUNT_HAS_TRANSACTIONS: 302,
 
   ERROR_NETWORK_UNVAILABLE: 401,
   ERROR_NETWORK_NOT_INITIALIZED: 402,
@@ -48,30 +49,39 @@ const D = {
   TX_DIRECTION_IN: 'in',
   TX_DIRECTION_OUT: 'out',
   TX_BTC_MATURE_CONFIRMATIONS: 6,
-  TX_UNSPENT: 0,
-  TX_SPENT_PENDING: 1,
-  TX_SPENT: 2,
+  UTXO_UNSPENT: 0,
+  UTXO_SPENT_PENDING: 1,
+  UTXO_SPENT: 2,
 
   // fee type
   FEE_FAST: 'fast',
   FEE_NORMAL: 'normal',
   FEE_ECNOMIC: 'economy',
 
-  getFloatValue (coinType, intFee) {
-    switch (coinType) {
-      case D.COIN_BIT_COIN:
-      case D.COIN_BIT_COIN_TEST:
-        return Number(intFee / 100000000)
-      default:
-        throw D.ERROR_COIN_NOT_SUPPORTED
-    }
-  },
+  // value type
+  UNIT_BTC: 'btc',
+  UNIT_BTC_M: 'mbtc',
+  UNIT_BTC_SANTOSHI: 'santoshi',
 
-  getIntFee (coinType, floatFee) {
+  convertValue (coinType, fee, fromType, toType) {
+    let convertBtc = (fee, fromType, toType) => {
+      let santoshi
+      switch (fromType) {
+        case D.UNIT_BTC: { santoshi = fee * 100000000; break }
+        case D.UNIT_BTC_M: { santoshi = fee * 100000; break }
+        case D.UNIT_BTC_SANTOSHI: { santoshi = fee; break }
+        default: throw D.ERROR_UNKNOWN
+      }
+      switch (toType) {
+        case D.UNIT_BTC: return Number(santoshi / 100000000)
+        case D.UNIT_BTC_M: return Number(santoshi / 100000)
+        case D.UNIT_BTC_SANTOSHI: return Number(santoshi)
+      }
+    }
     switch (coinType) {
       case D.COIN_BIT_COIN:
       case D.COIN_BIT_COIN_TEST:
-        return Number(floatFee * 100000000)
+        return convertBtc(fee, fromType, toType)
       default:
         throw D.ERROR_COIN_NOT_SUPPORTED
     }
@@ -117,22 +127,12 @@ const D = {
     }
   },
 
-  makeBip44Path (coinType, accountIndex, isExternal, addressIndex) {
+  makeBip44Path (coinType, accountIndex, type, addressIndex) {
     return "m/44'/" +
       D.getCoinIndex(coinType) + "'/" +
       accountIndex + "'/" +
-      (isExternal ? 0 : 1) +
-      (addressIndex ? ('/' + addressIndex) : '')
-  },
-
-  parseBip44Path (path, coinType) {
-    let splitPath = path.split('/')
-    return {
-      coinType: coinType,
-      accountIndex: parseInt(splitPath[3].slice(0, -1)),
-      isExternal: parseInt(splitPath[4]),
-      addressIndex: parseInt(splitPath[5])
-    }
+      (type === D.ADDRESS_EXTERNAL ? 0 : 1) +
+      (addressIndex === undefined ? '' : ('/' + addressIndex))
   },
 
   /**
@@ -151,12 +151,24 @@ const D = {
     return bitPony.tx.read(hexTx)
   },
 
+  /**
+   * shallow copy
+   * @param object
+   */
+  copy (object) {
+    return JSON.parse(JSON.stringify(object))
+  },
+
   // test
   TEST_MODE: true,
   TEST_DATA: false,
-  TEST_NETWORK_REQUEST: false,
+  TEST_NETWORK_REQUEST: true,
   TEST_JS_WALLET: true,
-  TEST_SYNC: true,
-  TEST_WALLET_ID: 'BA3253876AED6BC22D4A6FF53D8406C6AD864195ED144AB5C87621B6C233B548'
+  TEST_SYNC: false,
+  // TODO remove when publish
+  TEST_SYNC_WALLET_ID: 'BA3253876AED6BC22D4A6FF53D8406C6AD864195ED144AB5C87621B6C233B548',
+  TEST_TRANSACTION_WALLET_ID: 'BA3253876AED6BC22D4A6FF53D8406C6AD864195ED144AB5C87621B600000000',
+  TEST_SYNC_SEED: 'aa49342d805682f345135afcba79ffa7d50c2999944b91d88e01e1d38b80ca63',
+  TEST_TRANSACTION_SEED: 'aa49342d805682f345135afcba79ffa7d50c2999944b91d88e01e1d300000000'
 }
 export default D

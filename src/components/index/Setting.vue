@@ -23,20 +23,31 @@
           <div class="site-text site-block">
             <form class="layui-form" lay-filter="form3">
               <div class="layui-form-item">
-                <label class="layui-form-label" style="font-size: 13px">Interface Language</label>
+                <label class="layui-form-label">Interface Language</label>
                 <div class="layui-input-inline input-width">
                   <select name="lang" lay-filter="lang">
-                    <option value="en-us">English</option>
-                    <option value="cn-zh">简体中文</option>
+                    <option :value="lang.value" v-for="lang in langList">{{lang.label}}</option>
                   </select>
                 </div>
               </div>
               <div class="layui-form-item">
-                <label class="layui-form-label" style="font-size: 13px">Skin</label>
+                <label class="layui-form-label">Units</label>
+                <div class="layui-input-block" >
+                  <input type="radio" lay-filter="unit" name="unit" :value="item.value" :title="item.label" :checked="index === 1" v-for="(item, index) in unitValueList">
+                </div>
+              </div>
+              <div class="layui-form-item">
+                <label class="layui-form-label">Exchange Rate</label>
                 <div class="layui-input-inline input-width">
-                  <template v-for="item in skinColor">
-                    <a href="#" class="layui-btn layui-btn-sm" v-bind:class="[item.colorClass]" @click="switchColor(item.name)">{{item.name}}</a>
-                  </template>
+                  <select name="exchangeRate" lay-filter="exchange">
+                    <option :value="itemExchangeRate.value" v-for="itemExchangeRate in exchangeRate">{{itemExchangeRate.label}}</option>
+                  </select>
+                </div>
+              </div>
+              <div class="layui-form-item">
+                <label class="layui-form-label">Skin</label>
+                <div class="layui-input-inline input-width">
+                    <a href="#" class="layui-btn layui-btn-sm" v-bind:class="[item.colorClass]" @click="switchColor(item.name)" v-for="item in skinColor">{{item.name}}</a>
                 </div>
               </div>
             </form>
@@ -69,13 +80,15 @@
 </template>
 
 <script>
+import Bus from '../../common/js/bus'
+import D from '../../common/js/wallet/sdk/D'
 // eslint-disable-next-line
 const form = layui.form
 // eslint-disable-next-line
 const $ = layui.jquery
 export default {
   name: 'Setting',
-  props: ['walletInfo'],
+  props: ['walletInfo', 'accountInfo'],
   data () {
     return {
       hardwareList: [
@@ -86,7 +99,25 @@ export default {
         {name: 'gray', colorClass: 'gray-skin'},
         {name: 'blue', colorClass: 'blue-skin'},
         {name: 'red', colorClass: 'red-skin'}
-      ]
+      ],
+      unitChecked: '',
+      unitValueList: [
+        {label: 'BTC', value: 'btc'},
+        {label: 'mBTC', value: 'mbtc'}
+      ],
+      langList: [
+        {label: 'English', value: 'en-us'},
+        {label: '简体中文', value: 'cn-zh'},
+        {label: '简体中文', value: 'cn-zh'}
+      ],
+      exchangeRate: [
+        {label: 'USD', value: 'USD'},
+        {label: 'HK', value: 'HK'},
+        {label: '软妹币', value: 'RMB'}
+      ],
+      currentAccount: {},
+      coinType: '',
+      accountOrder: []
     }
   },
   watch: {
@@ -95,9 +126,35 @@ export default {
         this.hardwareList = newValue
       },
       deep: true
+    },
+    accountInfo: {
+      handler (newValue, oldValue) {
+        this.accountOrder = newValue
+        this.currentAccount = this.accountOrder[0]
+      }
+    },
+    currentAccount: {
+      handler (newValue, oldValue) {
+        this.coinType = newValue.coinType
+        if (this.coinType === D.COIN_BIT_COIN_TEST) {
+          this.unitValueList = [
+            {label: 'BTC', value: 'btc'},
+            {label: 'mBTC', value: 'mbtc'}
+          ]
+          this.$nextTick(() => {
+            form.render('radio', 'form3')
+            form.on('radio(unit)', data => {
+              this.unitChecked = data.value
+              this.$emit('setUnit', data.value)
+            })
+          })
+        } else if (this.coinType === 'lit_test') {
+        }
+      }
     }
   },
   mounted () {
+    Bus.$on('switchAccount', (index) => { this.currentAccount = this.accountOrder[index] })
     form.render('select', 'form3')
     this.switchLang()
     this.switchTab()
@@ -150,5 +207,8 @@ export default {
     background:#4b505d;
     border-color:#4b505d;
     color: #fff;
+  }
+  .layui-form-label {
+    font-size: 13px;
   }
 </style>

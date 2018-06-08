@@ -2,13 +2,15 @@
 import D from '../../D'
 
 const TYPE_ADDRESS = 'address'
-const TYPE_TRANSACTION_INFO = 'transaction_info'
+const TYPE_TRANSACTION = 'transaction_info'
 // TODO check block height to restart request
 // seconds per request
 let BLOCK_HEIGHT_REQUEST_PERIOD = 60
+let TX_INCLUDED_REQUEST_PERIOD = 20
 
 if (D.TEST_NETWORK_REQUEST) {
   BLOCK_HEIGHT_REQUEST_PERIOD = 20
+  TX_INCLUDED_REQUEST_PERIOD = 10
 }
 
 export default class ICoinNetwork {
@@ -23,18 +25,16 @@ export default class ICoinNetwork {
 
   async init () {
     this._blockHeight = await this.getBlockHeight()
-    console.info(this.coinType + ' current block height ' + this._blockHeight)
+    console.info(this.coinType, 'current block height', this._blockHeight)
 
     // start the request loop
     this._startQueue = true
     let queue = () => {
       for (let request of this._requestList) {
-        if (!request) {
-          // TODO one time
-          console.warn('a removed request')
-          continue
-        }
-        if (request.currentBlock < this._blockHeight) {
+        if (request.type === TYPE_TRANSACTION && new Date().getTime() > request.nextTime) {
+          request.nextTime = new Date().getTime() + TX_INCLUDED_REQUEST_PERIOD * 1000
+          request.request()
+        } else if (request.currentBlock < this._blockHeight) {
           request.currentBlock = this._blockHeight
           request.request()
           break
@@ -60,6 +60,7 @@ export default class ICoinNetwork {
     return {blockHeight: this._blockHeight}
   }
 
+  // noinspection JSUnusedGlobalSymbols
   async release () {
     this._startQueue = false
     this._requestList = []
@@ -131,14 +132,16 @@ export default class ICoinNetwork {
       }
     }
     this._requestList.push({
-      type: TYPE_TRANSACTION_INFO,
+      callback: callback,
+      type: TYPE_TRANSACTION,
       txInfo: txInfo,
-      response: null,
+      hasRecord: false,
       currentBlock: -1,
-      nextTime: 0, // TODO check transaction from miners memory pool
+      nextTime: 0,
       request: async function () {
+        let response
         try {
-          if (!this.response) this.response = await that.queryTx(this.txInfo.txId)
+          if (!this.hasRecord) response = await that.queryTx(this.txInfo.txId)
         } catch (e) {
           if (e === D.ERROR_TX_NOT_FOUND) {
             console.info('tx not found in network, continue. id: ', txInfo.txId)
@@ -146,33 +149,58 @@ export default class ICoinNetwork {
           }
           callback(e, this.txInfo)
         }
-        let confirmations = this.response.confirmations === 0 ? 0 : this._blockHeight - this.response.blockNumber
+        let confirmations = response.blockNumber ? that._blockHeight - response.blockNumber : 0
+
+        if (confirmations > 0) this.hasRecord = true
         if (confirmations >= D.TX_BTC_MATURE_CONFIRMATIONS) {
           console.info('confirmations enough, remove', this)
           remove(that._requestList, this)
         }
-        if (this.response.confirmations !== confirmations) {
-          this.response.confirmations = confirmations
+        if (this.txInfo.confirmations !== confirmations) {
+          this.txInfo.confirmations = confirmations
           callback(D.ERROR_NO_ERROR, this.txInfo)
         }
       }
     })
   }
 
-  /**
-   * listen new transaction from specific address
-   */
-  listenAddresses (addressInfos, callback, oneTime = false) {
-    let remove = (arr, val) => {
-      let index = arr.indexOf(val)
-      if (index > -1) {
-        arr.splice(index, 1)
-      }
-    }
+  removeListener(callback) {
+    this._requestList = this._requestList.filter(request => request.callback !== callback)
+  }
 
-    let checkNewTx = (response, addressInfo) => {
+  /**
+   * listen new transaction for provided addresses on new block generated
+   */
+  listenAddresses (addressInfos, callback) {
+    let tasks = this.generateAddressTasks(addressInfos)
+    tasks.forEach(task => {
+      this._requestList.push({
+        callback: callback,
+        type: TYPE_ADDRESS,
+        currentBlock: -1,
+        request: async () => {
+          task.request()
+            .then(blobs => blobs.forEach(
+              blob => callback(D.ERROR_NO_ERROR, blob.addressInfo, blob.txInfo, blob.utxos)))
+            // TODO retry
+            // TODO callback error once
+            .catch(e => callback(e))
+        }
+      })
+    })
+  }
+
+  /**
+   * get all the new transactions provided addresseses immediately
+   */
+  async checkAddresses (addressInfos) {
+    return Promise.all(this.generateAddressTasks(addressInfos).map(task => task.request()))
+      .then(blobs => blobs.reduce((array, item) => array.concat(item), []))
+  }
+
+  generateAddressTasks (addressInfos) {
+    let checkNewTx = async (response, addressInfo) => {
       let newTransaction = async (addressInfo, tx) => {
-        console.info('newTransaction', addressInfo, tx)
         let input = tx.inputs.find(input => addressInfo.address === input.address)
         let direction = input ? D.TX_DIRECTION_OUT : D.TX_DIRECTION_IN
         let txInfo = {
@@ -199,7 +227,7 @@ export default class ICoinNetwork {
             index: output.index,
             script: output.script,
             value: output.value,
-            spent: D.TX_UNSPENT
+            spent: D.UTXO_UNSPENT
           }
         })
         utxos.push(...unspentUtxos)
@@ -222,63 +250,40 @@ export default class ICoinNetwork {
               index: input.prevOutIndex,
               script: input.prevOutScript,
               value: input.value,
-              spent: tx.confirmations === 0 ? D.TX_SPENT_PENDING : D.TX_SPENT
+              spent: tx.confirmations === 0 ? D.UTXO_SPENT_PENDING : D.UTXO_SPENT
             }
           })
           utxos.push(...spentUtxos)
         }
-
-        // TODO test address1 + address1 => address1 + address1
-        callback(D.ERROR_NO_ERROR, addressInfo, txInfo, utxos)
+        return {addressInfo, txInfo, utxos}
       }
 
+      // TODO test address1 + address1 => address1 + address1
       let newTxs = response.txs.filter(tx => !addressInfo.txs.some(txId => txId === tx.txId))
-      newTxs.forEach(tx => { if (tx.confirmations > 0) addressInfo.txs.push(tx.txId) })
-      // noinspection JSCheckFunctionSignatures
-      newTxs.filter(tx => tx.hasDetails).forEach(tx => newTransaction(addressInfo, tx))
-      newTxs.filter(tx => !tx.hasDetails).forEach(
-        tx => that._network[addressInfo.coinType].queryTx(tx.txId)
-          .then(tx => newTransaction(addressInfo, tx))
-          .catch(callback))
+      newTxs.forEach(tx => addressInfo.txs.push(tx.txId))
+      return Promise.all(newTxs.map(async tx => {
+        // TODO queryTx request speed
+        if (!tx.hasDetails) tx = await this.queryTx(tx.txId)
+        return newTransaction(addressInfo, tx)
+      }))
     }
 
-    const that = this
+    const _this = this
     if (this._supportMultiAddresses) {
       let addressMap = {}
       addressInfos.forEach(addressInfo => { addressMap[addressInfo.address] = addressInfo })
-      this._requestList.push({
-        type: TYPE_ADDRESS,
-        addressMap: addressMap,
-        oneTime: oneTime,
-        currentBlock: -1,
-        request: function () {
-          let addresses = Object.keys(addressMap)
-          that.queryAddresses(addresses)
-            .then(multiResponses => {
-              multiResponses.forEach(response => checkNewTx(response, addressMap[response.address]))
-              oneTime && remove(that._requestList, this)
-            })
-            // TODO retry
-            // TODO callback error once
-            .catch(callback)
-        }
-      })
+      let addresses = Object.keys(addressMap)
+      return [{request () {
+        return _this.queryAddresses(addresses)
+          .then(multiResponses => Promise.all(multiResponses.map(response => checkNewTx(response, addressMap[response.address]))))
+          .then(blobs => blobs.reduce((array, item) => array.concat(item), []))
+      }}]
     } else {
-      for (let addressInfo of addressInfos) {
-        this._requestList.push({
-          type: TYPE_ADDRESS,
-          addressInfo: addressInfo,
-          currentBlock: -1,
-          request: async function () {
-            that.queryAddress(this.addressInfo.address)
-              .then(async response => {
-                await checkNewTx(response, this.addressInfo)
-                oneTime && remove(that._requestList, this)
-              })
-              .catch(callback)
-          }
-        })
-      }
+      return addressInfos.map(addressInfo => {
+        return {request () {
+          return _this.queryAddress(addressInfo.address).then(response => checkNewTx(response, addressInfo))
+        }}
+      })
     }
   }
 

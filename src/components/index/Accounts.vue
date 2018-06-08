@@ -14,16 +14,20 @@
         <div class="account-information">
           <div class="account-msg">
             <span class="layui-badge-dot layui-bg-green"></span>
-            <span>账户 ：</span>
-           <span style="color: #e74c3c">{{newAccount[index].info.label}}</span>
+            <span>Account ：</span>
+           <span style="color: #e74c3c">{{newAccount[index].label}}</span>
+            <a title="edit" href="#" class="edit-account" @click="editAccount(index)">
+              <i class="layui-icon ">&#xe642;</i>
+            </a>
           </div>
           <div class="account-msg">
             <span class="layui-badge-dot layui-bg-green"></span>
-            <span>余额 ：</span>
-            <span >{{newAccount[index].info.balance}}</span>
+            <span>Balance ：</span>
+            <span v-if="coinTypeList[index]">{{toTargetCoinUnit(coinTypeList[index], newAccount[index].balance)}}</span>
+            <span>{{currentUnit}}</span>
           </div>
           <div class="account-msg">
-            <a title="刷新" href="#" class="refresh-data" @click="refresh">
+            <a title="refresh" href="#" class="refresh-data" @click="refresh">
               <i class="layui-icon layui-icon-refresh-2" :class="loadingClass"></i>
             </a>
           </div>
@@ -38,12 +42,12 @@
             <table class="layui-table">
               <colgroup>
                 <col width="8%">
-                <col width="10%">
                 <col width="8%">
+                <col width="10%">
                 <col width="12%">
                 <col width="6%">
                 <col width="8%">
-                <col width="8%">
+                <col width="6%">
               </colgroup>
               <thead>
               <tr>
@@ -60,7 +64,7 @@
                 <tr style="height: 39px;overflow-x: hidden">
                   <td>{{table.txId}}</td>
                   <td>{{table.coinType}}</td>
-                  <td :class="[table.blockNumber<0?active:'']">{{table.blockNumber}}</td>
+                  <td :class="[table.blockNumber<0?active:'']" v-if="coinTypeList[index]">{{toTargetCoinUnit(coinTypeList[index], table.blockNumber)}}</td>
                   <td>{{getFormatTime(table.time)}}</td>
                   <td :class ="[table.direction === 'in'?green:red]">{{table.direction}}</td>
                   <td>
@@ -81,6 +85,20 @@
         </div>
       </div>
     </div>
+  </div>
+  <div class="edit-account-wrapper" id="edit-account">
+    <p class="description">
+      <i class="layui-icon" style="color: #dd4b39;">&#xe702;</i>&nbsp;
+      <span>请输入新的用户名！！</span>
+    </p>
+    <form class="layui-form" lay-filter="edit-form">
+      <div class="layui-form-item" >
+        <label class="layui-form-label" style="width: 130px">Account Name</label>
+        <div class="layui-input-inline" style="width: 350px">
+          <input type="text"  placeholder="Enter Yours New Account Name" id="editNameInput" v-model="renameValue" class="layui-input">
+        </div>
+      </div>
+    </form>
   </div>
   <div class="content" style="display: none">
     <table class="table table-striped">
@@ -123,6 +141,9 @@
 
 <script>
 import Bus from '../../common/js/bus'
+import D from '../../common/js/wallet/sdk/D'
+import EsWallet from '../../common/js/wallet/sdk/EsWallet'
+
 // eslint-disable-next-line
 const $ = layui.jquery
 // eslint-disable-next-line
@@ -131,7 +152,7 @@ const layer = layui.layer
 const laypage = layui.laypage
 export default {
   name: 'accouts',
-  props: ['accountInfo'],
+  props: ['accountInfo', 'currentUnit', 'currentExchangeRate'],
   data () {
     return {
       grid_pager: 'grid_pager',
@@ -147,7 +168,8 @@ export default {
         'layui-anim-rotate': false,
         'layui-anim-loop': false
       },
-      newAccount: [{info: {label: '', balance: 0}}],
+      renameValue: '',
+      newAccount: [{label: '', balance: 0}],
       wallet: [
         {
           label: 'bitcoin',
@@ -156,51 +178,48 @@ export default {
       ],
       gridList: [
         [
-          {txId: '', coinType: 'asd', blockNumber: -100, time: 1527665599, direction: 'in'}
+          {txId: '', coinType: '', blockNumber: null, time: null, direction: ''}
         ]
       ],
+      coinTypeList: [],
       totalNum: [],
       active: 'active-count',
       green: 'green-font',
-      red: 'red-font',
-      test: 0
+      red: 'red-font'
     }
   },
   watch: {
     accountInfo: {
       handler (newValue, oldValue) {
-        const arr = []
-        const accountList = []
-        for (let elem of newValue) {
-          if (!arr.includes(elem.info.coinType)) {
-            arr.push(elem.info.coinType)
-            accountList.push({label: elem.info.coinType, account: [elem.info.label]})
-          } else {
-            for (let val of accountList) {
-              if (val.label === elem.info.coinType) {
-                val.account.push(elem.info.label)
-                break
-              }
-            }
-          }
+        const a = this.toTargetCoinUnit('bitcoin_test', 32132131, D.UNIT_BTC_SANTOSHI, this.currentUnit)
+        console.log(a, 'wadawdadasd')
+        let newCoinTypeList = []
+        for (let item of newValue) {
+          newCoinTypeList.push(item.coinType)
         }
-        // 拼接成理想数据类型
-        this.wallet = accountList
-        this.newAccount = this.orderArr(newValue)
+        this.coinTypeList = newCoinTypeList
+        this.newAccount = newValue
         let newGridList = []
         let total = []
         let txInfoPromise = this.newAccount.map(item => item.getTxInfos(0, 3))
         Promise.all(txInfoPromise).then(data => {
           for (let value of data) {
-            newGridList.push(value[1])
-            total.push(value[0])
+            newGridList.push(value.txInfos)
+            total.push(value.total)
           }
           this.gridList = newGridList
           this.totalNum = total
-          for (let index of this.gridList.keys()) {
-            this.pageList(index, total[index])
-          }
-        })
+          this.$nextTick(() => {
+            for (let index of this.gridList.keys()) {
+              this.pageList(index, total[index])
+            }
+          })
+        }).catch(value => { console.log(value) })
+      }
+    },
+    newAccount: {
+      handler (newValue, oldValue) {
+        this.setMenuList(newValue)
       }
     }
   },
@@ -208,6 +227,9 @@ export default {
     this.createTab()
   },
   methods: {
+    toTargetCoinUnit (coinType, value) {
+      return EsWallet.convertValue(coinType, value, D.UNIT_BTC_SANTOSHI, this.currentUnit)
+    },
     refresh () {
       this.loadingClass['layui-anim'] = true
       this.loadingClass['layui-anim-rotate'] = true
@@ -218,27 +240,54 @@ export default {
         this.loadingClass['layui-anim-loop'] = false
       }, 3000)
     },
-    orderArr (targetArr) {
+    setMenuList (targetArray) {
       const arr = []
       const accountList = []
-      for (let val of targetArr) {
-        if (!arr.includes(val.info.coinType)) {
-          arr.push(val.info.coinType)
-          accountList.push({type: val.info.coinType, list: [val]})
+      for (let elem of targetArray) {
+        if (!arr.includes(elem.coinType)) {
+          arr.push(elem.coinType)
+          accountList.push({label: elem.coinType, account: [elem.label]})
         } else {
-          for (let item of accountList) {
-            if (item.type === val.info.coinType) {
-              item.list.push(val)
+          for (let val of accountList) {
+            if (val.label === elem.coinType) {
+              val.account.push(elem.label)
               break
             }
           }
         }
       }
-      let a = []
-      for (let val of accountList) {
-        a = a.concat(val.list)
-      }
-      return a
+      // 拼接成理想数据类型
+      this.wallet = accountList
+      this.$nextTick(() => {
+        this.switchTab()
+      })
+    },
+    editAccount (orderNum) {
+      const that = this
+      layer.open({
+        type: 1,
+        area: ['530px', '315px'],
+        shadeClose: true,
+        title: 'Edit Account Name',
+        btn: ['submit', 'cancel'],
+        content: $('#edit-account'),
+        yes (index) {
+          if (!that.renameValue) {
+            layer.msg('必填项不能为空！', {icon: 5, anim: 6})
+            document.getElementById('editNameInput').focus()
+            return false
+          }
+          if (that.newAccount[orderNum].rename) {
+            that.newAccount[orderNum].rename(that.renameValue).then(value => {
+              that.setMenuList(that.newAccount)
+              layer.close(index)
+              layer.msg('update successfully !!', { icon: 1 })
+            })
+              .catch(value => { layer.msg('Failed to update !!', { icon: 2 }) })
+          }
+        }
+      })
+      document.getElementById('editNameInput').focus()
     },
     sendMsg () {
       Bus.$emit('test', '123')
@@ -276,13 +325,15 @@ export default {
       const startItem = limit * (page - 1)
       const endItem = limit * (page - 1) + limit
       this.newAccount[id].getTxInfos(startItem, endItem).then(data => {
-        this.$set(this.gridList, id, data[1])
-      })
+        this.$set(this.gridList, id, data.txInfos)
+      }).catch(value => { layer.msg('Failed to retrieve data !!', { icon: 2 }) })
     },
     createTab () {
       // 初始化第一個tab标签
       $('.tab-title-1:first').addClass('layui-this')
       $('.tab-item:first').addClass('layui-show')
+    },
+    switchTab () {
       // 独立各tab操作
       $('.tab-title-1 a').click(function () {
         if ($(this).parent('li').hasClass('layui-this')) return false
@@ -311,7 +362,7 @@ export default {
       })
     },
     getFormatTime (time) {
-      let date = new Date(time * 1000)
+      let date = new Date(time)
       let yyyy = date.getFullYear()
       let moth = date.getMonth() + 1
       let MM = parseInt(moth / 10) ? moth : '0' + moth
@@ -368,6 +419,12 @@ export default {
     overflow: hidden;
     white-space:nowrap;
   }
+  .edit-account{
+    margin-left: 5px;
+  }
+  .edit-account :hover{
+    color: #009688;
+  }
   .account-msg a.refresh-data:hover {
     color: #009688;
   }
@@ -408,6 +465,9 @@ export default {
   .table td {
     box-sizing: border-box;
   }
+  .layui-table td, .layui-table th{
+    overflow: hidden;
+  }
   .table > thead > tr > th {
     width: 40px;
     border-bottom: 2px solid #f4f4f4;
@@ -442,5 +502,20 @@ export default {
   }
   .red-font {
     color: #e74c3c;
+  }
+  /*编辑账户名*/
+  .edit-account-wrapper{
+    display: none;
+    margin: 30px 12px 10px
+  }
+  .description {
+    text-indent: 2em;
+    font-size:16px;
+    height: 36px;
+    line-height: 36px;
+    color: #333;
+    background-color: #F8F8F8;
+    border-radius: 6px;
+    margin: 0 20px 20px;
   }
 </style>

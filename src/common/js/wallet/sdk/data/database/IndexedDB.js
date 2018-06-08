@@ -2,7 +2,7 @@
 import IDatabase from './IDatabase'
 import D from '../../D'
 
-const DB_VERSION = 3
+const DB_VERSION = 4
 export default class IndexedDB extends IDatabase {
   constructor (walletId) {
     super()
@@ -49,9 +49,9 @@ export default class IndexedDB extends IDatabase {
          *   index: 0,
          *   balance: long,
          *   externalPublicKey: string,
-         *   externalPublicKeyIndex: int,
+         *   externalPublicKeyIndex: int, // next external address index
          *   changePublicKey: string,
-         *   changePublicKeyIndex: int
+         *   changePublicKeyIndex: int // next change address index
          * }
          */
         if (!db.objectStoreNames.contains('account')) {
@@ -92,13 +92,13 @@ export default class IndexedDB extends IDatabase {
          *   coinType: string,
          *   path: string,
          *   type: D.ADDRESS_EXTERNAL / D.ADDRESS_CHANGE,
+         *   index: int,
          *   txs: txId (string) array
          * }
          */
         if (!db.objectStoreNames.contains('addressInfo')) {
           let addressInfo = db.createObjectStore('addressInfo', {keyPath: 'address'})
           addressInfo.createIndex('accountId', 'accountId', {unique: false})
-          addressInfo.createIndex('coinType', 'coinType', {unique: false})
         }
 
         /**
@@ -112,13 +112,24 @@ export default class IndexedDB extends IDatabase {
          *   index: int,
          *   script: string,
          *   value: long (santoshi),
-         *   spent: D.TX_UNSPENT / D.SPENT_PENDING / D.TX_SPENT
+         *   spent: D.UTXO_UNSPENT / D.SPENT_PENDING / D.UTXO_SPENT
          * }
          */
         if (!db.objectStoreNames.contains('utxo')) {
           let utxo = db.createObjectStore('utxo', {keyPath: ['txId', 'index']})
           utxo.createIndex('accountId', 'accountId', {unique: false})
-          utxo.createIndex('accountId, spent', ['accountId, spent'], {unique: false})
+          utxo.createIndex('accountId, spent', ['accountId', 'spent'], {unique: false})
+        }
+
+        /**
+         * fee:
+         * {
+         *   coinType: string,
+         *   fee: object // (bitcoin: {fast: int, normal: int, ecnomic: int})
+         * }
+         */
+        if (!db.objectStoreNames.contains('fee')) {
+          db.createObjectStore('fee', {keyPath: 'coinType'})
         }
       }
 
@@ -197,34 +208,37 @@ export default class IndexedDB extends IDatabase {
     // this._db && this._db.close()
   }
 
-  newAccount (account, addresseInfos = []) {
+  newAccount (account) {
     return new Promise((resolve, reject) => {
       if (this._db === null) {
         reject(D.ERROR_DATABASE_OPEN_FAILED)
         return
       }
 
-      let transaction = this._db.transaction(['account', 'addressInfo'], 'readwrite')
+      let transaction = this._db.transaction(['account'], 'readwrite')
       let request = transaction.objectStore('account').add(account)
-
-      let error = (e) => {
+      request.onsuccess = resolve
+      request.onerror = (e) => {
         console.warn('newAccount', e)
         reject(D.ERROR_DATABASE_EXEC_FAILED)
       }
-      request.onsuccess = async () => {
-        let promise = (address) => {
-          return new Promise((resolve, reject) => {
-            let request = transaction.objectStore('addressInfo').add(address)
-            request.onsuccess = resolve
-            request.onerror = reject
-          })
-        }
-        Promise.all(addresseInfos.map(address => promise(address))).then(() => resolve(account)).catch(ev => {
-          console.warn('newAccount addressInfos', ev)
-          reject(D.ERROR_DATABASE_EXEC_FAILED)
-        })
+    })
+  }
+
+  deleteAccount (account) {
+    return new Promise((resolve, reject) => {
+      if (this._db === null) {
+        reject(D.ERROR_DATABASE_OPEN_FAILED)
+        return
       }
-      request.onerror = error
+
+      let transaction = this._db.transaction(['account'], 'readwrite')
+      let request = transaction.objectStore('account').delete(account.accountId)
+      request.onsuccess = resolve
+      request.onerror = (e) => {
+        console.warn('deleteAccount', e)
+        reject(D.ERROR_DATABASE_EXEC_FAILED)
+      }
     })
   }
 
@@ -240,19 +254,52 @@ export default class IndexedDB extends IDatabase {
         request = this._db.transaction(['account'], 'readonly')
           .objectStore('account')
           .getAll(filter.accountId)
+      } else if (filter.coinType) {
+        request = this._db.transaction(['account'], 'readonly')
+          .objectStore('account')
+          .index('coinType')
+          .getAll(filter.coinType)
       } else {
         request = this._db.transaction(['account'], 'readonly')
           .objectStore('account')
           .getAll()
       }
 
-      request.onsuccess = (e) => {
-        resolve(e.target.result)
-      }
+      request.onsuccess = (e) => resolve(e.target.result)
       request.onerror = (e) => {
         console.warn('getAccounts', e)
         reject(D.ERROR_DATABASE_EXEC_FAILED)
       }
+    })
+  }
+
+  renameAccount (account) {
+    return new Promise((resolve, reject) => {
+      if (this._db === null) {
+        reject(D.ERROR_DATABASE_OPEN_FAILED)
+        return
+      }
+
+      let request = this._db.transaction(['account'], 'readwrite')
+        .objectStore('account')
+        .get(account.accountId)
+
+      let error = e => {
+        console.warn('renameAccount', e)
+        reject(D.ERROR_DATABASE_EXEC_FAILED)
+      }
+
+      request.onsuccess = e => {
+        let oldAccount = e.target.result
+        oldAccount.label = account.label
+
+        let request = this._db.transaction(['account'], 'readwrite')
+          .objectStore('account')
+          .put(oldAccount)
+        request.onsuccess = e => resolve(e.target.result)
+        request.onerror = error
+      }
+      request.onerror = error
     })
   }
 
@@ -297,17 +344,17 @@ export default class IndexedDB extends IDatabase {
       }
 
       let total = 0
-      let array = []
+      let txInfos = []
       let startIndex = filter.startIndex || 0
       let endIndex = filter.endIndex || Number.MAX_SAFE_INTEGER
       request.onsuccess = (e) => {
         let cursor = e.target.result
         if (!cursor) {
-          resolve([total, array])
+          resolve({total, txInfos})
           return
         }
         if (total >= startIndex && total < endIndex) {
-          array.push(cursor.value)
+          txInfos.push(cursor.value)
         }
         total++
         cursor.continue()
@@ -319,24 +366,38 @@ export default class IndexedDB extends IDatabase {
     })
   }
 
-  saveOrUpdateAddressInfo (addressInfo) {
+  newAddressInfos (account, addressInfos) {
     return new Promise((resolve, reject) => {
       if (this._db === null) {
         reject(D.ERROR_DATABASE_OPEN_FAILED)
         return
       }
 
-      let request = this._db.transaction(['addressInfo'], 'readwrite')
-        .objectStore('addressInfo')
-        .put(addressInfo)
+      let accountRequest = () => {
+        return new Promise((resolve, reject) => {
+          let request = this._db.transaction(['account'], 'readwrite')
+            .objectStore('account')
+            .put(account)
 
-      request.onsuccess = () => {
-        resolve(addressInfo)
+          request.onsuccess = () => resolve(account)
+          request.onerror = reject
+        })
       }
-      request.onerror = (e) => {
-        console.info('saveOrUpdateAddressInfo', e)
+      let addressInfosRequest = () => {
+        return Promise.all(addressInfos.map(addressInfo => new Promise((resolve, reject) => {
+          let request = this._db.transaction(['addressInfo'], 'readwrite')
+            .objectStore('addressInfo')
+            .add(addressInfo)
+
+          request.onsuccess = resolve
+          request.onerror = reject
+        })))
+      }
+
+      accountRequest().then(addressInfosRequest).then(resolve).catch(e => {
+        console.warn('newAddressInfos', e)
         reject(D.ERROR_DATABASE_EXEC_FAILED)
-      }
+      })
     })
   }
 
@@ -348,20 +409,18 @@ export default class IndexedDB extends IDatabase {
       }
 
       let request
-      if (filter.coinType) {
+      if (filter.accountId) {
         request = this._db.transaction(['addressInfo'], 'readonly')
           .objectStore('addressInfo')
-          .index('coinType')
-          .getAll(filter.coinType)
+          .index('accountId')
+          .getAll(filter.accountId)
       } else {
         request = this._db.transaction(['addressInfo'], 'readonly')
           .objectStore('addressInfo')
           .getAll()
       }
 
-      request.onsuccess = (e) => {
-        resolve(e.target.result)
-      }
+      request.onsuccess = (e) => resolve(e.target.result)
       request.onerror = (e) => {
         console.warn('getAddressInfos', e)
         reject(D.ERROR_DATABASE_EXEC_FAILED)
@@ -386,16 +445,14 @@ export default class IndexedDB extends IDatabase {
         request = this._db.transaction(['utxo'], 'readonly')
           .objectStore('utxo')
           .index('accountId')
-          .getAll()
+          .getAll(filter.accountId)
       } else {
         request = this._db.transaction(['utxo'], 'readonly')
           .objectStore('utxo')
           .getAll()
       }
 
-      request.onsuccess = (e) => {
-        resolve(e.target.result)
-      }
+      request.onsuccess = (e) => resolve(e.target.result)
       request.onerror = (e) => {
         console.warn('getAccounts', e)
         reject(D.ERROR_DATABASE_EXEC_FAILED)
@@ -450,6 +507,40 @@ export default class IndexedDB extends IDatabase {
           console.warn('newTx', ev)
           reject(D.ERROR_DATABASE_EXEC_FAILED)
         })
+    })
+  }
+
+  getFee (coinType) {
+    return new Promise((resolve, reject) => {
+      if (this._db === null) {
+        reject(D.ERROR_DATABASE_OPEN_FAILED)
+        return
+      }
+
+      let transaction = this._db.transaction(['fee'], 'readonly')
+      let request = transaction.objectStore('fee').get(coinType)
+      request.onsuccess = (e) => resolve(e.target.result)
+      request.onerror = (e) => {
+        console.warn('getFee', e)
+        reject(D.ERROR_DATABASE_EXEC_FAILED)
+      }
+    })
+  }
+
+  saveOfUpdateFee (fee) {
+    return new Promise((resolve, reject) => {
+      if (this._db === null) {
+        reject(D.ERROR_DATABASE_OPEN_FAILED)
+        return
+      }
+
+      let transaction = this._db.transaction(['fee'], 'readwrite')
+      let request = transaction.objectStore('fee').put(fee)
+      request.onsuccess = resolve
+      request.onerror = (e) => {
+        console.warn('saveOfUpdateFee', e)
+        reject(D.ERROR_DATABASE_EXEC_FAILED)
+      }
     })
   }
 }

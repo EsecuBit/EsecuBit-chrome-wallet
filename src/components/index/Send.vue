@@ -11,13 +11,13 @@
         <div class="layui-form-item">
           <label class="layui-form-label account-label" >Current Account</label>
           <div class="layui-input-block account-info">
-            <div class="account-msg">{{accountName}}</div>
+            <div class="account-msg">{{currentAccount.label}}</div>
           </div>
         </div>
         <div class="layui-form-item" style="margin-bottom: 5px">
           <label class="layui-form-label">Amount</label>
           <div class="layui-input-inline input-width">
-            <input type="number" v-model.number="amountValue" name="money" id="money" lay-verify="required|money" placeholder="0.00 BTC"
+            <input type="number" v-model.number="amountValue" name="money" id="money" lay-verify="isEmpty" :placeholder="currentUnit"
                    autocomplete="off" class="layui-input">
           </div><button class="layui-btn layui-btn-radius layui-btn-primary pull-left" type="button" @click="maxAmount">MAX</button>
         </div>
@@ -29,7 +29,7 @@
           <div class="layui-form-item">
             <label class="layui-form-label">Bitcoin Address</label>
             <div class="layui-input-inline input-width">
-              <input type="text" v-model="addressValue" name="address"  lay-verify="required"  placeholder="Bitcoin Address" autocomplete="off" class="layui-input">
+              <input type="text" v-model="addressValue" name="address"  lay-verify="isEmpty"  placeholder="Bitcoin Address" autocomplete="off" class="layui-input">
             </div>
             <!--<button class="layui-btn layui-btn-radius layui-btn-primary" type="button" @click="addAddressDom">Add</button>-->
           </div>
@@ -43,7 +43,7 @@
         <!--<div class="layui-form-item">-->
           <!--<label class="layui-form-label">Choose an Account</label>-->
           <!--<div class="layui-input-inline input-width">-->
-            <!--<select name="account" lay-verify="required">-->
+            <!--<select name="account" lay-verify="isEmpty">-->
               <!--<option disabled value="">请选择</option>-->
               <!--<option v-for="account in accountList" v-bind:value="account">{{account}}</option>-->
             <!--</select>-->
@@ -52,16 +52,15 @@
         <div class="layui-form-item" v-show="switchFee">
           <label class="layui-form-label">Custom fees</label>
           <div class="layui-input-inline input-width">
-            <input type="number"  lay-verify="required" v-model="customFees" placeholder="Enter Yours Transaction Fees" autocomplete="off" class="layui-input">
+            <input type="number"  lay-verify="isEmpty" v-model="customFees" placeholder="Enter Yours Transaction Fees" autocomplete="off" class="layui-input">
           </div>
           <button class="layui-btn layui-btn-radius layui-btn-primary pull-left" type="button" @click="switchSelectButton">Select fees</button>
         </div>
         <div class="layui-form-item" v-show="!switchFee">
           <label class="layui-form-label">Transaction Fees</label>
           <div class="layui-input-inline input-width">
-            <select name="fee" lay-verify="required" lay-filter="fee" v-model="selected" >
-              <option disabled value="">请选择</option>
-              <option v-for="fee in feeList" v-bind:value="fee.value">{{fee.label}}</option>
+            <select name="fee" lay-filter="fee"  >
+              <option v-for="(fee, index) in feeList" v-bind:value="fee.value" :selected="index === 0">{{fee.label}}</option>
             </select>
           </div>
           <button class="layui-btn layui-btn-radius layui-btn-primary pull-left" type="button" @click="switchCustomButton">Custom fees</button>
@@ -69,10 +68,7 @@
         <div class="layui-form-item">
           <label class="layui-form-label">Total Fees</label>
           <div class="layui-input-inline input-width">
-            <textarea disabled  lay-verify="required" class="layui-textarea"
-                      v-bind:value="'BTC '+ (amountValue + selected).toFixed(4)+' (BTC ' + (selected) + ' Transaction Fees)'+ '\n' +
-                       'USD '+(amountValue + selected).toFixed(4)+' (USD ' + (selected) + ' Transaction Fees)'"
-                      name="desc"></textarea>
+            <textarea disabled  lay-verify="isEmpty" class="layui-textarea" v-bind:value= "totalFeeDesc" name="desc"></textarea>
           </div>
         </div>
         <div class="layui-form-item">
@@ -88,76 +84,94 @@
 
 <script>
 import Bus from '../../common/js/bus'
+import D from '../../common/js/wallet/sdk/D'
+import EsWallet from '../../common/js/wallet/sdk/EsWallet'
+
 // eslint-disable-next-line
 const form = layui.form
+// eslint-disable-next-line
+const layer = layui.layer
 export default {
   name: 'Sending',
-  props: ['accountInfo'],
+  props: ['accountInfo', 'currentUnit', 'currentExchangeRate'],
   data () {
     return {
       addressList: [],
       count: 2,
       unit: 'BTC',
       amountValue: 0,
-      addressValue: '1MdYC22Gmjp2ejVpCxyYjfyWbQCYTGhGq8',
-      selected: 0.01,
+      addressValue: '',
+      selected: null,
       customFees: 0.00,
       accountList: ['account 1', 'account 2'],
       feeList: [
-        {label: '慢速确认（0.01 usd）', value: 0.01},
-        {label: '标准确认（0.02 usd）', value: 0.02},
-        {label: '快速确认（0.05 usd）', value: 0.05}
+        {label: '慢速确认（10 usd）', value: 10}
       ],
       switchFee: false,
-      AccountOrder: [],
-      accountName: null,
-      accountIndex: 0
+      accountOrder: [],
+      currentAccount: {label: ''},
+      totalFee: 0,
+      coinType: ''
+    }
+  },
+  computed: {
+    totalFeeDesc () {
+      return this.totalFee + ' ' + this.currentUnit
     }
   },
   watch: {
-    accountInfo: {
+    amountValue: {
       handler (newValue, oldValue) {
-        this.accountOrder = this.orderArr(newValue)
-        this.accountName = this.accountOrder[0].info.label
+        if (this.currentAccount.prepareTx) {
+          this.calculateTotal()
+        }
       }
     },
-    accountIndex: {
+    accountInfo: {
       handler (newValue, oldValue) {
-        this.accountName = this.accountOrder[newValue].info.label
+        this.accountOrder = newValue
+        this.currentAccount = this.accountOrder[0]
+      }
+    },
+    currentAccount: {
+      handler (newValue, oldValue) {
+        this.coinType = newValue.coinType
+        if (newValue.getSuggestedFee) {
+          let oldFeeList = newValue.getSuggestedFee()
+          let newFeeList = []
+          newFeeList.push({label: '快速确认' + '(' + oldFeeList.fast + ')', value: oldFeeList.fast})
+          newFeeList.push({label: '标准确认' + '(' + oldFeeList.normal + ')', value: oldFeeList.normal})
+          newFeeList.push({label: '慢速确认' + '(' + oldFeeList.economy + ')', value: oldFeeList.economy})
+          this.feeList = newFeeList
+          this.selected = oldFeeList.fast
+          this.$nextTick(() => {
+            form.render('select', 'form1')
+            form.on('select(fee)', data => {
+              this.selected = Number(data.value)
+              this.calculateTotal()
+            })
+          })
+        }
       }
     }
   },
   mounted () {
-    Bus.$on('switchAccount', function (index) {
-      this.accountIndex = index
-    })
-    form.render('select', 'form1')
-    form.on('select(fee)', data => {
-      this.selected = Number(data.value)
-    })
+    this.verifyForm()
+    Bus.$on('switchAccount', (index) => { this.currentAccount = this.accountOrder[index] })
   },
   methods: {
-    orderArr (targetArr) {
-      const arr = []
-      const accountList = []
-      for (let val of targetArr) {
-        if (!arr.includes(val.info.coinType)) {
-          arr.push(val.info.coinType)
-          accountList.push({type: val.info.coinType, list: [val]})
-        } else {
-          for (let item of accountList) {
-            if (item.type === val.info.coinType) {
-              item.list.push(val)
-              break
-            }
-          }
+    verifyForm () {
+      form.verify({
+        isEmpty (value) {
+          if (!value) return '必填项不能为空，请填写内容 ！'
         }
-      }
-      let a = []
-      for (let val of accountList) {
-        a = a.concat(val.list)
-      }
-      return a
+      })
+    },
+    toTargetCoinUnit (value) {
+      return EsWallet.convertValue(this.coinType, value, D.UNIT_BTC_SANTOSHI, this.currentUnit)
+    },
+    toMinCoinUnit (value) {
+      return EsWallet.convertValue(this.coinType, value, this.currentUnit, D.UNIT_BTC_SANTOSHI)
     },
     maxAmount () {
       this.amountValue = 200
@@ -171,18 +185,37 @@ export default {
       this.customFees = null
     },
     submitSendData () {
-      console.log(typeof this.amountValue)
       if (!this.switchFee) {
         if (!(this.selected && this.amountValue !== '' && this.addressValue)) return false
       } else {
         if (!(this.customFees && this.amountValue !== '' && this.addressValue)) return false
       }
+      let address = this.addressValue
+      let moneyValue = this.amountValue
       let formData = {
-        out: this.amountValue,
-        address: this.addressValue,
-        fee: this.switchFee ? this.customFees : this.selected
+        feeRate: Number(this.switchFee ? this.customFees : this.selected),
+        outputs: [{
+          address: address,
+          value: moneyValue
+        }]
       }
-      console.log(formData)
+      this.currentAccount.prepareTx(formData).then(value => this.currentAccount.buildTx(value))
+        .then(value => this.currentAccount.sendTx(value)).then(value => { layer.msg('submit successfully', { icon: 1 }) })
+        .catch(value => { layer.msg(value, { icon: 2 }) })
+    },
+    calculateTotal () {
+      let getAmountValue = this.amountValue ? this.amountValue : 0
+      let sendAmountValue = this.toMinCoinUnit(getAmountValue)
+      let getAddress = this.addressValue
+      let formData = {
+        feeRate: Number(this.switchFee ? this.customFees : this.selected),
+        outputs: [{
+          address: getAddress,
+          value: sendAmountValue
+        }]
+      }
+      this.currentAccount.prepareTx(formData).then(value => { this.totalFee = this.toTargetCoinUnit(value.total) })
+        .catch(value => { layer.msg(value, { icon: 2 }) })
     },
     addAddressDom () {
       let name = 'Bitcoin Address ' + this.count

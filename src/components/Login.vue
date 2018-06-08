@@ -36,14 +36,17 @@ export default {
     return {
       promptMsg: 'Please insert your key on your computer and unlock your wallet',
       loadingMsg1: 'Please insert your key on your computer and unlock your wallet',
-      loadingMsg2: 'Loading... please wait a moment',
+      loadingMsg2: 'initializing... please wait a moment !!',
+      loadingMsg3: 'Syncing... It may take a few minutes !!',
+      loadingMsg4: 'Loading... please wait a moment',
       isLoadingIcon: false
     }
   },
   watch: {
     status: {
       handler (newValue, oldValue) {
-        if (newValue === 1) this.loading()
+        if (newValue === 2) this.init()
+        if (newValue === 3) this.sync()
         if (newValue === 99) this.quitLoading()
       }
     }
@@ -54,6 +57,13 @@ export default {
     loading () {
       this.promptMsg = this.loadingMsg2
       this.isLoadingIcon = !this.isLoadingIcon
+    },
+    init () {
+      this.promptMsg = this.loadingMsg2
+      this.isLoadingIcon = !this.isLoadingIcon
+    },
+    sync () {
+      this.promptMsg = this.loadingMsg3
     },
     quitLoading () {
       this.promptMsg = this.loadingMsg1

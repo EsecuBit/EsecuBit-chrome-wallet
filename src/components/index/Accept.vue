@@ -54,33 +54,38 @@ export default {
       accountIndex: 0,
       accountOrder: [],
       accountName: null,
+      accountQrcode: null,
+      count: 1,
       accountAddress: [ { label: 'accout 1', value: '2313131352' }, {label: 'accout 2', value: 'https://www.baidu.com'} ]
     }
   },
   watch: {
     accountInfo: {
       handler (newValue, oldValue) {
-        this.accountOrder = this.orderArr(newValue)
-        this.accountName = this.accountOrder[0].info.label
-        this.accountOrder[0].getAddress().then(value => {
-          this.generateQRCode(value.qrAddress)
-          this.qrAddress = value.address
-        })
+        this.accountOrder = newValue
+        this.accountName = this.accountOrder[0].label
+        if (this.count === 1) {
+          this.accountOrder[0].getAddress().then(value => {
+            this.generateQRCode(value.qrAddress)
+            this.qrAddress = value.address
+          }).catch(value => { console.log(value) })
+        }
+        this.count++
       }
     },
     accountIndex: {
       handler (newValue, oldValue) {
-        this.accountName = this.accountOrder[newValue].info.label
+        this.accountName = this.accountOrder[newValue].label
         this.accountOrder[newValue].getAddress().then(value => {
-          this.generateQRCode(value.qrAddress)
+          this.changeQRCode(value.qrAddress)
           this.qrAddress = value.address
-        })
+        }).catch(value => { console.log(value) })
       }
     }
   },
   mounted () {
     form.render('select', 'form2')
-    Bus.$on('switchAccount', function (index) {
+    Bus.$on('switchAccount', (index) => {
       this.accountIndex = index
     })
     Bus.$on('test', function (msg) {
@@ -90,7 +95,7 @@ export default {
   methods: {
     generateQRCode (address) {
       // eslint-disable-next-line
-      const accountQrcode = new QRCode('code', {
+      this.accountQrcode = new QRCode('code', {
         text: address,
         width: 200,
         height: 200,
@@ -103,27 +108,10 @@ export default {
       //   accountQrcode.makeCode(data.value)
       // })
     },
-    orderArr (targetArr) {
-      const arr = []
-      const accountList = []
-      for (let val of targetArr) {
-        if (!arr.includes(val.info.coinType)) {
-          arr.push(val.info.coinType)
-          accountList.push({type: val.info.coinType, list: [val]})
-        } else {
-          for (let item of accountList) {
-            if (item.type === val.info.coinType) {
-              item.list.push(val)
-              break
-            }
-          }
-        }
+    changeQRCode (address) {
+      if (this.accountQrcode) {
+        this.accountQrcode.makeCode(address)
       }
-      let a = []
-      for (let val of accountList) {
-        a = a.concat(val.list)
-      }
-      return a
     }
   }
 }
