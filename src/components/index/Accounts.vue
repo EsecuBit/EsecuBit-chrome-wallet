@@ -17,7 +17,7 @@
             <span>Account ：</span>
            <span style="color: #e74c3c">{{newAccount[index].label}}</span>
             <a title="edit" href="#" class="edit-account" @click="editAccount(index)">
-              <i class="layui-icon ">&#xe642;</i>
+              <i class="icon iconfont icon-bianji1 "></i>
             </a>
           </div>
           <div class="account-msg">
