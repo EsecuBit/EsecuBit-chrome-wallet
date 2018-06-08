@@ -101,13 +101,13 @@ export default {
         {name: 'red', colorClass: 'red-skin'}
       ],
       unitChecked: '',
+      selectedExchangeRate: '',
       unitValueList: [
         {label: 'BTC', value: 'btc'},
         {label: 'mBTC', value: 'mbtc'}
       ],
       langList: [
         {label: 'English', value: 'en-us'},
-        {label: '简体中文', value: 'cn-zh'},
         {label: '简体中文', value: 'cn-zh'}
       ],
       exchangeRate: [
@@ -157,9 +157,16 @@ export default {
     Bus.$on('switchAccount', (index) => { this.currentAccount = this.accountOrder[index] })
     form.render('select', 'form3')
     this.switchLang()
+    this.switchExchange()
     this.switchTab()
   },
   methods: {
+    switchExchange () {
+      form.on('select(exchange)', (data) => {
+        this.selectedExchangeRate = data.value
+        this.$emit('setExchangeRate', data.value)
+      })
+    },
     switchLang () {
       form.on('select(lang)', (data) => {
         this.$i18n.locale = data.value

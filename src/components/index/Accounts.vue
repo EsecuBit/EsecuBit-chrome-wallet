@@ -25,6 +25,7 @@
             <span>Balance ：</span>
             <span v-if="coinTypeList[index]">{{toTargetCoinUnit(coinTypeList[index], newAccount[index].balance)}}</span>
             <span>{{currentUnit}}</span>
+            <span v-if="currentExchangeRate" class="exchange-rate">{{toExchangeText}}</span>
           </div>
           <div class="account-msg">
             <a title="refresh" href="#" class="refresh-data" @click="refresh">
@@ -68,13 +69,13 @@
                   <td>{{getFormatTime(table.time)}}</td>
                   <td :class ="[table.direction === 'in'?green:red]">{{table.direction}}</td>
                   <td>
-                    <a title="详情" href="#" @click="getDescription(table); sendMsg()">
-                    <i class="layui-icon">&#xe63c;</i> 详情
+                    <a title="Details" href="#" @click="getDescription(table); sendMsg()">
+                    <i class="layui-icon">&#xe63c;</i> Details
                     </a>
                   </td>
                   <td>
-                    <a title="查询" href="#">
-                      <i class="layui-icon">&#xe615;</i> 查询
+                    <a title="search" href="#">
+                      <i class="layui-icon">&#xe615;</i> search
                     </a>
                   </td>
                 </tr>
@@ -89,7 +90,7 @@
   <div class="edit-account-wrapper" id="edit-account">
     <p class="description">
       <i class="layui-icon" style="color: #dd4b39;">&#xe702;</i>&nbsp;
-      <span>请输入新的用户名！！</span>
+      <span>Please enter a new username!</span>
     </p>
     <form class="layui-form" lay-filter="edit-form">
       <div class="layui-form-item" >
@@ -188,6 +189,11 @@ export default {
       red: 'red-font'
     }
   },
+  computed: {
+    toExchangeText () {
+      return `( 1000 ${this.currentExchangeRate} )`
+    }
+  },
   watch: {
     accountInfo: {
       handler (newValue, oldValue) {
@@ -263,6 +269,7 @@ export default {
       })
     },
     editAccount (orderNum) {
+      this.renameValue = ''
       const that = this
       layer.open({
         type: 1,
@@ -273,7 +280,7 @@ export default {
         content: $('#edit-account'),
         yes (index) {
           if (!that.renameValue) {
-            layer.msg('必填项不能为空！', {icon: 5, anim: 6})
+            layer.msg('Required item cannot be empty!', {icon: 5, anim: 6})
             document.getElementById('editNameInput').focus()
             return false
           }
@@ -354,10 +361,10 @@ export default {
       this.description.direction = table.direction
       layer.open({
         type: 1,
-        title: '详情',
+        title: 'Details',
         area: ['600px', '380px'],
         shadeClose: true,
-        btn: ['关闭'],
+        btn: ['close'],
         content: $('.content')
       })
     },
@@ -413,7 +420,7 @@ export default {
   }
   .account-msg {
     display: inline-block;
-    max-width: 200px;
+    max-width: 350px;
     max-height: 19px;
     margin-right: 30px;
     overflow: hidden;
@@ -517,5 +524,9 @@ export default {
     background-color: #F8F8F8;
     border-radius: 6px;
     margin: 0 20px 20px;
+  }
+  .exchange-rate{
+    font-size: 12px;
+    color:#666;
   }
 </style>

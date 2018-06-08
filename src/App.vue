@@ -44,7 +44,7 @@
                 <Accept :account-info ="accounts"/>
               </div>
               <div class="main-tab-item">
-                <Setting @switchSetting = "switchSetting" @settingColor = "settingColor" @setUnit="setUnit" :account-info ="accounts" :wallet-info="WalletInfo"/>
+                <Setting @switchSetting = "switchSetting" @settingColor = "settingColor" @setExchangeRate="setExchangeRate" @setUnit="setUnit" :account-info ="accounts" :wallet-info="WalletInfo"/>
               </div>
             </div>
           </div>
@@ -54,7 +54,7 @@
             <div class="form-content" v-show="isHasAccount">
               <p class="description">
                 <i class="layui-icon" style="color: #dd4b39;">&#xe702;</i>&nbsp;
-                <span>请选择你想创建的账户的类型！！</span>
+                <span>Please select the type of account you want to create!</span>
               </p>
               <form class="layui-form" lay-filter="form1">
                 <div class="layui-form-item" >
@@ -83,7 +83,7 @@
           <div class="loading-center">
             <div class="loading-wrapper">
               <i class="layui-icon layui-anim layui-anim-rotate layui-anim-loop" style="font-size: 30px;"> </i>
-              <span>正在初始化您的账户，请稍候片刻...</span>
+              <span>Initializing new account, please wait a moment...</span>
             </div>
           </div>
         </div>
@@ -156,6 +156,9 @@ export default {
     })
   },
   methods: {
+    setExchangeRate (...data) {
+      this.currentExchangeRate = data[0]
+    },
     switchSetting (...data) {
       $('#message').text(data[0])
     },
@@ -177,10 +180,10 @@ export default {
           this.isLogin = !this.isLogin
           esWallet.getWalletInfo().then(value => {
             this.WalletInfo = value
-          }).catch(value => { console.log(value, '获取钱包信息失败') })
+          }).catch(value => { console.log(value, 'Failed to get wallet information') })
           esWallet.getAccounts().then(value => {
             if (value) this.accounts = this.orderArr(value)
-          }).catch(value => { console.log(value, '获取用户数据失败') })
+          }).catch(value => { console.log(value, 'Failed to get user data') })
         }
         if (status === 99) {
           this.loginStatus = 99
@@ -224,11 +227,11 @@ export default {
               if (Array.isArray(that.accounts) && that.accounts.length > 0) that.accounts.push(value)
             }).catch(value => {
               layer.closeAll()
-              console.log(value, '添加用户失败')
+              console.log(value, 'Failed to add user')
             })
           }
         })
-      }).catch(value => console.log(value, '获取币失败'))
+      }).catch(value => console.log(value, 'Failed to get wallet type'))
     },
     showAddAccount () {
       this.isAddAccounts = true

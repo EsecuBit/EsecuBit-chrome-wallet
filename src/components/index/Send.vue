@@ -23,7 +23,7 @@
         </div>
         <div class="switch-money">
           <label class="blank-label"></label>
-          <div ><span class="usd-amount">{{((amountValue * 1235.0191*100000000)/100000000).toFixed(4)}}</span><em class="unit">USD</em></div>
+          <div ><span class="usd-amount">{{toExchangeText}}</span><em class="unit"></em></div>
         </div>
         <div class="money-address">
           <div class="layui-form-item">
@@ -52,7 +52,7 @@
         <div class="layui-form-item" v-show="switchFee">
           <label class="layui-form-label">Custom fees</label>
           <div class="layui-input-inline input-width">
-            <input type="number"  lay-verify="isEmpty" v-model="customFees" placeholder="Enter Yours Transaction Fees" autocomplete="off" class="layui-input">
+            <input type="number"  lay-verify="isEmpty" v-model="customFees" placeholder="satoshis per byte" autocomplete="off" class="layui-input">
           </div>
           <button class="layui-btn layui-btn-radius layui-btn-primary pull-left" type="button" @click="switchSelectButton">Select fees</button>
         </div>
@@ -105,7 +105,7 @@ export default {
       customFees: 0.00,
       accountList: ['account 1', 'account 2'],
       feeList: [
-        {label: '慢速确认（10 usd）', value: 10}
+        {label: 'slow（10 usd）', value: 10}
       ],
       switchFee: false,
       accountOrder: [],
@@ -117,6 +117,9 @@ export default {
   computed: {
     totalFeeDesc () {
       return this.totalFee + ' ' + this.currentUnit
+    },
+    toExchangeText () {
+      return this.amountValue * 2135 + this.currentExchangeRate
     }
   },
   watch: {
@@ -125,6 +128,16 @@ export default {
         if (this.currentAccount.prepareTx) {
           this.calculateTotal()
         }
+      }
+    },
+    switchFee: {
+      handler () {
+        this.calculateTotal()
+      }
+    },
+    customFees: {
+      handler () {
+        if (this.switchFee) this.calculateTotal()
       }
     },
     accountInfo: {
@@ -139,9 +152,9 @@ export default {
         if (newValue.getSuggestedFee) {
           let oldFeeList = newValue.getSuggestedFee()
           let newFeeList = []
-          newFeeList.push({label: '快速确认' + '(' + oldFeeList.fast + ')', value: oldFeeList.fast})
-          newFeeList.push({label: '标准确认' + '(' + oldFeeList.normal + ')', value: oldFeeList.normal})
-          newFeeList.push({label: '慢速确认' + '(' + oldFeeList.economy + ')', value: oldFeeList.economy})
+          newFeeList.push({label: 'fast confirmation' + '(' + oldFeeList.fast + ')', value: oldFeeList.fast})
+          newFeeList.push({label: 'Standard confirmation' + '(' + oldFeeList.normal + ')', value: oldFeeList.normal})
+          newFeeList.push({label: 'Slow confirmation' + '(' + oldFeeList.economy + ')', value: oldFeeList.economy})
           this.feeList = newFeeList
           this.selected = oldFeeList.fast
           this.$nextTick(() => {
@@ -163,7 +176,7 @@ export default {
     verifyForm () {
       form.verify({
         isEmpty (value) {
-          if (!value) return '必填项不能为空，请填写内容 ！'
+          if (!value) return 'Required field cannot be empty, please fill in the content!'
         }
       })
     },

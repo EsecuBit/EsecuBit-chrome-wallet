@@ -18,7 +18,7 @@
           <label class="layui-form-label account-label" >Choose an Account</label>
           <div class="layui-input-block">
             <select name="receiveAccount" lay-verify="required" lay-filter="receiveAccount" v-model="selected">
-              <option disabled value="">请选择</option>
+              <option disabled value="">please choose</option>
               <option v-for="account in accountAddress" v-bind:value="account.value">{{account.label}}</option>
             </select>
           </div>
