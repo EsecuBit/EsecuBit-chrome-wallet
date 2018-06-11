@@ -5,11 +5,12 @@ import App from './App'
 import VueI18n from 'vue-i18n'
 Vue.config.productionTip = false
 Vue.use(VueI18n)
+const currentLang = navigator.language
 const i18n = new VueI18n({
-  locale: 'en-us',
+  locale: currentLang,
   messages: {
-    'cn-zh': require('./common/js/lang/cn'),
-    'en-us': require('./common/js/lang/en')
+    'zh-CN': require('./common/js/lang/cn'),
+    'en-US': require('./common/js/lang/en')
   }
 })
 /* eslint-disable no-new */

@@ -1,15 +1,15 @@
 <template>
   <div>
     <blockquote class="site-text layui-elem-quote" style="margin-top: 20px">
-      <i class="layui-icon">&#xe645;</i>   Please use the mobile phone to scan the QR code in the picture
+      <i class="layui-icon">&#xe645;</i>   {{$t('message.accept_prompt_msg')}}
     </blockquote>
     <div class="site-title" style="margin-top: 20px">
-      <fieldset><legend><a name="use">Receive Coin</a></legend></fieldset>
+      <fieldset><legend><a name="use">{{receiveCoinTypeMsg}}</a></legend></fieldset>
     </div>
     <div class="site-text site-block">
       <form class="layui-form"  lay-filter="form2">
         <div class="layui-form-item">
-          <label class="layui-form-label account-label" >Current Account :</label>
+          <label class="layui-form-label account-label" >{{$t('message.accept_current_account')}}</label>
           <div class="layui-input-block account-info">
             <div class="account-msg">{{accountName}}</div>
           </div>
@@ -32,7 +32,7 @@
           <!--</div>-->
         <!--</div>-->
         <div class="layui-form-item">
-          <div class="description">{{"QR code Address :" + "  " + qrAddress}}</div>
+          <div class="description">{{qrAddressMsg}}</div>
         </div>
       </form>
     </div>
@@ -56,12 +56,22 @@ export default {
       accountName: null,
       accountQrcode: null,
       count: 1,
+      coinType: '123',
       accountAddress: [ { label: 'accout 1', value: '2313131352' }, {label: 'accout 2', value: 'https://www.baidu.com'} ]
+    }
+  },
+  computed: {
+    qrAddressMsg () {
+      return this.$t('message.accept_qrcode_msg') + this.qrAddress
+    },
+    receiveCoinTypeMsg () {
+      return this.$t('message.accept_accept_msg') + ' ' + this.coinType
     }
   },
   watch: {
     accountInfo: {
       handler (newValue, oldValue) {
+        this.coinType = newValue[0].coinType
         this.accountOrder = newValue
         this.accountName = this.accountOrder[0].label
         if (this.count === 1) {
@@ -75,6 +85,7 @@ export default {
     },
     accountIndex: {
       handler (newValue, oldValue) {
+        this.coinType = this.accountOrder[newValue].coinType
         this.accountName = this.accountOrder[newValue].label
         this.accountOrder[newValue].getAddress().then(value => {
           this.changeQRCode(value.qrAddress)

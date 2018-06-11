@@ -14,7 +14,7 @@
         <div class="account-information">
           <div class="account-msg">
             <span class="layui-badge-dot layui-bg-green"></span>
-            <span>Account ：</span>
+            <span>{{$t('message.accounts_account')}}</span>
            <span style="color: #e74c3c">{{newAccount[index].label}}</span>
             <a title="edit" href="#" class="edit-account" @click="editAccount(index)">
               <i class="icon iconfont icon-bianji1 "></i>
@@ -22,7 +22,7 @@
           </div>
           <div class="account-msg">
             <span class="layui-badge-dot layui-bg-green"></span>
-            <span>Balance ：</span>
+            <span>{{$t('message.accounts_balance')}}</span>
             <span v-if="coinTypeList[index]">{{toTargetCoinUnit(coinTypeList[index], newAccount[index].balance)}}</span>
             <span>{{currentUnit}}</span>
             <span v-if="currentExchangeRate" class="exchange-rate">{{toExchangeText}}</span>
@@ -35,7 +35,7 @@
         </div>
         <div class="site-title">
           <fieldset>
-            <legend><a name="default">Recent Operations</a></legend>
+            <legend><a name="default">{{$t('message.accounts_recent_operations')}}</a></legend>
           </fieldset>
         </div>
         <div class="layui-row">
@@ -52,13 +52,13 @@
               </colgroup>
               <thead>
               <tr>
-                <th>txId</th>
-                <th>coinType</th>
-                <th>blockNumber</th>
-                <th>time</th>
-                <th>direction</th>
-                <th>Operation</th>
-                <th>Search</th>
+                <th>{{$t('message.accounts_table_txId')}}</th>
+                <th>{{$t('message.accounts_table_coinType')}}</th>
+                <th>{{$t('message.accounts_table_blockNumber')}}</th>
+                <th>{{$t('message.accounts_table_time')}}</th>
+                <th>{{$t('message.accounts_table_direction')}}</th>
+                <th>{{$t('message.accounts_table_operation')}}</th>
+                <th>{{$t('message.accounts_table_search')}}</th>
               </tr>
               </thead>
               <tbody v-for="table in tablecount" >
@@ -70,12 +70,12 @@
                   <td :class ="[table.direction === 'in'?green:red]">{{table.direction}}</td>
                   <td>
                     <a title="Details" href="#" @click="getDescription(table); sendMsg()">
-                    <i class="layui-icon">&#xe63c;</i> Details
+                    <i class="layui-icon">&#xe63c;</i> {{$t('message.accounts_details')}}
                     </a>
                   </td>
                   <td>
                     <a title="search" href="#">
-                      <i class="layui-icon">&#xe615;</i> search
+                      <i class="layui-icon">&#xe615;</i> {{$t('message.accounts_table_search')}}
                     </a>
                   </td>
                 </tr>
@@ -90,13 +90,13 @@
   <div class="edit-account-wrapper" id="edit-account">
     <p class="description">
       <i class="layui-icon" style="color: #dd4b39;">&#xe702;</i>&nbsp;
-      <span>Please enter a new username!</span>
+      <span>{{$t('message.accounts_enter_username')}}</span>
     </p>
     <form class="layui-form" lay-filter="edit-form">
       <div class="layui-form-item" >
-        <label class="layui-form-label" style="width: 130px">Account Name</label>
+        <label class="layui-form-label" style="width: 130px">{{$t('message.accounts_form_username')}}</label>
         <div class="layui-input-inline" style="width: 350px">
-          <input type="text"  placeholder="Enter Yours New Account Name" id="editNameInput" v-model="renameValue" class="layui-input">
+          <input type="text"  :placeholder="$t('message.accounts_form_placeholder')" id="editNameInput" v-model="renameValue" class="layui-input">
         </div>
       </div>
     </form>
@@ -109,29 +109,29 @@
       </colgroup>
       <thead>
       <tr>
-        <th>Name</th>
-        <th>Information</th>
+        <th>{{$t('message.accounts_name')}}</th>
+        <th>{{$t('message.accounts_information')}}</th>
       </tr>
       </thead>
       <tbody>
         <tr>
-          <td>txId</td>
+          <td>{{$t('message.accounts_table_txId')}}</td>
           <td>{{description.txId}}</td>
         </tr>
         <tr>
-          <td>coinType</td>
+          <td>{{$t('message.accounts_table_coinType')}}</td>
           <td>{{description.coinType}}</td>
         </tr>
         <tr>
-          <td>blockNumber</td>
+          <td>{{$t('message.accounts_table_blockNumber')}}</td>
           <td>{{description.blockNumber}}</td>
         </tr>
         <tr>
-          <td>time</td>
+          <td>{{$t('message.accounts_table_time')}}</td>
           <td>{{getFormatTime(description.time)}}</td>
         </tr>
         <tr>
-          <td>direction</td>
+          <td>{{$t('message.accounts_table_direction')}}</td>
           <td >{{description.direction}}</td>
         </tr>
       </tbody>
@@ -197,8 +197,6 @@ export default {
   watch: {
     accountInfo: {
       handler (newValue, oldValue) {
-        const a = this.toTargetCoinUnit('bitcoin_test', 32132131, D.UNIT_BTC_SANTOSHI, this.currentUnit)
-        console.log(a, 'wadawdadasd')
         let newCoinTypeList = []
         for (let item of newValue) {
           newCoinTypeList.push(item.coinType)
@@ -275,12 +273,12 @@ export default {
         type: 1,
         area: ['530px', '315px'],
         shadeClose: true,
-        title: 'Edit Account Name',
-        btn: ['submit', 'cancel'],
+        title: that.$t('message.accounts_layer_title'),
+        btn: [that.$t('message.accounts_submit_btn'), that.$t('message.accounts_cancel_btn')],
         content: $('#edit-account'),
         yes (index) {
           if (!that.renameValue) {
-            layer.msg('Required item cannot be empty!', {icon: 5, anim: 6})
+            layer.msg(that.$t('message.accounts_form_is_empty'), {icon: 5, anim: 6})
             document.getElementById('editNameInput').focus()
             return false
           }
@@ -288,9 +286,9 @@ export default {
             that.newAccount[orderNum].rename(that.renameValue).then(value => {
               that.setMenuList(that.newAccount)
               layer.close(index)
-              layer.msg('update successfully !!', { icon: 1 })
+              layer.msg(that.$t('message.accounts_update_msg'), { icon: 1 })
             })
-              .catch(value => { layer.msg('Failed to update !!', { icon: 2 }) })
+              .catch(value => { layer.msg(that.$t('message.accounts_update_error'), { icon: 2 }) })
           }
         }
       })
@@ -309,10 +307,8 @@ export default {
         count: total,
         limit: limit,
         curr: page,
-        prev: 'prev',
-        next: 'next',
-        first: 'first',
-        last: 'last',
+        prev: that.$t('message.accounts_prev'),
+        next: that.$t('message.accounts_next'),
         layout: ['prev', 'page', 'next', 'count'],
         jump: function (obj, first) {
           // obj包含了当前分页的所有参数，比如：
@@ -333,7 +329,7 @@ export default {
       const endItem = limit * (page - 1) + limit
       this.newAccount[id].getTxInfos(startItem, endItem).then(data => {
         this.$set(this.gridList, id, data.txInfos)
-      }).catch(value => { layer.msg('Failed to retrieve data !!', { icon: 2 }) })
+      }).catch(value => { layer.msg(this.$t('message.accounts_get_data'), { icon: 2 }) })
     },
     createTab () {
       // 初始化第一個tab标签
@@ -359,9 +355,10 @@ export default {
       this.description.blockNumber = table.blockNumber
       this.description.time = table.time
       this.description.direction = table.direction
+      const that = this
       layer.open({
         type: 1,
-        title: 'Details',
+        title: that.$t('message.accounts_details_title'),
         area: ['600px', '380px'],
         shadeClose: true,
         btn: ['close'],

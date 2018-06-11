@@ -11,10 +11,10 @@
               <a class="logo" href="#"> <img src="./common/imgs/logo.png" alt="Wallet Bitcion"></a>
               <!-- 头部区域（可配合layui已有的水平导航） -->
               <ul class="layui-nav fly-nav layui-hide-xs menu-switch">
-                <li class="layui-nav-item layui-this"><a href="#" id="set_jqgrid_width" @click="showAddAccount"><i class="icon iconfont icon-zhanghu1"></i>{{$t('message.accounts')}}</a></li>
-                <li class="layui-nav-item"><a href="#" @click="hiddenAddAccount"><i class="icon iconfont icon-msnui-cloud-upload bigger"></i>{{$t('message.send')}}</a></li>
-                <li class="layui-nav-item"><a href="#" @click="hiddenAddAccount"><i class="icon iconfont icon-msnui-cloud-download bigger"></i>{{$t('message.accept')}}</a></li>
-                <li class="layui-nav-item"><a href="#" @click="hiddenAddAccount"><i class="icon iconfont icon-shezhi2"></i>{{$t('message.setting')}}</a></li>
+                <li class="layui-nav-item layui-this"><a href="#" id="set_jqgrid_width" @click="showAddAccount"><i class="icon iconfont icon-zhanghu1"></i>{{$t('message.app_accounts')}}</a></li>
+                <li class="layui-nav-item"><a href="#" @click="hiddenAddAccount"><i class="icon iconfont icon-msnui-cloud-upload bigger"></i>{{$t('message.app_send')}}</a></li>
+                <li class="layui-nav-item"><a href="#" @click="hiddenAddAccount"><i class="icon iconfont icon-msnui-cloud-download bigger"></i>{{$t('message.app_accept')}}</a></li>
+                <li class="layui-nav-item"><a href="#" @click="hiddenAddAccount"><i class="icon iconfont icon-shezhi2"></i>{{$t('message.app_setting')}}</a></li>
                 <span class="layui-nav-bar" style="left: 0; top: 55px; width: 0; opacity: 0;"></span>
               </ul>
             </div>
@@ -23,10 +23,10 @@
             <div class="layui-container">
               <p style="height: 40px;line-height: 40px">
                 <span class="layui-breadcrumb" style="visibility: visible;">
-                  <a href="#">{{$t('message.home')}}</a><span lay-separator="">&gt;</span>
-                  <a href="#" id="message" class="message">Accounts</a>
+                  <a href="#">{{$t('message.app_home')}}</a><span lay-separator="">&gt;</span>
+                  <a href="#" id="message" class="message">{{$t('message.app_accounts')}}</a>
                   <div class="add-btn-wrapper clearfix" v-show="isAddAccounts">
-                    <a href="#" class="add-btn" @click="addAccountContent"><i class="layui-icon ">&#xe770;</i> Add Accounts</a>
+                    <a href="#" class="add-btn" @click="addAccountContent"><i class="layui-icon ">&#xe770;</i>{{$t('message.app_add_accounts')}}</a>
                   </div>
                  </span>
               </p>
@@ -54,11 +54,11 @@
             <div class="form-content" v-show="isHasAccount">
               <p class="description">
                 <i class="layui-icon" style="color: #dd4b39;">&#xe702;</i>&nbsp;
-                <span>Please select the type of account you want to create!</span>
+                <span>{{$t('message.app_select_prompt')}}</span>
               </p>
               <form class="layui-form" lay-filter="form1">
                 <div class="layui-form-item" >
-                  <label class="layui-form-label" style="width: 130px">Account Type</label>
+                  <label class="layui-form-label" style="width: 130px">{{$t('message.app_accounts_type')}}</label>
                   <div class="layui-input-inline" style="width: 350px">
                     <select lay-verify="required" lay-filter="addAccount" >
                       <option v-for="item in accountType" :value="item">{{item}}</option>
@@ -72,7 +72,7 @@
                 <p class="error-msg">
                   <i class="layui-icon" style="color: #dd4b39;font-size: 26px">&#xe702;</i>&nbsp;
                   <span>
-                    The current account does not have permission to create an account !!
+                    {{$t('message.app_error_prompt_msg')}}
                   </span>
                 </p>
               </div>
@@ -83,7 +83,7 @@
           <div class="loading-center">
             <div class="loading-wrapper">
               <i class="layui-icon layui-anim layui-anim-rotate layui-anim-loop" style="font-size: 30px;"> </i>
-              <span>Initializing new account, please wait a moment...</span>
+              <span>{{$t('message.app_init_new_account')}}</span>
             </div>
           </div>
         </div>
@@ -180,10 +180,10 @@ export default {
           this.isLogin = !this.isLogin
           esWallet.getWalletInfo().then(value => {
             this.WalletInfo = value
-          }).catch(value => { console.log(value, 'Failed to get wallet information') })
+          }).catch(value => { layer.msg(this.$t('message.app_error_get_wallet'), { icon: 2, anim: 6 }) })
           esWallet.getAccounts().then(value => {
             if (value) this.accounts = this.orderArr(value)
-          }).catch(value => { console.log(value, 'Failed to get user data') })
+          }).catch(value => { layer.msg(this.$t('message.app_error_get_account'), { icon: 2, anim: 6 }) })
         }
         if (status === 99) {
           this.loginStatus = 99
@@ -192,7 +192,7 @@ export default {
       })
     },
     addAccountContent () {
-      let btnDisplay = ['submit', 'cancel']
+      let btnDisplay = [this.$t('message.app_submit_btn'), this.$t('message.app_cancel_btn')]
       // 获取可用的币类型
       esWallet.availableNewAccountCoinTypes().then(value => {
         if (Array.isArray(value) && value.length > 0) {
@@ -207,7 +207,7 @@ export default {
           type: 1,
           area: ['530px', '315px'],
           shadeClose: true,
-          title: 'Add Accounts',
+          title: that.$t('message.app_add_accounts_title'),
           btn: btnDisplay,
           content: $('#account-content'),
           yes (index) {
@@ -227,11 +227,11 @@ export default {
               if (Array.isArray(that.accounts) && that.accounts.length > 0) that.accounts.push(value)
             }).catch(value => {
               layer.closeAll()
-              console.log(value, 'Failed to add user')
+              layer.msg(this.$t('message.app_error_add_account'), { icon: 2, anim: 6 })
             })
           }
         })
-      }).catch(value => console.log(value, 'Failed to get wallet type'))
+      }).catch(value => layer.msg(this.$t('message.app_error_get_type'), { icon: 2, anim: 6 }))
     },
     showAddAccount () {
       this.isAddAccounts = true

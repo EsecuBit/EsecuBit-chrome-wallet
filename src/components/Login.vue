@@ -6,8 +6,8 @@
           <div class="img">
             <img src="../common/imgs/49.png"  height=70>
           </div>
-          <h2>Bitcion Wallet</h2>
-          <p>A secure offline management tool</p>
+          <h2>{{$t('message.login_title')}}</h2>
+          <p>{{$t('message.login_detail')}}</p>
         </div>
       </div>
     </div>
@@ -23,7 +23,7 @@
       </div>
     </div>
     <div class="contact-us">
-      <a href="#">If you need help, please contact us.</a>
+      <a href="#">{{$t('message.login_contact_us')}}</a>
     </div>
   </div>
 </template>
@@ -34,11 +34,11 @@ export default {
   props: ['status'],
   data () {
     return {
-      promptMsg: 'Please insert your key on your computer and unlock your wallet',
-      loadingMsg1: 'Please insert your key on your computer and unlock your wallet',
-      loadingMsg2: 'initializing... please wait a moment !!',
-      loadingMsg3: 'Syncing... It may take a few minutes !!',
-      loadingMsg4: 'Loading... please wait a moment',
+      promptMsg: this.$t('message.login_prompt_msg'),
+      loadingMsg1: this.$t('message.login_prompt_msg1'),
+      loadingMsg2: this.$t('message.login_prompt_msg2'),
+      loadingMsg3: this.$t('message.login_prompt_msg3'),
+      loadingMsg4: this.$t('message.login_prompt_msg4'),
       isLoadingIcon: false
     }
   },

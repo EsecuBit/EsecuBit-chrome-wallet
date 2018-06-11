@@ -1,21 +1,21 @@
 <template>
   <div>
     <blockquote class="site-text layui-elem-quote" style="margin-top: 20px">
-      <i class="layui-icon">&#xe645;</i>   Make sure you have the correct beneficiary address
+      <i class="layui-icon">&#xe645;</i> {{$t('message.send_prompt_msg')}}
     </blockquote>
     <div class="site-title" style="margin-top: 20px">
-      <fieldset><legend><a name="use">Send Bitcoins</a></legend></fieldset>
+      <fieldset><legend><a name="use">{{sendCoinTypeMsg}}</a></legend></fieldset>
     </div>
     <div class="site-text site-block">
       <form class="layui-form" action="" lay-filter="form1">
         <div class="layui-form-item">
-          <label class="layui-form-label account-label" >Current Account</label>
+          <label class="layui-form-label account-label" >{{$t('message.send_current_account')}}</label>
           <div class="layui-input-block account-info">
             <div class="account-msg">{{currentAccount.label}}</div>
           </div>
         </div>
         <div class="layui-form-item" style="margin-bottom: 5px">
-          <label class="layui-form-label">Amount</label>
+          <label class="layui-form-label">{{$t('message.send_amount')}}</label>
           <div class="layui-input-inline input-width">
             <input type="number" v-model.number="amountValue" name="money" id="money" lay-verify="isEmpty" :placeholder="currentUnit"
                    autocomplete="off" class="layui-input">
@@ -27,16 +27,16 @@
         </div>
         <div class="money-address">
           <div class="layui-form-item">
-            <label class="layui-form-label">Bitcoin Address</label>
+            <label class="layui-form-label">{{$t('message.send_address')}}</label>
             <div class="layui-input-inline input-width">
-              <input type="text" v-model="addressValue" name="address"  lay-verify="isEmpty"  placeholder="Bitcoin Address" autocomplete="off" class="layui-input">
+              <input type="text" v-model="addressValue" name="address"  lay-verify="isEmpty"  :placeholder="$t('message.send_address')" autocomplete="off" class="layui-input">
             </div>
             <!--<button class="layui-btn layui-btn-radius layui-btn-primary" type="button" @click="addAddressDom">Add</button>-->
           </div>
           <div class="layui-form-item" v-for="item in addressList">
             <label class="layui-form-label">{{item}}</label>
             <div class="layui-input-inline input-width">
-              <input type="text" value="" name="address"  placeholder="Bitcoin Address" autocomplete="off" class="layui-input">
+              <input type="text" value="" name="address"  placeholder="Address" autocomplete="off" class="layui-input">
             </div>
           </div>
         </div>
@@ -50,31 +50,31 @@
           <!--</div>-->
         <!--</div>-->
         <div class="layui-form-item" v-show="switchFee">
-          <label class="layui-form-label">Custom fees</label>
+          <label class="layui-form-label">{{$t('message.send_custom_fee')}}</label>
           <div class="layui-input-inline input-width">
             <input type="number"  lay-verify="isEmpty" v-model="customFees" placeholder="satoshis per byte" autocomplete="off" class="layui-input">
           </div>
-          <button class="layui-btn layui-btn-radius layui-btn-primary pull-left" type="button" @click="switchSelectButton">Select fees</button>
+          <button class="layui-btn layui-btn-radius layui-btn-primary pull-left" type="button" @click="switchSelectButton">{{$t('message.send_select_fee')}}</button>
         </div>
         <div class="layui-form-item" v-show="!switchFee">
-          <label class="layui-form-label">Transaction Fees</label>
+          <label class="layui-form-label">{{$t('message.send_transaction_fees')}}</label>
           <div class="layui-input-inline input-width">
             <select name="fee" lay-filter="fee"  >
               <option v-for="(fee, index) in feeList" v-bind:value="fee.value" :selected="index === 0">{{fee.label}}</option>
             </select>
           </div>
-          <button class="layui-btn layui-btn-radius layui-btn-primary pull-left" type="button" @click="switchCustomButton">Custom fees</button>
+          <button class="layui-btn layui-btn-radius layui-btn-primary pull-left" type="button" @click="switchCustomButton">{{$t('message.send_custom_fee')}}</button>
         </div>
         <div class="layui-form-item">
-          <label class="layui-form-label">Total Fees</label>
+          <label class="layui-form-label">{{$t('message.send_total_fee')}}</label>
           <div class="layui-input-inline input-width">
             <textarea disabled  lay-verify="isEmpty" class="layui-textarea" v-bind:value= "totalFeeDesc" name="desc"></textarea>
           </div>
         </div>
         <div class="layui-form-item">
           <div class="layui-input-block">
-            <button class="layui-btn" lay-submit type="button" @click="submitSendData">Submit</button>
-            <button type="reset" class="layui-btn layui-btn-primary">Reset</button>
+            <button class="layui-btn" lay-submit type="button" @click="submitSendData">{{$t('message.send_submit_btn')}}</button>
+            <button type="reset" class="layui-btn layui-btn-primary">{{$t('message.send_reset_btn')}}</button>
           </div>
         </div>
       </form>
@@ -119,7 +119,10 @@ export default {
       return this.totalFee + ' ' + this.currentUnit
     },
     toExchangeText () {
-      return this.amountValue * 2135 + this.currentExchangeRate
+      return this.amountValue * 2135 + ' ' + this.currentExchangeRate
+    },
+    sendCoinTypeMsg () {
+      return this.$t('message.send_send_msg') + ' ' + this.coinType
     }
   },
   watch: {
@@ -152,9 +155,12 @@ export default {
         if (newValue.getSuggestedFee) {
           let oldFeeList = newValue.getSuggestedFee()
           let newFeeList = []
-          newFeeList.push({label: 'fast confirmation' + '(' + oldFeeList.fast + ')', value: oldFeeList.fast})
-          newFeeList.push({label: 'Standard confirmation' + '(' + oldFeeList.normal + ')', value: oldFeeList.normal})
-          newFeeList.push({label: 'Slow confirmation' + '(' + oldFeeList.economy + ')', value: oldFeeList.economy})
+          let fastMsg = this.$t('message.send_fast_confirm')
+          let standardMsg = this.$t('message.send_standard_confirm')
+          let slowMsg = this.$t('message.send_slow_confirm')
+          newFeeList.push({label: fastMsg + '(' + oldFeeList.fast + ')', value: oldFeeList.fast})
+          newFeeList.push({label: standardMsg + '(' + oldFeeList.normal + ')', value: oldFeeList.normal})
+          newFeeList.push({label: slowMsg + '(' + oldFeeList.economy + ')', value: oldFeeList.economy})
           this.feeList = newFeeList
           this.selected = oldFeeList.fast
           this.$nextTick(() => {
@@ -174,9 +180,10 @@ export default {
   },
   methods: {
     verifyForm () {
+      let that = this
       form.verify({
         isEmpty (value) {
-          if (!value) return 'Required field cannot be empty, please fill in the content!'
+          if (!value) return that.$t('message.send_form_is_empty')
         }
       })
     },
@@ -213,8 +220,8 @@ export default {
         }]
       }
       this.currentAccount.prepareTx(formData).then(value => this.currentAccount.buildTx(value))
-        .then(value => this.currentAccount.sendTx(value)).then(value => { layer.msg('submit successfully', { icon: 1 }) })
-        .catch(value => { layer.msg(value, { icon: 2 }) })
+        .then(value => this.currentAccount.sendTx(value)).then(value => { layer.msg(this.$t('message.send_submit_success'), { icon: 1 }) })
+        .catch(value => { layer.msg(this.$t('message.send_submit_error'), { icon: 2 }) })
     },
     calculateTotal () {
       let getAmountValue = this.amountValue ? this.amountValue : 0

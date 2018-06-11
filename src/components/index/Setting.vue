@@ -2,17 +2,17 @@
   <div>
     <div class="site-tree">
       <ul class="layui-tree ">
-        <li><h2>Setting</h2></li>
+        <li><h2>{{$t('message.app_setting')}}</h2></li>
         <li class="tab-title-2 layui-this">
           <a href="#">
             <i class="layui-icon" style="top: 3px;">&#xe632;</i>
-            <cite>display</cite>
+            <cite>{{$t('message.setting_display')}}</cite>
             </a>
         </li>
         <li class="tab-title-2">
           <a href="#">
             <i class="layui-icon" style="top: 3px;">&#xe628;</i>
-            <cite>hardware information</cite>
+            <cite>{{$t('message.setting_hardware')}}</cite>
           </a>
         </li>
       </ul>
@@ -23,21 +23,21 @@
           <div class="site-text site-block">
             <form class="layui-form" lay-filter="form3">
               <div class="layui-form-item">
-                <label class="layui-form-label">Interface Language</label>
+                <label class="layui-form-label">{{$t('message.setting_interface_lang')}}</label>
                 <div class="layui-input-inline input-width">
-                  <select name="lang" lay-filter="lang">
+                  <select name="lang" lay-filter="lang" v-model="initLang">
                     <option :value="lang.value" v-for="lang in langList">{{lang.label}}</option>
                   </select>
                 </div>
               </div>
               <div class="layui-form-item">
-                <label class="layui-form-label">Units</label>
+                <label class="layui-form-label">{{$t('message.setting_units')}}</label>
                 <div class="layui-input-block" >
                   <input type="radio" lay-filter="unit" name="unit" :value="item.value" :title="item.label" :checked="index === 1" v-for="(item, index) in unitValueList">
                 </div>
               </div>
               <div class="layui-form-item">
-                <label class="layui-form-label">Exchange Rate</label>
+                <label class="layui-form-label">{{$t('message.setting_exchange_rate')}}</label>
                 <div class="layui-input-inline input-width">
                   <select name="exchangeRate" lay-filter="exchange">
                     <option :value="itemExchangeRate.value" v-for="itemExchangeRate in exchangeRate">{{itemExchangeRate.label}}</option>
@@ -45,7 +45,7 @@
                 </div>
               </div>
               <div class="layui-form-item">
-                <label class="layui-form-label">Skin</label>
+                <label class="layui-form-label">{{$t('message.setting_skin')}}</label>
                 <div class="layui-input-inline input-width">
                     <a href="#" class="layui-btn layui-btn-sm" v-bind:class="[item.colorClass]" @click="switchColor(item.name)" v-for="item in skinColor">{{item.name}}</a>
                 </div>
@@ -62,8 +62,8 @@
             </colgroup>
             <thead>
             <tr>
-              <th>Name</th>
-              <th>Information</th>
+              <th>{{$t('message.setting_name')}}</th>
+              <th>{{$t('message.setting_information')}}</th>
             </tr>
             </thead>
             <tbody v-for="item in hardwareList">
@@ -86,6 +86,7 @@ import D from '../../common/js/wallet/sdk/D'
 const form = layui.form
 // eslint-disable-next-line
 const $ = layui.jquery
+const currentLang = navigator.language
 export default {
   name: 'Setting',
   props: ['walletInfo', 'accountInfo'],
@@ -106,9 +107,10 @@ export default {
         {label: 'BTC', value: 'btc'},
         {label: 'mBTC', value: 'mbtc'}
       ],
+      initLang: currentLang,
       langList: [
-        {label: 'English', value: 'en-us'},
-        {label: '简体中文', value: 'cn-zh'}
+        {label: 'English', value: 'en-US'},
+        {label: '简体中文', value: 'zh-CN'}
       ],
       exchangeRate: [
         {label: 'USD', value: 'USD'},
@@ -170,7 +172,7 @@ export default {
     switchLang () {
       form.on('select(lang)', (data) => {
         this.$i18n.locale = data.value
-        this.$emit('switchSetting', this.$t('message.setting'))
+        this.$emit('switchSetting', this.$t('message.app_setting'))
       })
     },
     switchColor (color) {
