@@ -1,7 +1,7 @@
 <template>
-  <div id="app" >
-    <div v-cloak>
-      <div v-show="isLogin">
+  <div id="app" style="height: 100%">
+    <div v-cloak style="height: 100%">
+      <div v-show="isLogin" style="height: 100%">
         <Login :status="loginStatus" />
       </div>
       <div v-show="!isLogin">

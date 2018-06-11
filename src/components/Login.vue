@@ -12,8 +12,8 @@
       </div>
     </div>
     <div class="layadmin-center">
-      <div class="layadmin-user-login-box layadmin-user-login-header" style="padding-top: 40px">
-        <div style="position: relative;height: 50px">
+      <div class="layadmin-user-login-box layadmin-user-login-header" >
+        <div style="position: relative;">
           <h2>
             <i class="layui-icon layui-anim layui-anim-rotate layui-anim-loop" v-if="isLoadingIcon" style="font-size: 36px;"> </i>
             <i class="icon iconfont icon-thumbDrive" style="font-size: 50px" v-else></i>
@@ -82,29 +82,34 @@ export default {
   }
   .login-container{
     width: 100%;
+    height: 100%;
+    display: -webkit-flex;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
   }
   .layadmin-user-login {
-    position: relative;
-    left: 0;
-    top: 0;
-    padding: 60px 0 40px 0;
-    max-height: 100%;
-    box-sizing: border-box
+    flex: 1;
+    display: flex;
+    width: 100%;
   }
   .img {
     margin-bottom: 25px;
   }
   .layadmin-center{
+    flex: 1;
+    display: flex;
+    margin: auto;
+    width: 100%;
     padding: 0 ;
-    margin-bottom: 100px;
-    height: 200px;
     background-color: #f4f4f4;
-    box-sizing: border-box
   }
 
   .layadmin-user-login-main {
     width: 375px;
-    margin: 0 auto;
+    margin: auto;
+    height: 200px;
     box-sizing: border-box
   }
 
@@ -113,7 +118,8 @@ export default {
   }
 
   .layadmin-user-login-header {
-    text-align: center
+    text-align: center;
+    margin: auto;
   }
   .layadmin-user-login-header h2 {
     margin-bottom: 10px;
@@ -134,9 +140,13 @@ export default {
     color: #999
   }
   .contact-us {
+    flex: 1;
+    display: flex;
+    width: 100%;
     text-align: center;
   }
   .contact-us a{
+    margin: auto;
     font-weight: 300;
     color: #999;
   }
