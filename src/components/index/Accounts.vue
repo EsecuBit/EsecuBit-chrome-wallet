@@ -23,9 +23,12 @@
           <div class="account-msg">
             <span class="layui-badge-dot layui-bg-green"></span>
             <span>{{$t('message.accounts_balance')}}</span>
-            <span v-if="coinTypeList[index]">{{toTargetCoinUnit(coinTypeList[index], newAccount[index].balance)}}</span>
-            <span>{{currentUnit}}</span>
-            <span v-if="currentExchangeRate" class="exchange-rate">{{toExchangeText}}</span>
+            <span v-if="coinTypeList[index]">{{toTargetCoinUnit(coinTypeList[index], newAccount[index].balance).toFixed(2)}}</span>
+            <span v-if="coinTypeList[index]">{{currentDisplayUnit(coinTypeList[index])}}</span>
+            <span class="exchange-rate">(</span>
+            <span v-if="currentExchangeRate && coinTypeList[index]" class="exchange-rate">{{toExchangeText(coinTypeList[index], newAccount[index].balance).toFixed(2)}}</span>
+            <span class="exchange-rate">{{currentExchangeRate}}</span>
+            <span class="exchange-rate">)</span>
           </div>
           <div class="account-msg">
             <a title="refresh" href="#" class="refresh-data" @click="refresh">
@@ -69,7 +72,7 @@
                   <td>{{getFormatTime(table.time)}}</td>
                   <td :class ="[table.direction === 'in'?green:red]">{{table.direction}}</td>
                   <td>
-                    <a title="Details" href="#" @click="getDescription(table); sendMsg()">
+                    <a title="Details" href="#" @click="getDescription(table, index); sendMsg()">
                     <i class="layui-icon">&#xe63c;</i> {{$t('message.accounts_details')}}
                     </a>
                   </td>
@@ -96,7 +99,7 @@
       <div class="layui-form-item" >
         <label class="layui-form-label" style="width: 130px">{{$t('message.accounts_form_username')}}</label>
         <div class="layui-input-inline" style="width: 350px">
-          <input type="text"  :placeholder="$t('message.accounts_form_placeholder')" id="editNameInput" v-model="renameValue" class="layui-input">
+          <input type="text"  :placeholder="$t('message.accounts_form_placeholder')" id="editNameInput" v-model="renameValue" @keyup.enter="submitEven" class="layui-input">
         </div>
       </div>
     </form>
@@ -128,7 +131,7 @@
         </tr>
         <tr>
           <td>{{$t('message.accounts_table_time')}}</td>
-          <td>{{getFormatTime(description.time)}}</td>
+          <td>{{description.time}}</td>
         </tr>
         <tr>
           <td>{{$t('message.accounts_table_direction')}}</td>
@@ -144,6 +147,7 @@
 import Bus from '../../common/js/bus'
 import D from '../../common/js/wallet/sdk/D'
 import EsWallet from '../../common/js/wallet/sdk/EsWallet'
+const esWallet = new EsWallet()
 
 // eslint-disable-next-line
 const $ = layui.jquery
@@ -153,7 +157,7 @@ const layer = layui.layer
 const laypage = layui.laypage
 export default {
   name: 'accouts',
-  props: ['accountInfo', 'currentUnit', 'currentExchangeRate'],
+  props: ['accountInfo', 'currentUnit', 'currentUnitEth', 'currentExchangeRate'],
   data () {
     return {
       grid_pager: 'grid_pager',
@@ -186,12 +190,8 @@ export default {
       totalNum: [],
       active: 'active-count',
       green: 'green-font',
-      red: 'red-font'
-    }
-  },
-  computed: {
-    toExchangeText () {
-      return `( 1000 ${this.currentExchangeRate} )`
+      red: 'red-font',
+      currentIndex: null
     }
   },
   watch: {
@@ -231,8 +231,15 @@ export default {
     this.createTab()
   },
   methods: {
+    currentDisplayUnit (coinType) {
+      return coinType.includes('btc') ? this.currentUnit : this.currentUnitEth
+    },
+    toExchangeText (coinType, value) {
+      let newValue = this.toTargetCoinUnit(coinType, value)
+      return coinType.includes('btc') ? esWallet.convertValue(coinType, newValue, this.currentUnit, this.currentExchangeRate) : esWallet.convertValue(coinType, newValue, this.currentUnitEth, this.currentExchangeRate)
+    },
     toTargetCoinUnit (coinType, value) {
-      return EsWallet.convertValue(coinType, value, D.UNIT_BTC_SANTOSHI, this.currentUnit)
+      return coinType.includes('btc') ? esWallet.convertValue(coinType, value, D.unit.btc.santoshi, this.currentUnit) : esWallet.convertValue(coinType, value, D.unit.btc.santoshi, this.currentUnitEth)
     },
     refresh () {
       this.loadingClass['layui-anim'] = true
@@ -268,6 +275,7 @@ export default {
     },
     editAccount (orderNum) {
       this.renameValue = ''
+      this.currentIndex = orderNum
       const that = this
       layer.open({
         type: 1,
@@ -277,22 +285,25 @@ export default {
         btn: [that.$t('message.accounts_submit_btn'), that.$t('message.accounts_cancel_btn')],
         content: $('#edit-account'),
         yes (index) {
-          if (!that.renameValue) {
-            layer.msg(that.$t('message.accounts_form_is_empty'), {icon: 5, anim: 6})
-            document.getElementById('editNameInput').focus()
-            return false
-          }
-          if (that.newAccount[orderNum].rename) {
-            that.newAccount[orderNum].rename(that.renameValue).then(value => {
-              that.setMenuList(that.newAccount)
-              layer.close(index)
-              layer.msg(that.$t('message.accounts_update_msg'), { icon: 1 })
-            })
-              .catch(value => { layer.msg(that.$t('message.accounts_update_error'), { icon: 2 }) })
-          }
+          that.submitEven()
         }
       })
       document.getElementById('editNameInput').focus()
+    },
+    submitEven () {
+      if (!this.renameValue) {
+        layer.msg(this.$t('message.accounts_form_is_empty'), {icon: 5, anim: 6})
+        document.getElementById('editNameInput').focus()
+        return false
+      }
+      if (this.newAccount[this.currentIndex].rename) {
+        this.newAccount[this.currentIndex].rename(this.renameValue).then(value => {
+          this.setMenuList(this.newAccount)
+          layer.closeAll('page')
+          layer.msg(this.$t('message.accounts_update_msg'), { icon: 1 })
+        })
+          .catch(value => { layer.msg(this.$t('message.accounts_update_error'), { icon: 2 }) })
+      }
     },
     sendMsg () {
       Bus.$emit('test', '123')
@@ -349,11 +360,11 @@ export default {
         Bus.$emit('switchAccount', tabIndex)
       })
     },
-    getDescription (table) {
+    getDescription (table, index) {
       this.description.txId = table.txId
       this.description.coinType = table.coinType
-      this.description.blockNumber = table.blockNumber
-      this.description.time = table.time
+      this.description.blockNumber = this.toTargetCoinUnit(this.coinTypeList[index], table.blockNumber)
+      this.description.time = this.getFormatTime(table.time)
       this.description.direction = table.direction
       const that = this
       layer.open({

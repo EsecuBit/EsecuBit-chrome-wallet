@@ -1,16 +1,15 @@
 
 import D from '../../D'
 
-const TYPE_ADDRESS = 'address'
-const TYPE_TRANSACTION = 'transaction_info'
-// TODO check block height to restart request
-// seconds per request
-let BLOCK_HEIGHT_REQUEST_PERIOD = 60
-let TX_INCLUDED_REQUEST_PERIOD = 20
+const typeAddress = 'address'
+const typeTx = 'tx'
 
-if (D.TEST_NETWORK_REQUEST) {
-  BLOCK_HEIGHT_REQUEST_PERIOD = 20
-  TX_INCLUDED_REQUEST_PERIOD = 10
+// seconds per request
+let blockHeightRequestPeriod = 60
+let txIncludedRequestPeriod = 20
+if (D.test.networkRequest) {
+  blockHeightRequestPeriod = 20
+  txIncludedRequestPeriod = 10
 }
 
 export default class ICoinNetwork {
@@ -25,14 +24,14 @@ export default class ICoinNetwork {
 
   async init () {
     this._blockHeight = await this.getBlockHeight()
-    console.info(this.coinType, 'current block height', this._blockHeight)
+    console.log(this.coinType, 'current block height', this._blockHeight)
 
     // start the request loop
     this._startQueue = true
     let queue = () => {
       for (let request of this._requestList) {
-        if (request.type === TYPE_TRANSACTION && new Date().getTime() > request.nextTime) {
-          request.nextTime = new Date().getTime() + TX_INCLUDED_REQUEST_PERIOD * 1000
+        if (request.type === typeTx && new Date().getTime() > request.nextTime) {
+          request.nextTime = new Date().getTime() + txIncludedRequestPeriod * 1000
           request.request()
         } else if (request.currentBlock < this._blockHeight) {
           request.currentBlock = this._blockHeight
@@ -53,9 +52,9 @@ export default class ICoinNetwork {
         this._blockHeight = newBlockHeight
         console.debug(this.coinType + ' has new block height ' + this._blockHeight)
       }
-      setTimeout(blockHeightRequest, BLOCK_HEIGHT_REQUEST_PERIOD * 1000)
+      setTimeout(blockHeightRequest, blockHeightRequestPeriod * 1000)
     }
-    setTimeout(blockHeightRequest, BLOCK_HEIGHT_REQUEST_PERIOD * 1000)
+    setTimeout(blockHeightRequest, blockHeightRequestPeriod * 1000)
 
     return {blockHeight: this._blockHeight}
   }
@@ -80,10 +79,10 @@ export default class ICoinNetwork {
             }
           } else if (xmlhttp.status === 500) {
             console.warn(url, xmlhttp)
-            reject(D.ERROR_NETWORK_PROVIDER_ERROR)
+            reject(D.error.networkProviderError)
           } else {
             console.warn(url, xmlhttp)
-            reject(D.ERROR_NETWORK_UNVAILABLE)
+            reject(D.error.networkUnVailable)
           }
         }
       }
@@ -107,10 +106,10 @@ export default class ICoinNetwork {
             }
           } else if (xmlhttp.status === 500) {
             console.warn(url, xmlhttp)
-            reject(D.ERROR_NETWORK_PROVIDER_ERROR)
+            reject(D.error.networkProviderError)
           } else {
             console.warn(url, xmlhttp)
-            reject(D.ERROR_NETWORK_UNVAILABLE)
+            reject(D.error.networkUnVailable)
           }
         }
       }
@@ -133,7 +132,7 @@ export default class ICoinNetwork {
     }
     this._requestList.push({
       callback: callback,
-      type: TYPE_TRANSACTION,
+      type: typeTx,
       txInfo: txInfo,
       hasRecord: false,
       currentBlock: -1,
@@ -143,8 +142,8 @@ export default class ICoinNetwork {
         try {
           if (!this.hasRecord) response = await that.queryTx(this.txInfo.txId)
         } catch (e) {
-          if (e === D.ERROR_TX_NOT_FOUND) {
-            console.info('tx not found in network, continue. id: ', txInfo.txId)
+          if (e === D.error.txNotFound) {
+            console.log('tx not found in network, continue. id: ', txInfo.txId)
             return
           }
           callback(e, this.txInfo)
@@ -152,19 +151,19 @@ export default class ICoinNetwork {
         let confirmations = response.blockNumber ? that._blockHeight - response.blockNumber : 0
 
         if (confirmations > 0) this.hasRecord = true
-        if (confirmations >= D.TX_BTC_MATURE_CONFIRMATIONS) {
-          console.info('confirmations enough, remove', this)
+        if (confirmations >= D.tx.matureConfirms.btc) {
+          console.log('confirmations enough, remove', this)
           remove(that._requestList, this)
         }
         if (this.txInfo.confirmations !== confirmations) {
           this.txInfo.confirmations = confirmations
-          callback(D.ERROR_NO_ERROR, this.txInfo)
+          callback(D.error.succeed, this.txInfo)
         }
       }
     })
   }
 
-  removeListener(callback) {
+  removeListener (callback) {
     this._requestList = this._requestList.filter(request => request.callback !== callback)
   }
 
@@ -176,12 +175,12 @@ export default class ICoinNetwork {
     tasks.forEach(task => {
       this._requestList.push({
         callback: callback,
-        type: TYPE_ADDRESS,
+        type: typeAddress,
         currentBlock: -1,
         request: async () => {
           task.request()
             .then(blobs => blobs.forEach(
-              blob => callback(D.ERROR_NO_ERROR, blob.addressInfo, blob.txInfo, blob.utxos)))
+              blob => callback(D.error.succeed, blob.addressInfo, blob.txInfo, blob.utxos)))
             // TODO retry
             // TODO callback error once
             .catch(e => callback(e))
@@ -202,7 +201,7 @@ export default class ICoinNetwork {
     let checkNewTx = async (response, addressInfo) => {
       let newTransaction = async (addressInfo, tx) => {
         let input = tx.inputs.find(input => addressInfo.address === input.address)
-        let direction = input ? D.TX_DIRECTION_OUT : D.TX_DIRECTION_IN
+        let direction = input ? D.tx.direction.out : D.tx.direction.in
         let txInfo = {
           accountId: addressInfo.accountId,
           coinType: addressInfo.coinType,
@@ -227,7 +226,7 @@ export default class ICoinNetwork {
             index: output.index,
             script: output.script,
             value: output.value,
-            spent: D.UTXO_UNSPENT
+            spent: D.utxo.status.unspent
           }
         })
         utxos.push(...unspentUtxos)
@@ -250,7 +249,7 @@ export default class ICoinNetwork {
               index: input.prevOutIndex,
               script: input.prevOutScript,
               value: input.value,
-              spent: tx.confirmations === 0 ? D.UTXO_SPENT_PENDING : D.UTXO_SPENT
+              spent: tx.confirmations === 0 ? D.utxo.status.pending : D.utxo.status.spent
             }
           })
           utxos.push(...spentUtxos)
@@ -292,7 +291,7 @@ export default class ICoinNetwork {
    * @see addressInfo
    */
   async queryAddresses (addresses) {
-    throw D.ERROR_NOT_IMPLEMENTED
+    throw D.error.notImplemented
   }
 
   /**
@@ -307,38 +306,51 @@ export default class ICoinNetwork {
    *
    */
   async queryAddress (address) {
-    throw D.ERROR_NOT_IMPLEMENTED
+    throw D.error.notImplemented
   }
 
   /**
    *
    * @return tx
+   * btc:
    * {
    *    txId: string,
    *    version: int,
    *    blockNumber: int,
    *    confirmations: int,
-   *    time: long,
+   *    time: long,         // mills
    *    hasDetails: bool,   // for queryAddress only, whether the tx has inputs and outputs. e.g. blockchain.info -> true, chain.so -> false
-   *    intputs: [{prevAddress, value(bitcoin -> santoshi)}],
-   *    outputs: [{address, value(bitcoin -> santoshi)}, index, script]
+   *    intputs: [{prevAddress, value(santoshi)}],
+   *    outputs: [{address, value(santoshi)}, index, script]
+   * }
+   * eth:
+   * {
+   *    txId: string,
+   *    blockNumber: int,
+   *    confirmations: int,
+   *    time: long,
+   *    hasDetails: bool,
+   *    intputs: [{prevAddress, value(wei)}], // tx.from, always length = 1
+   *    outputs: [{address, value(wei)}], // tx.to, always length = 1
+   *    gas: long, // wei
+   *    gasPrice: long // wei
    * }
    *
    */
   async queryTx (txId) {
-    throw D.ERROR_NOT_IMPLEMENTED
+    throw D.error.notImplemented
   }
 
   async queryRawTx (txId) {
-    throw D.ERROR_NOT_IMPLEMENTED
+    throw D.error.notImplemented
   }
 
   async sendTx (rawTx) {
-    throw D.ERROR_NOT_IMPLEMENTED
+    throw D.error.notImplemented
   }
 
   async getBlockHeight () {
-    throw D.ERROR_NOT_IMPLEMENTED
+    throw D.error.notImplemented
   }
 }
 ICoinNetwork.provider = 'undefined'

@@ -6,11 +6,11 @@ if (D.test.networkRequest) {
   UPDATE_DURATION = 60 * 1000
 }
 
-export default class FeeBitCoinEarn {
+export default class EthGasStationInfo {
   constructor (fee) {
     switch (fee.coinType) {
-      case D.coin.main.btc:
-      case D.coin.test.btcTestNet3:
+      case D.coin.main.eth:
+      case D.coin.test.ethRinkeby:
         this.coinType = fee.coinType
         break
       default:
@@ -19,9 +19,10 @@ export default class FeeBitCoinEarn {
 
     if (!fee.fee) {
       fee.fee = {}
-      fee.fee[D.fee.fast] = 100
-      fee.fee[D.fee.normal] = 50
-      fee.fee[D.fee.economic] = 20
+      fee.fee[D.fee.fastest] = 10 * 1000000000
+      fee.fee[D.fee.fast] = 4 * 1000000000
+      fee.fee[D.fee.normal] = 2 * 1000000000
+      fee.fee[D.fee.economic] = 1000000000
     }
     this.fee = D.copy(fee) // santonshi per b
 
@@ -38,7 +39,7 @@ export default class FeeBitCoinEarn {
   }
 
   async updateFee () {
-    const url = 'https://bitcoinfees.earn.com/api/v1/fees/recommended'
+    const url = 'https://ethgasstation.info/json/ethgasAPI.json'
     let get = (url) => {
       return new Promise((resolve, reject) => {
         console.debug('get', url)
@@ -70,15 +71,16 @@ export default class FeeBitCoinEarn {
     /**
      * response
      *
-     * @param response.fastestFee   Suggested fee(santonshi per b) to confirmed in 1 block.
-     * @param response.halfHourFee  Suggested fee(santonshi per b) to confirmed in 3 blocks.
-     * @param response.hourFee    Suggested fee(santonshi per b) to confirmed in 6 blocks.
+     * @param response.fastest (unit: 0.1 GWei)
+     * @param response.fast
+     * @param response.average
+     * @param response.safeLow
      */
     let response = await get(url)
     let fee = D.copy(this.fee)
-    fee.fee[D.fee.fast] = response.fastestFee
-    fee.fee[D.fee.normal] = response.halfHourFee
-    fee.fee[D.fee.economic] = response.hourFee
+    fee.fee[D.fee.fast] = response.fast * 100000000
+    fee.fee[D.fee.normal] = response.average * 100000000
+    fee.fee[D.fee.economic] = response.safeLow * 100000000
     console.debug('update fee succeed', 'old fee', this.fee, 'new fee', fee)
     this.fee = D.copy(fee)
     this.onUpdateFee(fee)

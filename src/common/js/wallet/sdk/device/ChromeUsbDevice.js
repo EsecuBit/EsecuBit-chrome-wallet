@@ -26,12 +26,12 @@ export default class ChromeUsbDevice extends IEsDevice {
     let connect = (device) => {
       chrome.usb.openDevice(device, (connectionHandle) => {
         this._connectionHandle = connectionHandle
-        console.info('Connected to the USB device!', connectionHandle)
+        console.log('Connected to the USB device!', connectionHandle)
 
         // setTimeout(function () {
         //   chrome.usb.listInterfaces(connectionHandle, function(descriptors) {
         //     for (var des in descriptors) {
-        //       console.info('device interface info: ')
+        //       console.log('device interface info: ')
         //       console.dir(descriptors[des])
         //     }
         //   })
@@ -40,28 +40,28 @@ export default class ChromeUsbDevice extends IEsDevice {
         //     if (chrome.runtime.lastError) {
         //       console.warn('chrome.usb.claimInterface error: ' + chrome.runtime.lastError.message)
         //       // if (that._listener !== null) {
-        //       //   that._listener(D.ERROR_DEVICE_CONNECT_FAILED, true)
+        //       //   that._listener(D.error.deviceConnectFailed, true)
         //       // }
         //       // return
         //     }
-        //     console.info('Claimed')
+        //     console.log('Claimed')
         //     that.sendAndReceive(hexToArrayBuffer('030604803300000ABD080000000000000000000000000000'), function () {
         //
         //     })
         //     if (that._listener !== null) {
-        //       that._listener(D.ERROR_NO_ERROR, true)
+        //       that._listener(D.error.succeed, true)
         //     }
         //   })
         // }, 500)
 
         if (this._listener !== null) {
-          this._listener(D.ERROR_NO_ERROR, true)
+          this._listener(D.error.succeed, true)
         }
       })
     }
 
     chrome.usb.onDeviceAdded.addListener((device) => {
-      console.info('plug in vid=' + device.vendorId + ', pid=' + device.productId)
+      console.log('plug in vid=' + device.vendorId + ', pid=' + device.productId)
       if (!this._deviceId) {
         this._deviceId = device.device
         connect(device)
@@ -69,13 +69,13 @@ export default class ChromeUsbDevice extends IEsDevice {
     })
 
     chrome.usb.onDeviceRemoved.addListener((device) => {
-      console.info('plug out vid=' + device.vendorId + ', pid=' + device.productId)
+      console.log('plug out vid=' + device.vendorId + ', pid=' + device.productId)
       if (device.device === this._deviceId) {
         this._deviceId = null
         this._connectionHandle = null
         if (this._listener !== null) {
           if (this._listener !== null) {
-            this._listener(D.ERROR_NO_ERROR, false)
+            this._listener(D.error.succeed, false)
           }
         }
       }
@@ -94,7 +94,7 @@ export default class ChromeUsbDevice extends IEsDevice {
         return
       }
       let device = foundDevices[0]
-      console.info('found device: vid=' + device.vendorId + ', pid=' + device.productId)
+      console.log('found device: vid=' + device.vendorId + ', pid=' + device.productId)
       this._deviceId = device.device
       connect(device)
     })
@@ -102,7 +102,7 @@ export default class ChromeUsbDevice extends IEsDevice {
 
   async sendAndReceive (apdu) {
     if (this._deviceId === null || this._connectionHandle === null) {
-      throw D.ERROR_NO_DEVICE
+      throw D.error.noDevice
     }
 
     let send = (data) => {
@@ -130,16 +130,16 @@ export default class ChromeUsbDevice extends IEsDevice {
         chrome.usb.controlTransfer(this._connectionHandle, transferInfo, (info) => {
           if (chrome.runtime.lastError) {
             console.warn('send error: ' + chrome.runtime.lastError.message + ' resultCode: ' + info ? 'undefined' : info.resultCode)
-            reject(D.ERROR_DEVICE_COMM)
+            reject(D.error.deviceComm)
           }
-          console.info('Sent to the USB device!', this._connectionHandle)
+          console.log('Sent to the USB device!', this._connectionHandle)
           if (info.resultCode !== 0) {
             console.warn('send apdu error ', info.resultCode)
-            reject(D.ERROR_DEVICE_COMM)
+            reject(D.error.deviceComm)
           }
 
-          console.info('send got ' + info.data.byteLength + ' bytes:')
-          console.info(D.arrayBufferToHex(info.data))
+          console.log('send got ' + info.data.byteLength + ' bytes:')
+          console.log(D.arrayBufferToHex(info.data))
           resolve()
           // for (i = 0; i < 64; i++) {
           //   package[i] = 0
@@ -158,19 +158,19 @@ export default class ChromeUsbDevice extends IEsDevice {
           //     + ' resultCode: ' + info? 'undefined' : info.resultCode)
           //     return
           //   }
-          //   console.info('Sent to the USB device!', that._connectionHandle)
+          //   console.log('Sent to the USB device!', that._connectionHandle)
           //   if (!info) {
-          //     callback(D.ERROR_UNKNOWN)
+          //     callback(D.error.unknown)
           //     return
           //   }
           //   if (info.resultCode !== 0) {
           //     console.warn('send apdu error ', info.resultCode)
-          //     callback(D.ERROR_DEVICE_COMM)
+          //     callback(D.error.deviceComm)
           //     return
           //   }
           //
-          //   console.info('send got ' + info.data.byteLength + ' bytes:')
-          //   console.info(arrayBufferToHex(info.data))
+          //   console.log('send got ' + info.data.byteLength + ' bytes:')
+          //   console.log(arrayBufferToHex(info.data))
           //   receive(callback)
           // })
         })
@@ -203,16 +203,16 @@ export default class ChromeUsbDevice extends IEsDevice {
           chrome.usb.controlTransfer(this._connectionHandle, transferInfo, (info) => {
             if (chrome.runtime.lastError) {
               console.warn('receive error: ' + chrome.runtime.lastError.message + ' resultCode: ' + info.resultCode)
-              reject(D.ERROR_DEVICE_COMM)
+              reject(D.error.deviceComm)
             }
-            console.info('receive from the USB device!', this._connectionHandle)
+            console.log('receive from the USB device!', this._connectionHandle)
             if (info.resultCode !== 0) {
               console.warn('receive apdu error ', info.resultCode)
-              reject(D.ERROR_DEVICE_COMM)
+              reject(D.error.deviceComm)
             }
 
-            console.info('receive got ' + info.data.byteLength + ' bytes:')
-            console.info(D.arrayBufferToHex(info.data))
+            console.log('receive got ' + info.data.byteLength + ' bytes:')
+            console.log(D.arrayBufferToHex(info.data))
             resolve(info.data)
           })
         })
@@ -236,7 +236,7 @@ export default class ChromeUsbDevice extends IEsDevice {
   listenPlug (callback) {
     this._listener = callback
     if (this._deviceId !== null && this._connectionHandle !== null) {
-      callback(D.ERROR_NO_ERROR, D.STATUS_PLUG_IN)
+      callback(D.error.succeed, D.status.plugIn)
     }
   }
 }

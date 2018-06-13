@@ -17,13 +17,14 @@
         <div class="layui-form-item" style="margin-bottom: 5px">
           <label class="layui-form-label">{{$t('message.send_amount')}}</label>
           <div class="layui-input-inline input-width">
-            <input type="number" v-model.number="amountValue" name="money" id="money" lay-verify="isEmpty" :placeholder="currentUnit"
+            <input type="number" v-model.number="amountValue" name="money" id="money" lay-verify="isEmpty" :placeholder="currentDisplayUnit(currentAccount.coinType)"
                    autocomplete="off" class="layui-input">
-          </div><button class="layui-btn layui-btn-radius layui-btn-primary pull-left" type="button" @click="maxAmount">MAX</button>
+          </div>
+          <!--<button class="layui-btn layui-btn-radius layui-btn-primary pull-left" type="button" @click="maxAmount">MAX</button>-->
         </div>
         <div class="switch-money">
           <label class="blank-label"></label>
-          <div ><span class="usd-amount">{{toExchangeText}}</span><em class="unit"></em></div>
+          <div ><span class="usd-amount" v-if="coinType && currentUnit && currentExchangeRate">{{toExchangeText}}</span><em class="unit"></em></div>
         </div>
         <div class="money-address">
           <div class="layui-form-item">
@@ -86,20 +87,20 @@
 import Bus from '../../common/js/bus'
 import D from '../../common/js/wallet/sdk/D'
 import EsWallet from '../../common/js/wallet/sdk/EsWallet'
-
+const esWallet = new EsWallet()
 // eslint-disable-next-line
 const form = layui.form
 // eslint-disable-next-line
 const layer = layui.layer
 export default {
   name: 'Sending',
-  props: ['accountInfo', 'currentUnit', 'currentExchangeRate'],
+  props: ['accountInfo', 'currentUnit', 'currentUnitEth', 'currentExchangeRate'],
   data () {
     return {
       addressList: [],
       count: 2,
       unit: 'BTC',
-      amountValue: 0,
+      amountValue: null,
       addressValue: '',
       selected: null,
       customFees: 0.00,
@@ -116,10 +117,17 @@ export default {
   },
   computed: {
     totalFeeDesc () {
-      return this.totalFee + ' ' + this.currentUnit
+      if (this.coinType && this.currentUnit && this.currentExchangeRate) {
+        let nowUnit = this.currentDisplayUnit(this.coinType)
+        return this.totalFee.toFixed(2) + ' ' + nowUnit + ' (' +
+          esWallet.convertValue(this.coinType, this.totalFee, nowUnit, this.currentExchangeRate).toFixed(2) + ' ' + this.currentExchangeRate + ')'
+      }
     },
     toExchangeText () {
-      return this.amountValue * 2135 + ' ' + this.currentExchangeRate
+      if (this.currentUnit && this.currentExchangeRate) {
+        let nowUnit = this.currentDisplayUnit(this.coinType)
+        return esWallet.convertValue(this.coinType, this.amountValue, nowUnit, this.currentExchangeRate).toFixed(2) + ' ' + this.currentExchangeRate
+      }
     },
     sendCoinTypeMsg () {
       return this.$t('message.send_send_msg') + ' ' + this.coinType
@@ -154,6 +162,8 @@ export default {
         this.coinType = newValue.coinType
         if (newValue.getSuggestedFee) {
           let oldFeeList = newValue.getSuggestedFee()
+          console.log(oldFeeList)
+
           let newFeeList = []
           let fastMsg = this.$t('message.send_fast_confirm')
           let standardMsg = this.$t('message.send_standard_confirm')
@@ -187,11 +197,16 @@ export default {
         }
       })
     },
+    currentDisplayUnit (coinType) {
+      return coinType.includes('btc') ? this.currentUnit : this.currentUnitEth
+    },
     toTargetCoinUnit (value) {
-      return EsWallet.convertValue(this.coinType, value, D.UNIT_BTC_SANTOSHI, this.currentUnit)
+      let nowUnit = this.currentDisplayUnit(this.coinType)
+      return esWallet.convertValue(this.coinType, value, D.unit.btc.santoshi, nowUnit)
     },
     toMinCoinUnit (value) {
-      return EsWallet.convertValue(this.coinType, value, this.currentUnit, D.UNIT_BTC_SANTOSHI)
+      let nowUnit = this.currentDisplayUnit(this.coinType)
+      return esWallet.convertValue(this.coinType, value, nowUnit, D.unit.btc.santoshi)
     },
     maxAmount () {
       this.amountValue = 200

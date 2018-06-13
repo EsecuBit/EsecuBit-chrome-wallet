@@ -29,29 +29,29 @@ export default class ChromeHidDevice extends IEsDevice {
         if (chrome.runtime.lastError) {
           console.warn('chrome.usb.connect error: ' + chrome.runtime.lastError.message)
           this._deviceId = null
-          if (this._listener) this._listener(D.ERROR_DEVICE_CONNECT_FAILED, true)
+          if (this._listener) this._listener(D.error.deviceConnectFailed, true)
           return
         }
 
         this._connectionId = connection.connectionId
-        console.info('Connected to the USB device!', this._deviceId, this._connectionId)
-        if (this._listener) this._listener(D.ERROR_NO_ERROR, true)
+        console.log('Connected to the USB device!', this._deviceId, this._connectionId)
+        if (this._listener) this._listener(D.error.succeed, true)
       })
     }
 
     chrome.hid.onDeviceAdded.addListener(device => {
-      console.info('plug in vid=' + device.vendorId + ', pid=' + device.productId)
+      console.log('plug in vid=' + device.vendorId + ', pid=' + device.productId)
       if (this._deviceId) return
       this._deviceId = device.deviceId
       connect()
     })
 
     chrome.hid.onDeviceRemoved.addListener(device => {
-      console.info('plug out vid=' + device.vendorId + ', pid=' + device.productId)
+      console.log('plug out vid=' + device.vendorId + ', pid=' + device.productId)
       if (device.deviceId === this._deviceId) {
         this._deviceId = null
         this._connectionId = null
-        if (this._listener) this._listener(D.ERROR_NO_ERROR, false)
+        if (this._listener) this._listener(D.error.succeed, false)
       }
     })
 
@@ -64,7 +64,7 @@ export default class ChromeHidDevice extends IEsDevice {
       if (this._deviceId) return
       if (foundDevices.length === 0) return
       let device = foundDevices[0]
-      console.info('found device: vid=' + device.vendorId + ', pid=' + device.productId)
+      console.log('found device: vid=' + device.vendorId + ', pid=' + device.productId)
       this._deviceId = device.deviceId
       connect(device)
     })
@@ -72,7 +72,7 @@ export default class ChromeHidDevice extends IEsDevice {
 
   async sendAndReceive (apdu) {
     if (this._deviceId === null || this._connectionId === null) {
-      throw D.ERROR_NO_DEVICE
+      throw D.error.noDevice
     }
 
     let send = (reportId, command) => {
@@ -80,7 +80,7 @@ export default class ChromeHidDevice extends IEsDevice {
         chrome.hid.sendFeatureReport(this._connectionId, reportId, command, () => {
           if (chrome.runtime.lastError) {
             console.warn('hid send error: ' + chrome.runtime.lastError.message)
-            reject(D.ERROR_DEVICE_COMM)
+            reject(D.error.deviceComm)
           }
           resolve()
         })
@@ -91,9 +91,9 @@ export default class ChromeHidDevice extends IEsDevice {
         chrome.hid.receiveFeatureReport(this._connectionId, 51, (data) => {
           if (chrome.runtime.lastError) {
             console.warn('receive error: ' + chrome.runtime.lastError.message)
-            reject(D.ERROR_DEVICE_COMM)
+            reject(D.error.deviceComm)
           }
-          console.info('receive got ', D.arrayBufferToHex(data))
+          console.log('receive got ', D.arrayBufferToHex(data))
           resolve(ChromeHidDevice.HidUnpackResponse(data))
         })
       })
@@ -107,7 +107,7 @@ export default class ChromeHidDevice extends IEsDevice {
   listenPlug (callback) {
     this._listener = callback
     if (this._deviceId !== null && this._connectionId !== null) {
-      callback(D.ERROR_NO_ERROR, D.STATUS_PLUG_IN)
+      callback(D.error.succeed, D.status.plugIn)
     }
   }
 

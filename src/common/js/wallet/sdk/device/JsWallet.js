@@ -1,10 +1,9 @@
-// powered by bitcoin-js
+// powered by btc-js and web3
 
 import ecurve from 'ecurve'
 import bitcoin from 'bitcoinjs-lib'
+import web3 from 'web3'
 import D from '../D'
-
-const NETWORK = D.TEST_MODE ? bitcoin.networks.testnet : bitcoin.networks.bitcoin
 
 export default class JsWallet {
   constructor () {
@@ -15,14 +14,16 @@ export default class JsWallet {
   }
 
   init (initSeed) {
-    const DEFAULT_SEED = D.TEST_SYNC ? D.TEST_SYNC_SEED : D.TEST_TRANSACTION_SEED
-    const WALLET_ID = D.TEST_SYNC ? D.TEST_SYNC_WALLET_ID : D.TEST_TRANSACTION_WALLET_ID
-    let seed = initSeed || DEFAULT_SEED
-    this._root = bitcoin.HDNode.fromSeedHex(seed, NETWORK)
+    const network = D.test.mode ? bitcoin.networks.testnet : bitcoin.networks.btc
+    const defaultSeed = D.test.sync ? D.test.syncSeed : D.test.txSeed
+    const walletId = D.test.sync ? D.test.syncWalletId : D.test.txWalletId
 
+    let seed = initSeed || defaultSeed
+    this.network = network
+    this._root = bitcoin.HDNode.fromSeedHex(seed, network)
     console.log('seed', seed)
-    console.log('walletId', WALLET_ID)
-    return {walletId: WALLET_ID}
+    console.log('walletId', walletId)
+    return {walletId: walletId}
   }
 
   async sync () {
@@ -32,7 +33,7 @@ export default class JsWallet {
   }
 
   async listenPlug (callback) {
-    callback(D.ERROR_NO_ERROR, D.STATUS_PLUG_IN)
+    callback(D.error.succeed, D.status.plugIn)
   }
 
   async getWalletInfo () {
@@ -52,13 +53,13 @@ export default class JsWallet {
         let curve = ecurve.getCurveByName('secp256k1')
         let Q = ecurve.Point.decodeFrom(curve, Buffer.from(D.hexToArrayBuffer(pPublicKey.publicKey)))
         let pChainCode = Buffer.from(D.hexToArrayBuffer(pPublicKey.chainCode))
-        let keyPair = new ECPair(null, Q, {network: NETWORK})
+        let keyPair = new ECPair(null, Q, {network: this.network})
         node = new HDNode(keyPair, pChainCode)
       }
       return node.derivePath(path)
     } catch (e) {
       console.warn(e)
-      throw D.ERROR_UNKNOWN
+      throw D.error.unknown
     }
   }
 
@@ -69,21 +70,44 @@ export default class JsWallet {
     return {publicKey, chainCode}
   }
 
-  async getAddress (addressPath, pPublicKey) {
-    let node = await this._derive(addressPath, pPublicKey)
-    return node.getAddress()
+  async getAddress (coinType, addressPath, pPublicKey) {
+    let btc = async () => {
+      let node = await this._derive(addressPath, pPublicKey)
+      return node.getAddress()
+    }
+
+    let eth = async () => {
+      let node = await this._derive(addressPath, pPublicKey)
+      let uncompressedPublicKey = node.keyPair.Q.getEncoded(false)
+      let withoutHead = new Uint8Array(D.hexToArrayBuffer(D.arrayBufferToHex(uncompressedPublicKey).slice(2)))
+      // noinspection JSCheckFunctionSignatures
+      let hash = web3.utils.keccak256(withoutHead)
+      return '0x' + hash.slice(-40)
+    }
+
+    switch (coinType) {
+      case D.coin.main.btc:
+      case D.coin.test.btcTestNet3:
+        return btc()
+      case D.coin.main.eth:
+      case D.coin.test.ethRinkeby:
+        return eth()
+      default:
+        throw D.error.coinNotSupported
+    }
   }
 
   async publicKeyToAddress (publicKey) {
     const ECPair = bitcoin.ECPair
     let curve = ecurve.getCurveByName('secp256k1')
     let Q = ecurve.Point.decodeFrom(curve, Buffer.from(D.hexToArrayBuffer(publicKey)))
-    let keyPair = new ECPair(null, Q, {network: NETWORK})
+    let keyPair = new ECPair(null, Q, {network: this.network})
     return keyPair.getAddress()
   }
 
   /**
    * tx:
+   * btc:
    * {
    *   inputs: [{
    *     address: base58 string,
@@ -96,28 +120,50 @@ export default class JsWallet {
    *     address: base58 string,
    *     value: long
    *   }]
+   *
+   * eth:
+   * // TODO finish
    */
-  async signTransaction (tx) {
-    try {
-      let txb = new bitcoin.TransactionBuilder(NETWORK)
-      txb.setVersion(1)
-      for (let input of tx.inputs) {
-        txb.addInput(input.txId, input.index)
+  async signTransaction (coinType, tx) {
+    let btc = () => {
+      try {
+        let txb = new bitcoin.TransactionBuilder(this.network)
+        txb.setVersion(1)
+        for (let input of tx.inputs) {
+          txb.addInput(input.txId, input.index)
+        }
+        for (let output of tx.outputs) {
+          txb.addOutput(output.address, output.value)
+        }
+        let i = 0
+        for (let input of tx.inputs) {
+          let key = this._root.derivePath(input.path)
+          txb.sign(i, key)
+          i++
+        }
+        let transaction = txb.build()
+        return {id: transaction.getId(), hex: transaction.toHex()}
+      } catch (e) {
+        console.warn(e)
+        throw D.error.unknown
       }
-      for (let output of tx.outputs) {
-        txb.addOutput(output.address, output.value)
-      }
-      let i = 0
-      for (let input of tx.inputs) {
-        let key = this._root.derivePath(input.path)
-        txb.sign(i, key)
-        i++
-      }
-      let transaction = txb.build()
-      return {id: transaction.getId(), hex: transaction.toHex()}
-    } catch (e) {
-      console.warn(e)
-      throw D.ERROR_UNKNOWN
+    }
+
+    let eth = () => {
+      // TODO finish
+      throw D.error.notImplemented
+    }
+
+    switch (coinType) {
+      case D.coin.main.btc:
+      case D.coin.test.btcTestNet3:
+        return btc()
+      case D.coin.main.eth:
+      case D.coin.test.ethRinkeby:
+        return eth()
+      default:
+        console.log('2')
+        throw D.error.coinNotSupported
     }
   }
 }

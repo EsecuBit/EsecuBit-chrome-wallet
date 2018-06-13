@@ -35,10 +35,10 @@
           <div class="layui-container page-content ">
             <div class="main-tab-content">
               <div class="main-tab-item layui-show">
-                <Accounts :account-info ="accounts" :current-unit="currentUnit" :current-exchange-rate="currentExchangeRate"/>
+                <Accounts :account-info ="accounts" :current-unit="currentUnit" :current-unit-eth="currentUnitEth" :current-exchange-rate="currentExchangeRate"/>
               </div>
               <div class="main-tab-item">
-                <Send :account-info ="accounts" :current-unit="currentUnit" :current-exchange-rate="currentExchangeRate"/>
+                <Send :account-info ="accounts" :current-unit="currentUnit" :current-unit-eth="currentUnitEth" :current-exchange-rate="currentExchangeRate"/>
               </div>
               <div class="main-tab-item">
                 <Accept :account-info ="accounts"/>
@@ -124,8 +124,9 @@ export default {
       selected: '',
       isHasAccount: true,
       accountType: [],
-      currentUnit: D.UNIT_BTC_M,
-      currentExchangeRate: 'USD'
+      currentUnit: D.unit.btc.mBTC,
+      currentUnitEth: D.unit.btc.GWei,
+      currentExchangeRate: D.unit.legal.USD
     }
   },
   watch: {
@@ -173,19 +174,20 @@ export default {
     },
     listenLoginStatus () {
       esWallet.listenStatus((errorNum, status) => {
-        if (status === 1) this.loginStatus = 1
-        if (status === 2) this.loginStatus = 2
-        if (status === 3) this.loginStatus = 3
-        if (status === 10) {
+        if (status === D.status.plugIn) this.loginStatus = 1
+        if (status === D.status.initializing) this.loginStatus = 2
+        if (status === D.status.syncing) this.loginStatus = 3
+        if (status === D.status.syncFinish) {
           this.isLogin = !this.isLogin
           esWallet.getWalletInfo().then(value => {
             this.WalletInfo = value
           }).catch(value => { layer.msg(this.$t('message.app_error_get_wallet'), { icon: 2, anim: 6 }) })
           esWallet.getAccounts().then(value => {
+            console.log(value, 12313123123123)
             if (value) this.accounts = this.orderArr(value)
           }).catch(value => { layer.msg(this.$t('message.app_error_get_account'), { icon: 2, anim: 6 }) })
         }
-        if (status === 99) {
+        if (status === D.status.plugOut) {
           this.loginStatus = 99
           this.isLogin = !this.isLogin
         }

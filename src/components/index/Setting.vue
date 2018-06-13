@@ -39,7 +39,7 @@
               <div class="layui-form-item">
                 <label class="layui-form-label">{{$t('message.setting_exchange_rate')}}</label>
                 <div class="layui-input-inline input-width">
-                  <select name="exchangeRate" lay-filter="exchange">
+                  <select name="exchangeRate" lay-filter="exchange" v-model="selectedExchangeRate">
                     <option :value="itemExchangeRate.value" v-for="itemExchangeRate in exchangeRate">{{itemExchangeRate.label}}</option>
                   </select>
                 </div>
@@ -55,7 +55,7 @@
         </div>
         <!--硬件信息-->
         <div class="tab-item">
-          <table class="layui-table" lay-skin="line">
+          <table class="layui-table" >
             <colgroup>
               <col width="100">
               <col width="200">
@@ -86,6 +86,17 @@ import D from '../../common/js/wallet/sdk/D'
 const form = layui.form
 // eslint-disable-next-line
 const $ = layui.jquery
+const getExchangeList = D.suppertedLegals()
+const editExchangeList = function (arry) {
+  let exRate = []
+  if (Array.isArray(arry) && arry.length > 0) {
+    for (let item of arry) {
+      exRate.push({label: item, value: item})
+    }
+  }
+  return exRate
+}
+const currentExchangeList = editExchangeList(getExchangeList)
 const currentLang = navigator.language
 export default {
   name: 'Setting',
@@ -102,7 +113,7 @@ export default {
         {name: 'red', colorClass: 'red-skin'}
       ],
       unitChecked: '',
-      selectedExchangeRate: '',
+      selectedExchangeRate: 'USD',
       unitValueList: [
         {label: 'BTC', value: 'btc'},
         {label: 'mBTC', value: 'mbtc'}
@@ -112,11 +123,7 @@ export default {
         {label: 'English', value: 'en-US'},
         {label: '简体中文', value: 'zh-CN'}
       ],
-      exchangeRate: [
-        {label: 'USD', value: 'USD'},
-        {label: 'HK', value: 'HK'},
-        {label: '软妹币', value: 'RMB'}
-      ],
+      exchangeRate: currentExchangeList,
       currentAccount: {},
       coinType: '',
       accountOrder: []
@@ -138,10 +145,11 @@ export default {
     currentAccount: {
       handler (newValue, oldValue) {
         this.coinType = newValue.coinType
-        if (this.coinType === D.COIN_BIT_COIN_TEST) {
+        if (this.coinType.includes('btc')) {
           this.unitValueList = [
-            {label: 'BTC', value: 'btc'},
-            {label: 'mBTC', value: 'mbtc'}
+            {label: 'BTC', value: 'BTC'},
+            {label: 'mBTC', value: 'mBTC'},
+            {label: 'santoshi', value: 'santoshi'}
           ]
           this.$nextTick(() => {
             form.render('radio', 'form3')
@@ -150,7 +158,19 @@ export default {
               this.$emit('setUnit', data.value)
             })
           })
-        } else if (this.coinType === 'lit_test') {
+        } else if (this.coinType.includes('eth')) {
+          this.unitValueList = [
+            {label: 'Ether', value: 'Ether'},
+            {label: 'GWei', value: 'GWei'},
+            {label: 'Wei', value: 'Wei'}
+          ]
+          this.$nextTick(() => {
+            form.render('radio', 'form3')
+            form.on('radio(unit)', data => {
+              this.unitChecked = data.value
+              this.$emit('setUnit', data.value)
+            })
+          })
         }
       }
     }

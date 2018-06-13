@@ -3,8 +3,11 @@ import D from '../D'
 import IndexedDB from './database/IndexedDB'
 import BlockChainInfo from './network/BlockChainInfo'
 import FeeBitCoinEarn from './network/fee/FeeBitCoinEarn'
+import ExchangeCryptoCompareCom from './network/exchange/ExchangeCryptoCompareCom'
+import EthGasStationInfo from './network/fee/EthGasStationInfo'
+import EtherScanIo from './network/EtherScanIo'
 
-// TODO CoinData only manage data, don't handle data. leave it to EsAccount and EsWallet?
+// TODO CoinData only manage data, don't handle data. leave it to BtcAccount and EsWallet?
 export default class CoinData {
   constructor () {
     if (CoinData.prototype.Instance) {
@@ -13,15 +16,19 @@ export default class CoinData {
     CoinData.prototype.Instance = this
 
     this._initialized = false
-    // TODO read provider from settings
-    this._networkProvider = BlockChainInfo
-    this._network = {}
-    this._network[D.COIN_BIT_COIN_TEST] = new this._networkProvider(D.COIN_BIT_COIN_TEST)
-    this._network[D.COIN_BIT_COIN] = new this._networkProvider(D.COIN_BIT_COIN)
 
-    this._networkFee = {}
-    this._networkFee[D.COIN_BIT_COIN_TEST] = null
-    this._networkFee[D.COIN_BIT_COIN] = null
+    const coinTypes = D.suppertedCoinTypes()
+    this._network = coinTypes.reduce((obj, coinType) => {
+      // TODO read provider from settings
+      if (coinType.includes('btc')) {
+        obj[coinType] = new BlockChainInfo(coinType)
+      } else if (coinType.includes('eth')) {
+        obj[coinType] = new EtherScanIo(coinType)
+      }
+      return obj
+    }, {})
+    this._networkFee = coinTypes.reduce((obj, coinType) => (obj[coinType] = null) || obj, {})
+    this._exchange = coinTypes.reduce((obj, coinType) => (obj[coinType] = null) || obj, {})
 
     this._listeners = []
   }
@@ -37,15 +44,27 @@ export default class CoinData {
       // fee
       await Promise.all(Object.keys(this._networkFee).map(async coinType => {
         let fee = await this._db.getFee(coinType)
-        fee = fee || {}
-        this._networkFee[coinType] = new FeeBitCoinEarn(fee.fee)
-        this._networkFee[coinType].onUpdateFee = (fee) => this._db.saveOfUpdateFee({coinType, fee})
+        fee = fee || {coinType}
+        if (coinType.includes('btc')) {
+          this._networkFee[coinType] = new FeeBitCoinEarn(fee)
+          this._networkFee[coinType].onUpdateFee = (fee) => this._db.saveOfUpdateFee(fee)
+        } else if (coinType.includes('eth')) {
+          this._networkFee[coinType] = new EthGasStationInfo(fee)
+          this._networkFee[coinType].onUpdateFee = (fee) => this._db.saveOfUpdateFee(fee)
+        }
+      }))
+      // exchange
+      await Promise.all(Object.keys(this._exchange).map(async coinType => {
+        let exchange = await this._db.getExchange(coinType)
+        exchange = exchange || {coinType}
+        this._exchange[coinType] = new ExchangeCryptoCompareCom(exchange)
+        this._exchange[coinType].onUpdateExchange = (fee) => this._db.saveOfUpdateExchange(fee)
       }))
 
       this._initialized = true
     } catch (e) {
-      console.info(e)
-      throw D.ERROR_UNKNOWN
+      console.warn(e)
+      throw D.error.unknown
     }
   }
 
@@ -62,7 +81,7 @@ export default class CoinData {
   addListener (callback) {
     let exists = this._listeners.some(listener => listener === callback)
     if (exists) {
-      console.info('addTransactionListener already has this listener', callback)
+      console.log('addTransactionListener already has this listener', callback)
       return
     }
     this._listeners.push(callback)
@@ -74,12 +93,10 @@ export default class CoinData {
 
   async newAccount (coinType) {
     let accountIndex = await await this._newAccountIndex(coinType)
-    if (accountIndex === -1) {
-      throw D.ERROR_LAST_ACCOUNT_NO_TRANSACTION
-    }
+    if (accountIndex === -1) throw D.error.lastAccountNoTransaction
 
     let account = await this._newAccount(coinType, accountIndex)
-    if (D.TEST_DATA && accountIndex === 0 && (coinType === D.COIN_BIT_COIN || coinType.D.COIN_BIT_COIN_TEST)) {
+    if (D.test.data && accountIndex === 0 && (coinType === D.coin.main.btc || coinType.D.coin.test.btcTestNet3)) {
       await this._initTestDbData(account)
     }
     await this._db.newAccount(account)
@@ -87,12 +104,10 @@ export default class CoinData {
   }
 
   async _newAccount (coinType, accountIndex) {
-    let makeId = function () {
+    let makeId = () => {
       let text = ''
       const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-      for (let i = 0; i < 32; i++) {
-        text += possible.charAt(Math.floor(Math.random() * possible.length))
-      }
+      for (let i = 0; i < 32; i++) text += possible.charAt(Math.floor(Math.random() * possible.length))
       return text
     }
 
@@ -103,7 +118,7 @@ export default class CoinData {
       index: accountIndex,
       balance: 0
     }
-    console.info('newAccount', account)
+    console.log('newAccount', account)
     return account
   }
 
@@ -115,14 +130,11 @@ export default class CoinData {
     let accounts = await this._db.getAccounts({coinType})
 
     // check whether the last spec coinType account has transaction
-    let lastAccount = accounts[0]
-    for (let account of accounts) {
-      if (lastAccount.index < account.index) {
-        lastAccount = account
-      }
-    }
-
+    let lastAccount = accounts.reduce(
+      (lastAccount, account) => lastAccount.index > account.index ? lastAccount : account,
+      accounts[0])
     if (!lastAccount) return 0
+
     let {total} = await this._db.getTxInfos({
       accountId: lastAccount.accountId,
       startIndex: 0,
@@ -134,12 +146,13 @@ export default class CoinData {
 
   async deleteAccount (account) {
     let {total} = await this._db.getTxInfos({accountId: account.accountId})
+    let addressInfos = await this._db.getAddressInfos({accountId: account.accountId})
     if (total !== 0) {
       console.warn('attemp to delete a non-empty account', account)
-      throw D.ERROR_ACCOUNT_HAS_TRANSACTIONS
+      throw D.error.accountHasTransactions
     }
-    console.info('delete account', account)
-    await this._db.deleteAccount(account)
+    console.log('delete account', account)
+    await this._db.deleteAccount(account, addressInfos)
   }
 
   async renameAccount (account) {
@@ -147,8 +160,9 @@ export default class CoinData {
   }
 
   async saveOrUpdateTxInfo (txInfo) {
+    console.log('yeah', txInfo)
     await this._db.saveOrUpdateTxInfo(txInfo)
-    this._listeners.forEach(listener => listener(D.ERROR_NO_ERROR, txInfo))
+    this._listeners.forEach(listener => listener(D.error.succeed, txInfo))
   }
 
   async newAddressInfos (account, addressInfos) {
@@ -169,7 +183,7 @@ export default class CoinData {
 
   async newTx (account, addressInfo, txInfo, utxos) {
     await this._db.newTx(account, addressInfo, txInfo, utxos)
-    this._listeners.forEach(listener => listener(D.ERROR_NO_ERROR, txInfo))
+    this._listeners.forEach(listener => listener(D.error.succeed, txInfo))
   }
 
   checkAddresses (coinType, addressInfos) {
@@ -177,12 +191,12 @@ export default class CoinData {
   }
 
   listenAddresses (coinType, addressInfos, callback) {
-    console.info('listen addresses', addressInfos)
+    console.log('listen addresses', addressInfos)
     return this._network[coinType].listenAddresses(addressInfos, callback)
   }
 
   listenTx (coinType, txInfo, callback) {
-    console.info('listen txInfo', txInfo)
+    console.log('listen txInfo', txInfo)
     return this._network[coinType].listenTx(txInfo, callback)
   }
 
@@ -196,19 +210,40 @@ export default class CoinData {
 
   getSuggestedFee (coinType) {
     switch (coinType) {
-      case D.COIN_BIT_COIN:
-      case D.COIN_BIT_COIN_TEST:
+      case D.coin.main.btc:
+      case D.coin.test.btcTestNet3:
         return this._networkFee[coinType].getCurrentFee()
       default:
-        throw D.ERROR_COIN_NOT_SUPPORTED
+        throw D.error.coinNotSupported
+    }
+  }
+
+  convertValue (coinType, value, fromType, toType) {
+    let fromLegal = D.suppertedLegals().includes(fromType)
+    let toLegal = D.suppertedLegals().includes(toType)
+    // not support convertion between legal currency
+    if (fromLegal && toLegal) {
+      throw D.error.coinNotSupported
+    } else if (fromLegal) {
+      let exchange = this._exchange[coinType].getCurrentExchange()
+      let rRate = exchange.exchange[fromType]
+      let unitValue = D.convertValue(coinType, value, toType, exchange.unit)
+      return rRate && (unitValue / rRate)
+    } else if (toLegal) {
+      let exchange = this._exchange[coinType].getCurrentExchange()
+      let rate = exchange.exchange[toType]
+      let unitValue = D.convertValue(coinType, value, fromType, exchange.unit)
+      return unitValue * rate
+    } else {
+      return D.convertValue(coinType, value, fromType, toType)
     }
   }
 
   /*
-   * Test data when TEST_DATA = true
+   * Test data when test.data = true
    */
   async _initTestDbData (account) {
-    console.info('TEST_DATA add test txInfo')
+    console.log('test.data add test txInfo')
     account.balance = 32000000
     let accountId = account.accountId
     // TODO update data
@@ -216,10 +251,10 @@ export default class CoinData {
       this._db.saveOrUpdateTxInfo(
         {
           accountId: accountId,
-          coinType: D.COIN_BIT_COIN,
+          coinType: D.coin.main.btc,
           txId: '574e073f66897c203a172e7bf65df39e99b11eec4a2b722312d6175a1f8d00c3',
           address: '1Lhyvw28ERxYJRjAYgntWazfmZmyfFkgqw',
-          direction: D.TX_DIRECTION_IN,
+          direction: D.tx.direction.in,
           time: 1524138384000,
           outIndex: 0,
           script: '76a91499bc78ba577a95a11f1a344d4d2ae55f2f857b9888ac',
@@ -230,10 +265,10 @@ export default class CoinData {
       this._db.saveOrUpdateTxInfo(
         {
           accountId: accountId,
-          coinType: D.COIN_BIT_COIN,
+          coinType: D.coin.main.btc,
           txId: '574e073f66897c203a172e7bf65df39e99b11eec4a2b722312d6175a1f8d00c4',
           address: '3PfcrxHzT6WuNo7tcqmAdLKn6EvgXCCSiQ',
-          direction: D.TX_DIRECTION_OUT,
+          direction: D.tx.direction.out,
           time: 1524138384000,
           value: 18000000,
           hasDetails: false
@@ -242,10 +277,10 @@ export default class CoinData {
       this._db.saveOrUpdateTxInfo(
         {
           accountId: accountId,
-          coinType: D.COIN_BIT_COIN,
+          coinType: D.coin.main.btc,
           txId: '574e073f66897c203a172e7bf65df39e99b11eec4a2b722312d6175a1f8d00c5',
           address: '14F7iCA4FsPEYj67Jpme2puVmwAT6VoVEU',
-          direction: D.TX_DIRECTION_OUT,
+          direction: D.tx.direction.out,
           time: 1524138384000,
           value: 34000000,
           hasDetails: false
@@ -255,9 +290,9 @@ export default class CoinData {
         {
           address: '14F7iCA4FsPEYj67Jpme2puVmwAT6VoVEU',
           accountId: accountId,
-          coinType: D.COIN_BIT_COIN,
+          coinType: D.coin.main.btc,
           path: [0x80000000, 0x8000002C, 0x80000000, 0x00000000, 0x00000000],
-          type: D.ADDRESS_EXTERNAL,
+          type: D.address.external,
           txIds: []
         })
     ])

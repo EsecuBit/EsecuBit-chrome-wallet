@@ -11,7 +11,7 @@
         <div class="layui-form-item">
           <label class="layui-form-label account-label" >{{$t('message.accept_current_account')}}</label>
           <div class="layui-input-block account-info">
-            <div class="account-msg">{{accountName}}</div>
+            <div class="account-msg">{{currentAccount.label}}</div>
           </div>
         </div>
         <div class="layui-form-item" v-if="isSelect">
@@ -53,7 +53,7 @@ export default {
       qrAddress: null,
       accountIndex: 0,
       accountOrder: [],
-      accountName: null,
+      currentAccount: {label: ''},
       accountQrcode: null,
       count: 1,
       coinType: '123',
@@ -73,12 +73,14 @@ export default {
       handler (newValue, oldValue) {
         this.coinType = newValue[0].coinType
         this.accountOrder = newValue
-        this.accountName = this.accountOrder[0].label
+        this.currentAccount = this.accountOrder[0]
         if (this.count === 1) {
+          console.log('xiaowang')
           this.accountOrder[0].getAddress().then(value => {
+            console.log(value)
             this.generateQRCode(value.qrAddress)
             this.qrAddress = value.address
-          }).catch(value => { console.log(value) })
+          }).catch(value => { console.log('xiaowang') })
         }
         this.count++
       }
@@ -86,11 +88,11 @@ export default {
     accountIndex: {
       handler (newValue, oldValue) {
         this.coinType = this.accountOrder[newValue].coinType
-        this.accountName = this.accountOrder[newValue].label
+        this.currentAccount = this.accountOrder[newValue]
         this.accountOrder[newValue].getAddress().then(value => {
           this.changeQRCode(value.qrAddress)
           this.qrAddress = value.address
-        }).catch(value => { console.log(value) })
+        }).catch(value => { console.log(value)  })
       }
     }
   },

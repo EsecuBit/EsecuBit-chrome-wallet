@@ -2,8 +2,8 @@
 import ICoinNetwork from './ICoinNetwork'
 import D from '../../D'
 
-const TEST_URL = 'https://testnet.blockchain.info'
-const MAIN_URL = 'https://blockchain.info'
+const testUrl = 'https://testnet.blockchain.info'
+const mainUrl = 'https://blockchain.info'
 
 export default class BlockchainInfo extends ICoinNetwork {
   constructor (coinType) {
@@ -15,14 +15,14 @@ export default class BlockchainInfo extends ICoinNetwork {
 
   async init () {
     switch (this.coinType) {
-      case D.COIN_BIT_COIN:
-        this._apiUrl = MAIN_URL
+      case D.coin.main.btc:
+        this._apiUrl = mainUrl
         break
-      case D.COIN_BIT_COIN_TEST:
-        this._apiUrl = TEST_URL
+      case D.coin.test.btcTestNet3:
+        this._apiUrl = testUrl
         break
       default:
-        throw D.ERROR_COIN_NOT_SUPPORTED
+        throw D.error.coinNotSupported
     }
     return super.init()
   }
@@ -43,15 +43,15 @@ export default class BlockchainInfo extends ICoinNetwork {
             let response = xmlhttp.responseText
             switch (response) {
               case 'Transaction not found':
-                reject(D.ERROR_TX_NOT_FOUND)
+                reject(D.error.txNotFound)
                 return
               default:
                 console.warn('BlockChainInfo get', xmlhttp)
-                reject(D.ERROR_NETWORK_PROVIDER_ERROR)
+                reject(D.error.networkProviderError)
             }
           } else {
             console.warn(url, xmlhttp)
-            reject(D.ERROR_NETWORK_UNVAILABLE)
+            reject(D.error.networkUnVailable)
           }
         }
       }
@@ -67,21 +67,17 @@ export default class BlockchainInfo extends ICoinNetwork {
 
   async queryAddresses (addresses) {
     let response = await this.get(this._apiUrl + '/multiaddr?cors=true&active=' + addresses.join('|'))
-    let addressInfos = []
-    for (let rAddress of response.addresses) {
-      let exist = (io) => {
-        let address = io.addr || io.prev_out.addr
-        return address === rAddress.address
-      }
-      let info = {}
-      info.address = rAddress.address
-      info.txCount = rAddress.n_tx
-      info.txs = response.txs
-        .filter(rTx => rTx.inputs.some(exist) || rTx.out.some(exist))
-        .map(rTx => this.wrapTx(rTx))
-      addressInfos.push(info)
+    let exist = (rTx, address) => {
+      return rTx.inputs.map(input => input.prev_out.addr).includes(address) ||
+        rTx.out.map(output => output.addr).includes(address)
     }
-    return addressInfos
+    return response.addresses.map(rAddress => {
+      return {
+        address: rAddress.address,
+        txCount: rAddress.n_tx,
+        txs: response.txs.filter(rTx => exist(rTx, rAddress.address)).map(rTx => this.wrapTx(rTx))
+      }
+    })
   }
 
   async queryTx (txId) {
@@ -91,14 +87,11 @@ export default class BlockchainInfo extends ICoinNetwork {
 
   async queryRawTx (txId) {
     let response = await this.get([this._apiUrl, 'rawtx', txId].join('/') + '?cors=true&format=hex')
-    return D.parseRawTx(response.response)
+    return D.parseBitcoinRawTx(response.response)
   }
 
-  async sendTx (rawTransaction) {
-    // TODO uncomment after testing EsAccount
-    let response = await this.post([this._apiUrl, 'pushtx'].join('/'), 'tx=' + rawTransaction)
-    // TODO wrap
-    return response
+  sendTx (rawTransaction) {
+    return this.post([this._apiUrl, 'pushtx'].join('/'), 'tx=' + rawTransaction)
   }
 
   wrapTx (rTx) {
