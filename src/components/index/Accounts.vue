@@ -10,7 +10,7 @@
   </div>
   <div class="site-content">
     <div class="tab-content-1" id="tab-content-1">
-      <div class="tab-item" v-for="(tablecount, index) in gridList">
+      <div class="tab-item" v-for="(tablecount, index) in gridList" >
         <div class="account-information">
           <div class="account-msg">
             <span class="layui-badge-dot layui-bg-green"></span>
@@ -43,42 +43,40 @@
         </div>
         <div class="layui-row">
           <div class="layui-col-xs12 ">
-            <table class="layui-table">
+            <table class="layui-table" lay-skin="line"  v-if="tablecount.length > 0">
               <colgroup>
-                <col width="8%">
-                <col width="8%">
+                <col width="15%">
+                <col width="30%">
                 <col width="10%">
-                <col width="12%">
-                <col width="6%">
                 <col width="8%">
-                <col width="6%">
+                <col width="8%">
               </colgroup>
               <thead>
               <tr>
-                <th>{{$t('message.accounts_table_txId')}}</th>
-                <th>{{$t('message.accounts_table_coinType')}}</th>
-                <th>{{$t('message.accounts_table_blockNumber')}}</th>
                 <th>{{$t('message.accounts_table_time')}}</th>
-                <th>{{$t('message.accounts_table_direction')}}</th>
+                <th>{{$t('message.accounts_table_address')}}</th>
+                <th>{{$t('message.accounts_table_blockNumber')}}</th>
+                <th>{{$t('message.accounts_confirmations')}}</th>
                 <th>{{$t('message.accounts_table_operation')}}</th>
-                <th>{{$t('message.accounts_table_search')}}</th>
               </tr>
               </thead>
-              <tbody v-for="table in tablecount" >
+              <tbody v-for="table in tablecount">
                 <tr style="height: 39px;overflow-x: hidden">
-                  <td>{{table.txId}}</td>
-                  <td>{{table.coinType}}</td>
-                  <td :class="[table.blockNumber<0?active:'']" v-if="coinTypeList[index]">{{toTargetCoinUnit(coinTypeList[index], table.blockNumber)}}</td>
                   <td>{{getFormatTime(table.time)}}</td>
-                  <td :class ="[table.direction === 'in'?green:red]">{{table.direction}}</td>
                   <td>
-                    <a title="Details" href="#" @click="getDescription(table, index); sendMsg()">
-                    <i class="layui-icon">&#xe63c;</i> {{$t('message.accounts_details')}}
-                    </a>
+                    <span :class ="[table.direction === 'in'?green:red]" class="text-opacity">{{toOrForm(table.direction)}}</span>
+                    <span>{{getTableAddress(table)}}</span>
+                  </td>
+                  <td :class="[table.blockNumber>0?green:red]" v-if="coinTypeList[index]">{{tableBlockNumber(coinTypeList[index], table.blockNumber)}}</td>
+                  <td style="padding: 0">
+                    <canvas class="canvas" width="100" height="30" :data-counts="table.confirmations"></canvas>
                   </td>
                   <td>
+                    <a title="Details" href="#" @click="getDescription(table, index); sendMsg()">
+                    <i class="layui-icon">&#xe63c;</i>
+                    </a>&nbsp;
                     <a title="search" href="#">
-                      <i class="layui-icon">&#xe615;</i> {{$t('message.accounts_table_search')}}
+                      <i class="layui-icon">&#xe615;</i>
                     </a>
                   </td>
                 </tr>
@@ -118,24 +116,19 @@
       </thead>
       <tbody>
         <tr>
-          <td>{{$t('message.accounts_table_txId')}}</td>
-          <td>{{description.txId}}</td>
-        </tr>
-        <tr>
-          <td>{{$t('message.accounts_table_coinType')}}</td>
-          <td>{{description.coinType}}</td>
-        </tr>
-        <tr>
-          <td>{{$t('message.accounts_table_blockNumber')}}</td>
-          <td>{{description.blockNumber}}</td>
-        </tr>
-        <tr>
           <td>{{$t('message.accounts_table_time')}}</td>
           <td>{{description.time}}</td>
         </tr>
         <tr>
-          <td>{{$t('message.accounts_table_direction')}}</td>
-          <td >{{description.direction}}</td>
+          <td>{{$t('message.accounts_table_address')}}</td>
+          <td>
+            <span :class ="[description.direction === 'in'?green:red]" class="text-opacity">{{description.toOrForm}}</span>
+            <span>{{description.address}}</span>
+          </td>
+        </tr>
+        <tr>
+          <td>{{$t('message.accounts_table_blockNumber')}}</td>
+          <td>{{description.blockNumber}}</td>
         </tr>
       </tbody>
     </table>
@@ -182,9 +175,7 @@ export default {
         }
       ],
       gridList: [
-        [
-          {txId: '', coinType: '', blockNumber: null, time: null, direction: ''}
-        ]
+        []
       ],
       coinTypeList: [],
       totalNum: [],
@@ -212,8 +203,10 @@ export default {
             total.push(value.total)
           }
           this.gridList = newGridList
+          console.log(this.gridList, 8989898)
           this.totalNum = total
           this.$nextTick(() => {
+            this.tableCanvas()
             for (let index of this.gridList.keys()) {
               this.pageList(index, total[index])
             }
@@ -231,6 +224,36 @@ export default {
     this.createTab()
   },
   methods: {
+    toOrForm (value) {
+      return value === 'in' ? 'from' : 'to'
+    },
+    getTableAddress (table) {
+      if (table.direction === 'in') {
+        let address = ''
+        if (table.inputs.length === 1) {
+          address = table.inputs[0].prevAddress
+        } else if (table.inputs.length > 1) {
+          for (let item of table.inputs) {
+            address += item.prevAddress + '; '
+          }
+        }
+        return address
+      } else {
+        let address = ''
+        if (table.outputs.length === 1) {
+          address = table.outputs[0].address
+        } else if (table.outputs.length > 1) {
+          for (let item of table.outputs) {
+            address += item.address
+          }
+        }
+        return address
+      }
+    },
+    tableBlockNumber (coinType, value) {
+      let newValue = this.toTargetCoinUnit(coinType, value)
+      return newValue.toFixed(2) + ' ' + this.currentDisplayUnit(coinType)
+    },
     currentDisplayUnit (coinType) {
       return coinType.includes('btc') ? this.currentUnit : this.currentUnitEth
     },
@@ -239,7 +262,41 @@ export default {
       return coinType.includes('btc') ? esWallet.convertValue(coinType, newValue, this.currentUnit, this.currentExchangeRate) : esWallet.convertValue(coinType, newValue, this.currentUnitEth, this.currentExchangeRate)
     },
     toTargetCoinUnit (coinType, value) {
-      return coinType.includes('btc') ? esWallet.convertValue(coinType, value, D.unit.btc.santoshi, this.currentUnit) : esWallet.convertValue(coinType, value, D.unit.btc.santoshi, this.currentUnitEth)
+      return coinType.includes('btc') ? esWallet.convertValue(coinType, value, D.unit.btc.santoshi, this.currentUnit) : esWallet.convertValue(coinType, value, D.unit.eth.Wei, this.currentUnitEth)
+    },
+    tableCanvas () {
+      let canvasList = document.getElementsByClassName('canvas')
+      for (let canvas of canvasList) {
+        let context = canvas.getContext('2d') // 获取画图环境，指明为2d
+        let centerX = canvas.width / 2 // Canvas中心点x轴坐标
+        let centerY = canvas.height / 2 // Canvas中心点y轴坐标
+        let rad = Math.PI * 2 / 100 // 将360度分成100份，那么每一份就是rad度
+        let data = parseInt(canvas.getAttribute('data-counts'))
+        if (data === -1) {
+          context.save()
+          context.fillStyle = '#e74c3c'
+          context.font = '16px'
+          context.fillText('Pending..', centerX - 25, centerY + 4)
+          context.stroke()
+        } else {
+          let n = (data === 0 && 0) || (data === 1 && 1) || (data === 2 && 2) || (data === 3 && 3) || (data === 4 && 4) || (data === 5 && 5) || (data >= 6 && 6)
+          let percentDisplay = n * 100 / 6
+          // 绘制灰色外圈
+          context.save()
+          context.beginPath()
+          context.lineWidth = 5// 设置线宽
+          context.strokeStyle = '#ddd'
+          context.arc(centerX, centerY, 10, 0, Math.PI * 2, false)
+          context.stroke()
+          // 绘制5像素宽的运动外圈
+          context.save()
+          context.strokeStyle = '#009688' // 设置描边样式
+          context.lineWidth = 5// 设置线宽
+          context.beginPath()// 路径开始
+          context.arc(centerX, centerY, 10, -Math.PI / 2, -Math.PI / 2 + percentDisplay * rad, false) // 用于绘制圆弧context.arc(x坐标，y坐标，半径，起始角度，终止角度，顺时针/逆时针)
+          context.stroke() // 绘制
+        }
+      }
     },
     refresh () {
       this.loadingClass['layui-anim'] = true
@@ -340,6 +397,9 @@ export default {
       const endItem = limit * (page - 1) + limit
       this.newAccount[id].getTxInfos(startItem, endItem).then(data => {
         this.$set(this.gridList, id, data.txInfos)
+        this.$nextTick(() => {
+          this.tableCanvas()
+        })
       }).catch(value => { layer.msg(this.$t('message.accounts_get_data'), { icon: 2 }) })
     },
     createTab () {
@@ -361,16 +421,16 @@ export default {
       })
     },
     getDescription (table, index) {
-      this.description.txId = table.txId
-      this.description.coinType = table.coinType
-      this.description.blockNumber = this.toTargetCoinUnit(this.coinTypeList[index], table.blockNumber)
+      this.description.blockNumber = this.tableBlockNumber(this.coinTypeList[index], table.blockNumber)
       this.description.time = this.getFormatTime(table.time)
+      this.description.toOrForm = this.toOrForm(table.direction) + ' '
+      this.description.address = this.getTableAddress(table)
       this.description.direction = table.direction
       const that = this
       layer.open({
         type: 1,
         title: that.$t('message.accounts_details_title'),
-        area: ['600px', '380px'],
+        area: ['550px', '340px'],
         shadeClose: true,
         btn: ['close'],
         content: $('.content')
@@ -431,6 +491,7 @@ export default {
     max-width: 350px;
     max-height: 19px;
     margin-right: 30px;
+    text-overflow: ellipsis;
     overflow: hidden;
     white-space:nowrap;
   }
@@ -450,7 +511,8 @@ export default {
     table-layout:fixed;
   }
   td {
-    overflow:hidden;
+    text-overflow: ellipsis;
+    overflow: hidden;
     white-space:nowrap;
   }
   .content .table {
@@ -481,6 +543,7 @@ export default {
     box-sizing: border-box;
   }
   .layui-table td, .layui-table th{
+    text-overflow: ellipsis;
     overflow: hidden;
   }
   .table > thead > tr > th {
@@ -509,6 +572,9 @@ export default {
     word-break: break-all;
     white-space: pre-wrap;
   }
+  .layui-table  td,.layui-table  th {
+    text-align: center;
+  }
   .active-count {
     color: #e74c3c;
   }
@@ -536,5 +602,12 @@ export default {
   .exchange-rate{
     font-size: 12px;
     color:#666;
+  }
+  .text-opacity {
+    opacity: 0.8;
+    font-size: 10px;
+  }
+  canvas{
+    vertical-align: middle;
   }
 </style>

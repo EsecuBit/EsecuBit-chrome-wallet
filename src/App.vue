@@ -44,7 +44,7 @@
                 <Accept :account-info ="accounts"/>
               </div>
               <div class="main-tab-item">
-                <Setting @switchSetting = "switchSetting" @settingColor = "settingColor" @setExchangeRate="setExchangeRate" @setUnit="setUnit" :account-info ="accounts" :wallet-info="WalletInfo"/>
+                <Setting @switchSetting = "switchSetting" @settingColor = "settingColor" @setExchangeRate="setExchangeRate" @setBitUnit="setBitUnit"  @setEthUnit="setEthUnit" :account-info ="accounts" :wallet-info="WalletInfo"/>
               </div>
             </div>
           </div>
@@ -114,7 +114,6 @@ export default {
   name: 'App',
   data () {
     return {
-      what: 'name',
       isLogin: true,
       loginStatus: null,
       WalletInfo: null,
@@ -125,7 +124,7 @@ export default {
       isHasAccount: true,
       accountType: [],
       currentUnit: D.unit.btc.mBTC,
-      currentUnitEth: D.unit.btc.GWei,
+      currentUnitEth: D.unit.eth.GWei,
       currentExchangeRate: D.unit.legal.USD
     }
   },
@@ -166,8 +165,11 @@ export default {
     settingColor (...data) {
       this.heardColor = data[0] + '-skin'
     },
-    setUnit (...data) {
+    setBitUnit (...data) {
       this.currentUnit = data[0]
+    },
+    setEthUnit (...data) {
+      this.currentUnitEth = data[0]
     },
     changelang () {
       // console.log(this.$t('message.hello'))
@@ -183,8 +185,8 @@ export default {
             this.WalletInfo = value
           }).catch(value => { layer.msg(this.$t('message.app_error_get_wallet'), { icon: 2, anim: 6 }) })
           esWallet.getAccounts().then(value => {
-            console.log(value, 12313123123123)
             if (value) this.accounts = this.orderArr(value)
+            console.log(value)
           }).catch(value => { layer.msg(this.$t('message.app_error_get_account'), { icon: 2, anim: 6 }) })
         }
         if (status === D.status.plugOut) {
@@ -226,10 +228,14 @@ export default {
               layer.close(loadingIndex)
               layer.close(index)
               layer.msg('successful', { icon: 1 })
-              if (Array.isArray(that.accounts) && that.accounts.length > 0) that.accounts.push(value)
+              if (Array.isArray(that.accounts) && that.accounts.length > 0) {
+                that.accounts.push(value)
+                that.accounts = that.orderArr(that.accounts)
+              }
             }).catch(value => {
               layer.closeAll()
-              layer.msg(this.$t('message.app_error_add_account'), { icon: 2, anim: 6 })
+              console.log(value, 908909890989)
+              layer.msg(that.$t('message.app_error_add_account'), { icon: 2, anim: 6 })
             })
           }
         })

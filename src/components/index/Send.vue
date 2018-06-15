@@ -7,30 +7,34 @@
       <fieldset><legend><a name="use">{{sendCoinTypeMsg}}</a></legend></fieldset>
     </div>
     <div class="site-text site-block">
-      <form class="layui-form" action="" lay-filter="form1">
+      <form class="layui-form customize-form" action="" lay-filter="form1">
         <div class="layui-form-item">
           <label class="layui-form-label account-label" >{{$t('message.send_current_account')}}</label>
-          <div class="layui-input-block account-info">
+          <div class="layui-input-block account-info" style="margin-left: 464px">
             <div class="account-msg">{{currentAccount.label}}</div>
           </div>
         </div>
         <div class="layui-form-item" style="margin-bottom: 5px">
           <label class="layui-form-label">{{$t('message.send_amount')}}</label>
-          <div class="layui-input-inline input-width">
-            <input type="number" v-model.number="amountValue" name="money" id="money" lay-verify="isEmpty" :placeholder="currentDisplayUnit(currentAccount.coinType)"
-                   autocomplete="off" class="layui-input">
+          <div class="layui-input-block input-width">
+            <input type="number" v-model.number="amountValue" name="money" id="money" lay-verify="isEmpty" v-if="coinType"
+                   :placeholder="$t('message.send_amount')"
+                   autocomplete="off" class="layui-input" style="width: 300px;text-align: end;">
+            <span v-if="coinType" style="font-size: 16px;font-weight: 600;color:#000;opacity: 0.6">{{currentDisplayUnit(currentAccount.coinType)}}</span>
+            <span class="usd-amount" v-if="coinType && currentUnit && currentExchangeRate">{{toExchangeText}}</span>
           </div>
           <!--<button class="layui-btn layui-btn-radius layui-btn-primary pull-left" type="button" @click="maxAmount">MAX</button>-->
         </div>
-        <div class="switch-money">
-          <label class="blank-label"></label>
-          <div ><span class="usd-amount" v-if="coinType && currentUnit && currentExchangeRate">{{toExchangeText}}</span><em class="unit"></em></div>
-        </div>
+        <!--<div class="switch-money">-->
+          <!--<label class="blank-label"></label>-->
+          <!--<div ><span class="usd-amount" v-if="coinType && currentUnit && currentExchangeRate">{{toExchangeText}}</span><em class="unit"></em></div>-->
+        <!--</div>-->
         <div class="money-address">
           <div class="layui-form-item">
             <label class="layui-form-label">{{$t('message.send_address')}}</label>
-            <div class="layui-input-inline input-width">
-              <input type="text" v-model="addressValue" name="address"  lay-verify="isEmpty"  :placeholder="$t('message.send_address')" autocomplete="off" class="layui-input">
+            <div class="layui-input-block input-width">
+              <input type="text" v-model="addressValue" name="address"  lay-verify="isEmpty"  :placeholder="$t('message.send_address')" autocomplete="off"
+                     class="layui-input" style="width: 300px;text-align: end;">
             </div>
             <!--<button class="layui-btn layui-btn-radius layui-btn-primary" type="button" @click="addAddressDom">Add</button>-->
           </div>
@@ -51,32 +55,34 @@
           <!--</div>-->
         <!--</div>-->
         <div class="layui-form-item" v-show="switchFee">
-          <label class="layui-form-label">{{$t('message.send_custom_fee')}}</label>
-          <div class="layui-input-inline input-width">
-            <input type="number"  lay-verify="isEmpty" v-model="customFees" placeholder="satoshis per byte" autocomplete="off" class="layui-input">
+          <label class="layui-form-label">{{$t('message.send_transaction_fees')}}</label>
+          <div class="layui-input-block input-width">
+            <input type="number"  lay-verify="isEmpty" v-model="customFees" :placeholder="$t('message.send_transaction_fees')" autocomplete="off" class="layui-input" style="width: 300px;text-align: end;  ">
+            <button class="layui-btn layui-btn-sm layui-btn-radius "
+                    style="margin-left: 5px" type="button" @click="switchSelectButton">{{$t('message.send_select_fee')}}</button>
           </div>
-          <button class="layui-btn layui-btn-radius layui-btn-primary pull-left" type="button" @click="switchSelectButton">{{$t('message.send_select_fee')}}</button>
         </div>
         <div class="layui-form-item" v-show="!switchFee">
           <label class="layui-form-label">{{$t('message.send_transaction_fees')}}</label>
-          <div class="layui-input-inline input-width">
-            <select name="fee" lay-filter="fee"  >
+          <div class="layui-input-block input-width" style="margin-left: 270px">
+            <div style="display: inline-block;width: 200px">
+              <select name="fee" lay-filter="fee"  style="width: 200px">
               <option v-for="(fee, index) in feeList" v-bind:value="fee.value" :selected="index === 0">{{fee.label}}</option>
-            </select>
+              </select>
+            </div>
+            <button class="layui-btn layui-btn-sm layui-btn-radius "
+                    style="margin-left: 5px" type="button" @click="switchCustomButton">{{$t('message.send_custom_fee')}}</button>
           </div>
-          <button class="layui-btn layui-btn-radius layui-btn-primary pull-left" type="button" @click="switchCustomButton">{{$t('message.send_custom_fee')}}</button>
         </div>
         <div class="layui-form-item">
           <label class="layui-form-label">{{$t('message.send_total_fee')}}</label>
           <div class="layui-input-inline input-width">
-            <textarea disabled  lay-verify="isEmpty" class="layui-textarea" v-bind:value= "totalFeeDesc" name="desc"></textarea>
+            <textarea disabled  class="layui-textarea" v-bind:value= "totalFeeDesc" name="desc"></textarea>
           </div>
         </div>
-        <div class="layui-form-item">
-          <div class="layui-input-block">
-            <button class="layui-btn" lay-submit type="button" @click="submitSendData">{{$t('message.send_submit_btn')}}</button>
-            <button type="reset" class="layui-btn layui-btn-primary">{{$t('message.send_reset_btn')}}</button>
-          </div>
+        <div class="layui-form-item" style="border:none">
+          <button class="layui-btn" lay-submit type="button" @click="submitSendData">{{$t('message.send_submit_btn')}}</button>
+          <button type="reset" class="layui-btn layui-btn-primary">{{$t('message.send_reset_btn')}}</button>
         </div>
       </form>
     </div>
@@ -120,7 +126,7 @@ export default {
       if (this.coinType && this.currentUnit && this.currentExchangeRate) {
         let nowUnit = this.currentDisplayUnit(this.coinType)
         return this.totalFee.toFixed(2) + ' ' + nowUnit + ' (' +
-          esWallet.convertValue(this.coinType, this.totalFee, nowUnit, this.currentExchangeRate).toFixed(2) + ' ' + this.currentExchangeRate + ')'
+          esWallet.convertValue(this.coinType, this.totalFee, nowUnit, this.currentExchangeRate).toFixed(2) + ' ' + this.currentExchangeRate + ')' + ' '
       }
     },
     toExchangeText () {
@@ -130,7 +136,8 @@ export default {
       }
     },
     sendCoinTypeMsg () {
-      return this.$t('message.send_send_msg') + ' ' + this.coinType
+      let coinTypeName = this.coinType.includes('btc') ? 'Bitcoin' : 'Ether'
+      return this.$t('message.send_send_msg') + ' ' + coinTypeName
     }
   },
   watch: {
@@ -162,15 +169,22 @@ export default {
         this.coinType = newValue.coinType
         if (newValue.getSuggestedFee) {
           let oldFeeList = newValue.getSuggestedFee()
-          console.log(oldFeeList)
-
+          console.log(oldFeeList, 12343213123)
           let newFeeList = []
+          let fastestMsg = this.$t('message.send_fastest_confirm')
           let fastMsg = this.$t('message.send_fast_confirm')
           let standardMsg = this.$t('message.send_standard_confirm')
           let slowMsg = this.$t('message.send_slow_confirm')
-          newFeeList.push({label: fastMsg + '(' + oldFeeList.fast + ')', value: oldFeeList.fast})
-          newFeeList.push({label: standardMsg + '(' + oldFeeList.normal + ')', value: oldFeeList.normal})
-          newFeeList.push({label: slowMsg + '(' + oldFeeList.economy + ')', value: oldFeeList.economy})
+          if (this.coinType.includes('btc')) {
+            newFeeList.push({label: fastMsg + '(' + oldFeeList.fast + ')', value: oldFeeList.fast})
+            newFeeList.push({label: standardMsg + '(' + oldFeeList.normal + ')', value: oldFeeList.normal})
+            newFeeList.push({label: slowMsg + '(' + oldFeeList.economic + ')', value: oldFeeList.economic})
+          } else {
+            newFeeList.push({label: fastestMsg + '(' + oldFeeList.fastest + ')', value: oldFeeList.fastest})
+            newFeeList.push({label: fastMsg + '(' + oldFeeList.fast + ')', value: oldFeeList.fast})
+            newFeeList.push({label: standardMsg + '(' + oldFeeList.normal + ')', value: oldFeeList.normal})
+            newFeeList.push({label: slowMsg + '(' + oldFeeList.economic + ')', value: oldFeeList.economic})
+          }
           this.feeList = newFeeList
           this.selected = oldFeeList.fast
           this.$nextTick(() => {
@@ -201,12 +215,16 @@ export default {
       return coinType.includes('btc') ? this.currentUnit : this.currentUnitEth
     },
     toTargetCoinUnit (value) {
-      let nowUnit = this.currentDisplayUnit(this.coinType)
-      return esWallet.convertValue(this.coinType, value, D.unit.btc.santoshi, nowUnit)
+      if (this.coinType) {
+        let nowUnit = this.currentDisplayUnit(this.coinType)
+        return esWallet.convertValue(this.coinType, value, D.unit.btc.santoshi, nowUnit)
+      }
     },
     toMinCoinUnit (value) {
-      let nowUnit = this.currentDisplayUnit(this.coinType)
-      return esWallet.convertValue(this.coinType, value, nowUnit, D.unit.btc.santoshi)
+      if (this.coinType) {
+        let nowUnit = this.currentDisplayUnit(this.coinType)
+        return esWallet.convertValue(this.coinType, value, nowUnit, D.unit.btc.santoshi)
+      }
     },
     maxAmount () {
       this.amountValue = 200
@@ -285,7 +303,10 @@ export default {
     padding: 9px 15px;
   }
   .usd-amount{
-    padding-left: 10px;
+    font-size: 12px;
+    margin-left: 5px;
+    color: #999;
+    padding-left: 3px;
   }
   .unit{
     color: #999;
@@ -295,5 +316,27 @@ export default {
   }
   .layui-textarea{
     min-height: 80px;
+  }
+  /*自定义 表格与样式*/
+  .layui-form-item {
+    width: 100%;
+    border-bottom: 1px dotted #b7d3ea;
+  }
+  .layui-form-label{
+    text-align: left;
+    width:auto;
+  }
+  .layui-textarea {
+    width: 395px;
+    padding: 9px 10px;
+    resize: none;
+  }
+  .layui-btn-sm {
+    height: 28px;
+    line-height: 28px;
+    font-size: 10px;
+  }
+  .site-block {
+    border: 1px solid #DCEBF7;
   }
 </style>

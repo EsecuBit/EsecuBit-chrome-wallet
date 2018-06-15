@@ -209,13 +209,10 @@ export default class CoinData {
   }
 
   getSuggestedFee (coinType) {
-    switch (coinType) {
-      case D.coin.main.btc:
-      case D.coin.test.btcTestNet3:
-        return this._networkFee[coinType].getCurrentFee()
-      default:
-        throw D.error.coinNotSupported
+    if (!D.suppertedCoinTypes().includes(coinType)) {
+      throw D.error.coinNotSupported
     }
+    return this._networkFee[coinType].getCurrentFee()
   }
 
   convertValue (coinType, value, fromType, toType) {

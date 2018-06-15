@@ -14,10 +14,10 @@
     <div class="layadmin-center">
       <div class="layadmin-user-login-box layadmin-user-login-header" >
         <div style="position: relative;">
-          <h2>
-            <i class="layui-icon layui-anim layui-anim-rotate layui-anim-loop" v-if="isLoadingIcon" style="font-size: 36px;"> </i>
+          <div class="loader-anim">
+            <i class="layui-icon layui-anim layui-anim-rotate layui-anim-loop" v-if="isLoadingIcon" style="font-size: 50px;"> </i>
             <i class="icon iconfont icon-thumbDrive" style="font-size: 50px" v-else></i>
-          </h2>
+          </div>
           <h3 v-text="promptMsg"></h3>
         </div>
       </div>
@@ -103,7 +103,7 @@ export default {
     margin: auto;
     width: 100%;
     padding: 0 ;
-    background-color: #f4f4f4;
+    background-color: #f5f5f5;
   }
 
   .layadmin-user-login-main {
@@ -124,7 +124,16 @@ export default {
   .layadmin-user-login-header h2 {
     margin-bottom: 10px;
     font-weight: 300;
+    height: 30px;
     line-height: 30px;
+    font-size: 30px;
+    color: #000
+  }
+  .loader-anim {
+    margin-bottom: 20px;
+    font-weight: 300;
+    height: 50px;
+    line-height: 50px;
     font-size: 30px;
     color: #000
   }

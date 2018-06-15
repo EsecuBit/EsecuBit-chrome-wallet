@@ -65,7 +65,8 @@ export default {
       return this.$t('message.accept_qrcode_msg') + this.qrAddress
     },
     receiveCoinTypeMsg () {
-      return this.$t('message.accept_accept_msg') + ' ' + this.coinType
+      let coinTypeName = this.coinType.includes('btc') ? 'Bitcoin' : 'Ether'
+      return this.$t('message.accept_accept_msg') + ' ' + coinTypeName
     }
   },
   watch: {

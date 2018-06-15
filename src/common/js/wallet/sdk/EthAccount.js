@@ -161,6 +161,7 @@ export default class EthAccount {
   }
 
   getSuggestedFee () {
+    console.log(this.coinType)
     return this._coinData.getSuggestedFee(this.coinType).fee
   }
 

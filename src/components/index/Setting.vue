@@ -30,10 +30,16 @@
                   </select>
                 </div>
               </div>
-              <div class="layui-form-item">
+              <div class="layui-form-item" v-show="isBitcoin">
                 <label class="layui-form-label">{{$t('message.setting_units')}}</label>
                 <div class="layui-input-block" >
-                  <input type="radio" lay-filter="unit" name="unit" :value="item.value" :title="item.label" :checked="index === 1" v-for="(item, index) in unitValueList">
+                  <input type="radio" lay-filter="bitUnit" name="bitUnit" :value="item.value" :title="item.label" :checked="index === 1" v-for="(item, index) in bitUnitValueList">
+                </div>
+              </div>
+              <div class="layui-form-item" v-show="!isBitcoin">
+                <label class="layui-form-label">{{$t('message.setting_units')}}</label>
+                <div class="layui-input-block" >
+                  <input type="radio" lay-filter="ethUnit" name="ethUnit" :value="item.value" :title="item.label" :checked="index === 1" v-for="(item, index) in ethUnitValueList">
                 </div>
               </div>
               <div class="layui-form-item">
@@ -114,7 +120,11 @@ export default {
       ],
       unitChecked: '',
       selectedExchangeRate: 'USD',
-      unitValueList: [
+      bitUnitValueList: [
+        {label: 'BTC', value: 'btc'},
+        {label: 'mBTC', value: 'mbtc'}
+      ],
+      ethUnitValueList: [
         {label: 'BTC', value: 'btc'},
         {label: 'mBTC', value: 'mbtc'}
       ],
@@ -126,6 +136,9 @@ export default {
       exchangeRate: currentExchangeList,
       currentAccount: {},
       coinType: '',
+      isBitcoin: true,
+      isBitFirst: true,
+      isEthFirst: true,
       accountOrder: []
     }
   },
@@ -146,31 +159,37 @@ export default {
       handler (newValue, oldValue) {
         this.coinType = newValue.coinType
         if (this.coinType.includes('btc')) {
-          this.unitValueList = [
+          this.isBitcoin = true
+          if (!this.isBitFirst) return false
+          this.bitUnitValueList = [
             {label: 'BTC', value: 'BTC'},
             {label: 'mBTC', value: 'mBTC'},
             {label: 'santoshi', value: 'santoshi'}
           ]
           this.$nextTick(() => {
             form.render('radio', 'form3')
-            form.on('radio(unit)', data => {
+            form.on('radio(bitUnit)', data => {
               this.unitChecked = data.value
-              this.$emit('setUnit', data.value)
+              this.$emit('setBitUnit', data.value)
             })
           })
+          this.isBitFirst = false
         } else if (this.coinType.includes('eth')) {
-          this.unitValueList = [
+          this.isBitcoin = false
+          if (!this.isEthFirst) return false
+          this.ethUnitValueList = [
             {label: 'Ether', value: 'Ether'},
             {label: 'GWei', value: 'GWei'},
             {label: 'Wei', value: 'Wei'}
           ]
           this.$nextTick(() => {
             form.render('radio', 'form3')
-            form.on('radio(unit)', data => {
+            form.on('radio(ethUnit)', data => {
               this.unitChecked = data.value
-              this.$emit('setUnit', data.value)
+              this.$emit('setEthUnit', data.value)
             })
           })
+          this.isEthFirst = false
         }
       }
     }

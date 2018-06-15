@@ -77,7 +77,7 @@ const D = {
     fastest: 'fastest',
     fast: 'fast',
     normal: 'normal',
-    ecnomic: 'economy'
+    economic: 'economic'
   },
 
   unit: {
@@ -110,7 +110,7 @@ const D = {
   // TODO let user select
   recoverCoinTypes () {
     // return [D.coin.test.btcTestNet3, D.coin.test.ethRinkeby]
-    return [D.coin.test.btcTestNet3]
+    return [ D.coin.test.btcTestNet3,D.coin.test.ethRinkeby]
   },
 
   convertValue (coinType, value, fromType, toType) {
