@@ -15,7 +15,7 @@ export default class EsWallet {
     return D.suppertedCoinTypes()
   }
 
-  static supportedLegalCurrency () {
+  static suppertedLegals () {
     return D.suppertedLegals()
   }
 
@@ -86,7 +86,7 @@ export default class EsWallet {
       console.log('no accounts, new wallet, start recovery')
       await Promise.all(D.recoverCoinTypes().map(coinType => this._recover(coinType)))
     } else {
-      await Promise.all(this._esAccounts.map(esAccount => esAccount.sync()))
+      await Promise.all(this._esAccounts.map(esAccount => esAccount.sync(true)))
     }
   }
 
@@ -94,15 +94,15 @@ export default class EsWallet {
     while (true) {
       let account = await this._coinData.newAccount(coinType)
       let esAccount
-      if (coinType.includes('btc')) {
+      if (D.isBtc(coinType)) {
         esAccount = new BtcAccount(account, this._device, this._coinData)
-      } else if (coinType.includes('eth')) {
+      } else if (D.isEth(coinType)) {
         esAccount = new EthAccount(account, this._device, this._coinData)
       } else {
         throw D.error.coinNotSupported
       }
       await esAccount.init()
-      await esAccount.sync()
+      await esAccount.sync(true)
       // new account has no transactions, recover finish
       if ((await esAccount.getTxInfos()).total === 0) {
         if (esAccount.index !== 0) {
@@ -119,6 +119,13 @@ export default class EsWallet {
 
   _release () {
     return this._coinData.release()
+  }
+
+  /**
+   * Clear all data. Used for unrecoverable error. Need resync after reset.
+   */
+  reset () {
+    return this._coinData.clearData()
   }
 
   listenStatus (callback) {

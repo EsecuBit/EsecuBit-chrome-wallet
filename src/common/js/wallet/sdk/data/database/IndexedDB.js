@@ -61,22 +61,41 @@ export default class IndexedDB extends IDatabase {
 
         /**
          * txInfo:
+         * btc：
          * {
          *   accountId: string,
          *   coinType: string,
          *   txId: string,
          *   version: int,
          *   blockNumber: int,
-         *   confirmations: int, // -1: not found in network, 0: found in miner's memory pool. other: confirmations
+         *   confirmations: int, // -1: not found in btcNetwork, 0: found in miner's memory pool. other: confirmations
          *                  just for showing the status. won't active update after confirmations >= D.TRANSACTION_##coin.TYPE##_MATURE_CONFIRMATIONS
-         *   time: long,
+         *   time: number,
          *   direction: D.tx.direction.in / D.tx.direction.out,
          *   inputs: [{prevAddress, prevOutIndex, index, value, isMine}, ...]
          *   outputs: [{address, index, value, isMine}, ...]
-         *   value: long (btc -> santoshi) // value that shows the account balance changes, calculated by inputs and outputs
+         *   value: number (btc -> santoshi) // value that shows the account balance changes, calculated by inputs and outputs
+         * }
+         *
+         * eth：
+         * {
+         *   accountId: string,
+         *   coinType: string,
+         *   txId: string,
+         *   version: number,
+         *   blockNumber: number,
+         *   confirmations: number, // -1: not found in btcNetwork, 0: found in miner's memory pool. other: confirmations
+         *                  just for showing the status. won't active update after confirmations >= D.TRANSACTION_##coin.TYPE##_MATURE_CONFIRMATIONS
+         *   time: number,
+         *   direction: D.tx.direction.in / D.tx.direction.out,
+         *   inputs: [{prevAddress, prevOutIndex, index, value, isMine}, ...]
+         *   outputs: [{address, index, value, isMine}, ...]
+         *   value: number (btc -> santoshi) // value that shows the account balance changes, calculated by inputs and outputs
+         *   gas: number,
+         *   gasPrice: number,
+         *   fee: gas * gasPrice
          * }
          */
-        // TODO createIndex when upgrade?
         if (!db.objectStoreNames.contains('txInfo')) {
           let txInfo = db.createObjectStore('txInfo', {keyPath: 'txId'})
           txInfo.createIndex('accountId', 'accountId', {unique: false})
@@ -163,6 +182,13 @@ export default class IndexedDB extends IDatabase {
     })
   }
 
+  /**
+   * Won't do anything in release. Will keep the connection until app closed
+   */
+  async release () {
+    // do nothing
+  }
+
   clearDatabase () {
     return new Promise((resolve, reject) => {
       let transaction = this._db.transaction(['account', 'txInfo', 'addressInfo', 'utxo'], 'readwrite')
@@ -190,6 +216,7 @@ export default class IndexedDB extends IDatabase {
     })
   }
 
+  // noinspection JSUnusedGlobalSymbols
   deleteDatabase () {
     this._db = null
     return new Promise((resolve, reject) => {
@@ -209,15 +236,6 @@ export default class IndexedDB extends IDatabase {
         finished++ || reject(D.error.databaseOpenFailed)
       }, 1900)
     })
-  }
-
-  /**
-   * Won't do anything in release. Will keep the connection until app closed
-   */
-  async release () {
-    // FIXME after release and reinit, throw "the database connection is closing".
-    // IndexedDB.pool[this._walletId] = undefined
-    // this._db && this._db.close()
   }
 
   newAccount (account) {

@@ -21,7 +21,7 @@
                    :placeholder="$t('message.send_amount')"
                    autocomplete="off" class="layui-input" style="width: 300px;text-align: end;">
             <span v-if="coinType" style="font-size: 16px;font-weight: 600;color:#000;opacity: 0.6">{{currentDisplayUnit(currentAccount.coinType)}}</span>
-            <span class="usd-amount" v-if="coinType && currentUnit && currentExchangeRate">{{toExchangeText}}</span>
+            <span class="usd-amount" v-if="coinType && currentUnit && currentExchangeRate && isDisplayExchange">{{toExchangeText}}</span>
           </div>
           <!--<button class="layui-btn layui-btn-radius layui-btn-primary pull-left" type="button" @click="maxAmount">MAX</button>-->
         </div>
@@ -33,8 +33,8 @@
           <div class="layui-form-item">
             <label class="layui-form-label">{{$t('message.send_address')}}</label>
             <div class="layui-input-block input-width">
-              <input type="text" v-model="addressValue" name="address"  lay-verify="isEmpty"  :placeholder="$t('message.send_address')" autocomplete="off"
-                     class="layui-input" style="width: 300px;text-align: end;">
+              <input type="text" v-model="addressValue" name="address"  lay-verify="isEmpty"  :placeholder="$t('message.send_address')" @blur="verifyAddress()"
+                     class="layui-input" style="width: 300px;text-align: end;" id="transactionAddress">
             </div>
             <!--<button class="layui-btn layui-btn-radius layui-btn-primary" type="button" @click="addAddressDom">Add</button>-->
           </div>
@@ -57,7 +57,7 @@
         <div class="layui-form-item" v-show="switchFee">
           <label class="layui-form-label">{{$t('message.send_transaction_fees')}}</label>
           <div class="layui-input-block input-width">
-            <input type="number"  lay-verify="isEmpty" v-model="customFees" :placeholder="$t('message.send_transaction_fees')" autocomplete="off" class="layui-input" style="width: 300px;text-align: end;  ">
+            <input type="number"  lay-verify="isEmpty" v-model="customFees" :placeholder="currentTransactionUnit(coinType)" autocomplete="off" class="layui-input" style="width: 300px;text-align: end;  ">
             <button class="layui-btn layui-btn-sm layui-btn-radius "
                     style="margin-left: 5px" type="button" @click="switchSelectButton">{{$t('message.send_select_fee')}}</button>
           </div>
@@ -67,7 +67,7 @@
           <div class="layui-input-block input-width" style="margin-left: 270px">
             <div style="display: inline-block;width: 200px">
               <select name="fee" lay-filter="fee"  style="width: 200px">
-              <option v-for="(fee, index) in feeList" v-bind:value="fee.value" :selected="index === 0">{{fee.label}}</option>
+              <option v-for="(fee, index) in feeList"  :value="index" :selected="selectedIndex(index)">{{fee.label}}</option>
               </select>
             </div>
             <button class="layui-btn layui-btn-sm layui-btn-radius "
@@ -118,6 +118,8 @@ export default {
       accountOrder: [],
       currentAccount: {label: ''},
       totalFee: 0,
+      isDisplayExchange: false,
+      isDisplayDetails: false,
       coinType: ''
     }
   },
@@ -125,8 +127,12 @@ export default {
     totalFeeDesc () {
       if (this.coinType && this.currentUnit && this.currentExchangeRate) {
         let nowUnit = this.currentDisplayUnit(this.coinType)
-        return this.totalFee.toFixed(2) + ' ' + nowUnit + ' (' +
-          esWallet.convertValue(this.coinType, this.totalFee, nowUnit, this.currentExchangeRate).toFixed(2) + ' ' + this.currentExchangeRate + ')' + ' '
+        if (this.isDisplayDetails) {
+          return this.totalFee.toFixed(2) + ' ' + nowUnit + ' (' +
+            esWallet.convertValue(this.coinType, this.totalFee, nowUnit, this.currentExchangeRate).toFixed(2) + ' ' + this.currentExchangeRate + ')' + ' '
+        } else {
+          return ''
+        }
       }
     },
     toExchangeText () {
@@ -143,6 +149,7 @@ export default {
   watch: {
     amountValue: {
       handler (newValue, oldValue) {
+        this.isDisplayExchange = true
         if (this.currentAccount.prepareTx) {
           this.calculateTotal()
         }
@@ -167,9 +174,9 @@ export default {
     currentAccount: {
       handler (newValue, oldValue) {
         this.coinType = newValue.coinType
+        this.isDisplayDetails = false
         if (newValue.getSuggestedFee) {
           let oldFeeList = newValue.getSuggestedFee()
-          console.log(oldFeeList, 12343213123)
           let newFeeList = []
           let fastestMsg = this.$t('message.send_fastest_confirm')
           let fastMsg = this.$t('message.send_fast_confirm')
@@ -186,11 +193,12 @@ export default {
             newFeeList.push({label: slowMsg + '(' + oldFeeList.economic + ')', value: oldFeeList.economic})
           }
           this.feeList = newFeeList
-          this.selected = oldFeeList.fast
+          this.selected = oldFeeList.normal
           this.$nextTick(() => {
             form.render('select', 'form1')
             form.on('select(fee)', data => {
-              this.selected = Number(data.value)
+              let index = Number(data.value)
+              this.selected = this.feeList[index].value
               this.calculateTotal()
             })
           })
@@ -211,23 +219,53 @@ export default {
         }
       })
     },
+    selectedIndex (index) {
+      if (this.coinType) {
+        return this.coinType.includes('btc') ? index === 1 : index === 2
+      }
+    },
     currentDisplayUnit (coinType) {
       return coinType.includes('btc') ? this.currentUnit : this.currentUnitEth
     },
+    currentTransactionUnit (coinType) {
+      return coinType.includes('btc') ? 'santoshi per bitcoin' : 'wei per ether'
+    },
     toTargetCoinUnit (value) {
       if (this.coinType) {
+        let nowType = this.coinType.includes('btc') ? D.unit.btc.santoshi : D.unit.eth.Wei
         let nowUnit = this.currentDisplayUnit(this.coinType)
-        return esWallet.convertValue(this.coinType, value, D.unit.btc.santoshi, nowUnit)
+        return esWallet.convertValue(this.coinType, value, nowType, nowUnit)
       }
     },
     toMinCoinUnit (value) {
       if (this.coinType) {
+        let nowType = this.coinType.includes('btc') ? D.unit.btc.santoshi : D.unit.eth.Wei
         let nowUnit = this.currentDisplayUnit(this.coinType)
-        return esWallet.convertValue(this.coinType, value, nowUnit, D.unit.btc.santoshi)
+        return esWallet.convertValue(this.coinType, value, nowUnit, nowType)
       }
     },
     maxAmount () {
       this.amountValue = 200
+    },
+    verifyAddress () {
+      if (!this.currentAccount) return false
+      try {
+        this.currentAccount.checkAddress(this.addressValue)
+        layer.msg(this.$t('message.send_effective_address_mag'), { icon: 1, anim: 2, time: 1500 })
+      } catch (e) {
+        layer.msg(this.$t('message.send_invalid_address_mag'), { icon: 2, anim: 6 })
+      }
+    },
+    verifySubmitAddress () {
+      if (!this.currentAccount) return false
+      try {
+        this.currentAccount.checkAddress(this.addressValue)
+        return true
+      } catch (e) {
+        layer.msg(this.$t('message.send_invalid_address_mag'), { icon: 2, anim: 6 })
+        document.getElementById('transactionAddress').focus()
+        return false
+      }
     },
     switchSelectButton () {
       this.switchFee = !this.switchFee
@@ -238,11 +276,13 @@ export default {
       this.customFees = null
     },
     submitSendData () {
+      // 验证表单
       if (!this.switchFee) {
         if (!(this.selected && this.amountValue !== '' && this.addressValue)) return false
       } else {
         if (!(this.customFees && this.amountValue !== '' && this.addressValue)) return false
       }
+      if (!this.verifySubmitAddress()) return false
       let address = this.addressValue
       let moneyValue = this.amountValue
       let formData = {
@@ -267,8 +307,16 @@ export default {
           value: sendAmountValue
         }]
       }
-      this.currentAccount.prepareTx(formData).then(value => { this.totalFee = this.toTargetCoinUnit(value.total) })
-        .catch(value => { layer.msg(value, { icon: 2 }) })
+      this.currentAccount.prepareTx(formData).then(value => {
+        this.isDisplayDetails = true
+        this.totalFee = this.toTargetCoinUnit(value.total)
+      })
+        .catch(value => {
+          switch (value) {
+            case 501: layer.msg('余额不足', { icon: 2 })
+              break
+          }
+        })
     },
     addAddressDom () {
       let name = 'Bitcoin Address ' + this.count

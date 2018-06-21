@@ -12,7 +12,7 @@
         <li class="tab-title-2">
           <a href="#">
             <i class="layui-icon" style="top: 3px;">&#xe628;</i>
-            <cite>{{$t('message.setting_hardware')}}</cite>
+            <cite>{{$t('message.setting_information')}}</cite>
           </a>
         </li>
       </ul>

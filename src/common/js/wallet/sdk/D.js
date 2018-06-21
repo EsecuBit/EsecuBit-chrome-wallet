@@ -1,8 +1,10 @@
 
 import bitPony from 'bitpony'
+import base58check from 'bs58check'
+import web3 from 'web3'
 
 const D = {
-  // listen status
+  // wallet status
   status: {
     plugIn: 1,
     initializing: 2,
@@ -30,8 +32,13 @@ const D = {
     networkNotInitialized: 402,
     networkProviderError: 403,
 
-    txNotEnoughValue: 501,
+    balanceNotEnough: 501,
     txNotFound: 502,
+
+    invalidAddress: 601,
+    noAddressCheckSum: 602, // for eth
+    invalidAddressChecksum: 603,
+    notSupportP2SH: 604,
 
     notImplemented: 10000,
     unknown: 10001,
@@ -51,7 +58,51 @@ const D = {
 
   address: {
     external: 'external',
-    change: 'change'
+    change: 'change',
+
+    checkBtcAddress (address) {
+      let buffer
+      try {
+        buffer = base58check.decode(address)
+      } catch (e) {
+        console.warn(e)
+        throw D.error.invalidAddress
+      }
+      if (buffer.length !== 21) throw D.error.invalidAddress
+
+      let network = buffer.readUInt8(0)
+      switch (network) {
+        case 0: // main net P2PKH
+          if (D.test.mode) throw D.error.invalidAddress
+          break
+        case 0x6f: // test net P2PKH
+          if (!D.test.mode) throw D.error.invalidAddress
+          break
+        case 0x05: // main net P2SH
+        case 0xc4: // test net P2SH
+          throw D.error.notSupportP2SH
+        default:
+          throw D.error.invalidAddress
+      }
+      return true
+    },
+
+    checkEthAddress (address) {
+      let checksum
+      try {
+        checksum = web3.utils.toChecksumAddress(address)
+      } catch (e) {
+        console.warn(e)
+        throw D.error.invalidAddress
+      }
+      if (checksum === address) {
+        return true
+      }
+      if (address.toUpperCase() === address || address.toLowerCase() === address) {
+        throw D.error.noAddressCheckSum
+      }
+      throw D.error.invalidAddress
+    }
   },
 
   tx: {
@@ -62,6 +113,16 @@ const D = {
     matureConfirms: {
       btc: 6,
       eth: 6
+    },
+
+    getMatureConfirms (coinType) {
+      if (D.isBtc(coinType)) {
+        return D.tx.matureConfirms.btc
+      } else if (D.isEth(coinType)) {
+        return D.tx.matureConfirms.eth
+      } else {
+        throw D.error.coinNotSupported
+      }
     }
   },
 
@@ -99,6 +160,14 @@ const D = {
     }
   },
 
+  isBtc (coinType) {
+    return coinType.includes('btc')
+  },
+
+  isEth (coinType) {
+    return coinType.includes('eth')
+  },
+
   suppertedLegals () {
     return Object.values(this.unit.legal)
   },
@@ -107,10 +176,8 @@ const D = {
     return Object.values(D.test.mode ? D.coin.test : D.coin.main)
   },
 
-  // TODO let user select
   recoverCoinTypes () {
-    // return [D.coin.test.btcTestNet3, D.coin.test.ethRinkeby]
-    return [ D.coin.test.btcTestNet3,D.coin.test.ethRinkeby]
+    return D.suppertedCoinTypes()
   },
 
   convertValue (coinType, value, fromType, toType) {
@@ -158,7 +225,7 @@ const D = {
     return new Promise(resolve => setTimeout(resolve, timeMill))
   },
 
-  arrayBufferToHex (array) {
+  toHex (array) {
     const hexChars = '0123456789ABCDEF'
     let hexString = new Array(array.byteLength * 2)
     let intArray = new Uint8Array(array)
@@ -170,7 +237,7 @@ const D = {
     return hexString.join('')
   },
 
-  hexToArrayBuffer (hex) {
+  toBuffer (hex) {
     const hexChars = '0123456789ABCDEFabcdef'
     let result = new ArrayBuffer(hex.length / 2)
     let res = new Uint8Array(result)

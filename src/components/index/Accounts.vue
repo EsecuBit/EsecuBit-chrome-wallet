@@ -75,7 +75,7 @@
                     <a title="Details" href="#" @click="getDescription(table, index); sendMsg()">
                     <i class="layui-icon">&#xe63c;</i>
                     </a>&nbsp;
-                    <a title="search" href="#">
+                    <a title="search" :href="table.link" target="_blank">
                       <i class="layui-icon">&#xe615;</i>
                     </a>
                   </td>
@@ -130,6 +130,10 @@
           <td>{{$t('message.accounts_table_blockNumber')}}</td>
           <td>{{description.blockNumber}}</td>
         </tr>
+        <tr>
+          <td>{{$t('message.accounts_table_blockNumber')}}</td>
+          <td>{{description.confirmations}}</td>
+        </tr>
       </tbody>
     </table>
   </div>
@@ -182,7 +186,7 @@ export default {
       active: 'active-count',
       green: 'green-font',
       red: 'red-font',
-      currentIndex: null
+      currentIndex: 0
     }
   },
   watch: {
@@ -203,7 +207,6 @@ export default {
             total.push(value.total)
           }
           this.gridList = newGridList
-          console.log(this.gridList, 8989898)
           this.totalNum = total
           this.$nextTick(() => {
             this.tableCanvas()
@@ -244,7 +247,7 @@ export default {
           address = table.outputs[0].address
         } else if (table.outputs.length > 1) {
           for (let item of table.outputs) {
-            address += item.address
+            address += item.address + '; '
           }
         }
         return address
@@ -273,11 +276,9 @@ export default {
         let rad = Math.PI * 2 / 100 // 将360度分成100份，那么每一份就是rad度
         let data = parseInt(canvas.getAttribute('data-counts'))
         if (data === -1) {
-          context.save()
           context.fillStyle = '#e74c3c'
           context.font = '16px'
           context.fillText('Pending..', centerX - 25, centerY + 4)
-          context.stroke()
         } else {
           let n = (data === 0 && 0) || (data === 1 && 1) || (data === 2 && 2) || (data === 3 && 3) || (data === 4 && 4) || (data === 5 && 5) || (data >= 6 && 6)
           let percentDisplay = n * 100 / 6
@@ -298,6 +299,15 @@ export default {
         }
       }
     },
+    clearCanvas () {
+      let canvasList = document.getElementsByClassName('canvas')
+      for (let canvas of canvasList) {
+        let context = canvas.getContext('2d') // 获取画图环境，指明为2d
+        let centerX = canvas.width
+        let centerY = canvas.height
+        context.clearRect(0, 0, centerX, centerY)
+      }
+    },
     refresh () {
       this.loadingClass['layui-anim'] = true
       this.loadingClass['layui-anim-rotate'] = true
@@ -307,6 +317,21 @@ export default {
         this.loadingClass['layui-anim-rotate'] = false
         this.loadingClass['layui-anim-loop'] = false
       }, 3000)
+      let index = this.currentIndex
+      let total = 0
+      this.newAccount[index].sync(false).then(value => {
+        this.newAccount[index].getTxInfos(0, 3).then(value => {
+          this.$set(this.gridList, index, value.txInfos)
+          total = value.total
+          console.log(value, 5666)
+        })
+        this.$nextTick(() => {
+          this.pageList(index, total)
+        })
+        layer.msg(this.$t('message.accounts_sync_success'), { icon: 1 })
+      }).catch(value => {
+        layer.msg(this.$t('message.accounts_sync_error'), { icon: 2 })
+      })
     },
     setMenuList (targetArray) {
       const arr = []
@@ -355,7 +380,7 @@ export default {
       }
       if (this.newAccount[this.currentIndex].rename) {
         this.newAccount[this.currentIndex].rename(this.renameValue).then(value => {
-          this.setMenuList(this.newAccount)
+          // this.setMenuList(this.newAccount)
           layer.closeAll('page')
           layer.msg(this.$t('message.accounts_update_msg'), { icon: 1 })
         })
@@ -386,6 +411,7 @@ export default {
           if (!first) {
             limit = obj.limit
             page = obj.curr
+            that.clearCanvas()
             that.changeTableData(i, limit, page)
           }
         }
@@ -426,6 +452,7 @@ export default {
       this.description.toOrForm = this.toOrForm(table.direction) + ' '
       this.description.address = this.getTableAddress(table)
       this.description.direction = table.direction
+      this.description.confirmations = table.confirmations
       const that = this
       layer.open({
         type: 1,

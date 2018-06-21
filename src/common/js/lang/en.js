@@ -55,6 +55,9 @@ export const message = {
   accounts_get_data: 'Failed to retrieve data !!',
   accounts_details_title: 'Details',
   accounts_confirmations: 'Confirmations',
+  accounts_sync_error: 'Synchronization failed',
+  accounts_sync_success: 'Successful synchronization',
+
 
   send_prompt_msg: 'Make sure you have the correct beneficiary address!!',
   send_current_account: 'Current Account',
@@ -63,7 +66,7 @@ export const message = {
   send_custom_fee: 'Custom fees',
   send_select_fee: 'Select fees',
   send_transaction_fees: 'Transaction Fees',
-  send_total_fee: 'Total Fees',
+  send_total_fee: 'Detail',
   send_submit_btn: 'Submit',
   send_reset_btn: 'Reset',
   send_fastest_confirm: 'Fastest confirmation',
@@ -74,13 +77,15 @@ export const message = {
   send_submit_success: 'submit successfully',
   send_submit_error: 'Failed to submit',
   send_send_msg: 'Send',
+  send_effective_address_mag: 'The address you entered is valid',
+  send_invalid_address_mag: 'The address you entered is illegal, please re-enter',
 
   accept_prompt_msg: 'Please use the mobile phone to scan the QR code in the picture',
   accept_current_account: 'Current Account :',
   accept_qrcode_msg: 'QR code Address :',
   accept_accept_msg: 'Accept',
 
-  setting_display: 'display',
+  setting_display: 'Display',
   setting_hardware: 'hardware information',
   setting_interface_lang: 'Interface Language',
   setting_units: 'Units',

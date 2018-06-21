@@ -55,6 +55,8 @@ export const message = {
   accounts_get_data: '无法获取数据',
   accounts_details_title: '明细',
   accounts_confirmations: '确认数',
+  accounts_sync_error: '同步失败',
+  accounts_sync_success: '同步成功',
 
   send_prompt_msg: '请确认您输入的地址是有效的 ！！',
   send_current_account: '当前账户',
@@ -74,6 +76,8 @@ export const message = {
   send_submit_success: '交易成功',
   send_submit_error: '交易失败',
   send_send_msg: '发送',
+  send_effective_address_mag: '地址有效',
+  send_invalid_address_mag: '地址不合法，请重新输入',
 
   accept_prompt_msg: '请使用手机扫描下面的二位码',
   accept_current_account: '当前账户 ：',

@@ -40,7 +40,6 @@ export default class BtcAccount {
         console.warn('BtcAccount addressListener', error)
         return
       }
-      console.log('newTransaction', addressInfo, addressInfo, txInfo, utxos)
       await this._handleNewTx(addressInfo, txInfo, utxos)
     }
   }
@@ -54,8 +53,8 @@ export default class BtcAccount {
     await this._coinData.newAddressInfos(this._toAccountInfo(), newAddressInfos)
   }
 
-  // TODO judge compress uncompress public key
-  async sync () {
+  // TODO judge recover from compress or uncompress public key
+  async sync (firstSync = false) {
     let newAddressInfos = await this._checkAddressIndexAndGenerateNew(true)
     await this._coinData.newAddressInfos(this._toAccountInfo(), newAddressInfos)
 
@@ -64,21 +63,22 @@ export default class BtcAccount {
       // find out all the transactions
       let blobs = await this._coinData.checkAddresses(this.coinType, checkAddressInfos)
       let responses = await Promise.all(blobs.map(blob => this._handleNewTx(blob.addressInfo, blob.txInfo, blob.utxos, true)))
-      // no new transactions, sync finish
+      responses = responses.reduce((array, item) => array.concat(item), [])
       if (responses.length === 0) break
+      // noinspection JSUnresolvedVariable
       checkAddressInfos = responses.reduce((array, response) => array.concat(response.newAddressInfos), [])
     }
-    // TODO listen external address only
-    let listenAddressInfos = [].concat(
-      this._getAddressInfos(0, this.externalPublicKeyIndex + 1, D.address.external),
-      this._getAddressInfos(0, this.changePublicKeyIndex + 1, D.address.change))
-    if (listenAddressInfos.length !== 0) this._coinData.listenAddresses(this.coinType, listenAddressInfos, this._addressListener)
 
-    this.txInfos.filter(txInfo => txInfo.confirmations < D.tx.matureConfirms.btc)
-      .forEach(txInfo => {
-        this._listenedTxs.push(txInfo.txId)
-        this._coinData.listenTx(this.coinType, D.copy(txInfo), this._txListener)
-      })
+    if (firstSync) {
+      let listenAddressInfos = this._getAddressInfos(0, this.externalPublicKey + 1, D.address.external)
+      if (listenAddressInfos.length !== 0) this._coinData.listenAddresses(this.coinType, listenAddressInfos, this._addressListener)
+
+      this.txInfos.filter(txInfo => txInfo.confirmations < D.tx.getMatureConfirms(this.coinType))
+        .forEach(txInfo => {
+          this._listenedTxs.push(txInfo.txId)
+          this._coinData.listenTx(this.coinType, D.copy(txInfo), this._txListener)
+        })
+    }
   }
 
   async delete () {
@@ -101,6 +101,8 @@ export default class BtcAccount {
    * 2. store utxo, addressInfo, txInfo
    */
   async _handleNewTx (addressInfo, txInfo, utxos, isSyncing = false) {
+    console.log('newTransaction', addressInfo, txInfo, utxos, isSyncing)
+
     // async operation may lead to disorder. so we need a simple lock
     // eslint-disable-next-line
     while (this.busy) {
@@ -126,6 +128,7 @@ export default class BtcAccount {
     this.balance += txInfo.value
     this.txInfos.push(D.copy(txInfo))
     this.utxos.push(...utxos)
+    this.addressInfos.find(a => a.address === addressInfo.address).txs = D.copy(addressInfo.txs)
 
     // update and addressIndex and listen new address
     let newIndex = addressInfo.index + 1
@@ -140,16 +143,27 @@ export default class BtcAccount {
       let newListeneAddressInfos = this._getAddressInfos(oldIndex, newIndex + 1, addressInfo.type)
       if (newListeneAddressInfos.length !== 0) this._coinData.listenAddresses(this.coinType, newListeneAddressInfos, this._addressListener)
     }
-    if (txInfo.confirmations < D.tx.matureConfirms.btc) {
-      console.log('listen transaction status', txInfo)
+    if (txInfo.confirmations < D.tx.getMatureConfirms(this.coinType)) {
       if (!this._listenedTxs.some(tx => tx === txInfo.txId)) {
         this._listenedTxs.push(txInfo.txId)
         this._coinData.listenTx(this.coinType, D.copy(txInfo), this._txListener)
       }
     }
-
     this.busy = false
-    return {addressInfo, txInfo, utxos, newAddressInfos}
+
+    // find out changeAddreses for this tx
+    let relativeAddresses = [].concat(
+      txInfo.inputs.filter(input => input.isMine).map(input => input.prevAddress),
+      txInfo.outputs.filter(input => input.isMine).map(output => output.address))
+    let changeAddresses = this.addressInfos
+      .filter(a => a.type === D.address.change)
+      .filter(a => !a.txs.includes(txInfo.txId))
+      .filter(a => relativeAddresses.find(address => a.address === address))
+    changeAddresses.forEach(a => a.txs.push(txInfo.txId))
+    let changeResponses = await Promise.all(changeAddresses.map(a => this._handleNewTx(a, txInfo, utxos, true)))
+    changeResponses = changeResponses.reduce((array, item) => array.concat(item), [])
+
+    return [{addressInfo, txInfo, utxos, newAddressInfos}].concat(changeResponses)
   }
 
   /**
@@ -237,15 +251,7 @@ export default class BtcAccount {
 
   async getAddress () {
     let address = await this._getAddressFromDeviceRetry(D.address.external)
-    let prefix
-    switch (this.coinType) {
-      case D.coin.main.btc:
-      case D.coin.test.btcTestNet3:
-        prefix = 'bitcoin:'
-        break
-      default:
-        throw D.error.coin_not_supported
-    }
+    let prefix = ''
     return {address: address, qrAddress: prefix + address}
   }
 
@@ -277,25 +283,30 @@ export default class BtcAccount {
     return this._coinData.getSuggestedFee(this.coinType).fee
   }
 
+  // noinspection JSMethodCanBeStatic
+  checkAddress (address) {
+    return D.address.checkBtcAddress(address)
+  }
+
   /**
    *
    * @param details
    * {
-   *   feeRate: long (btc -> santoshi) per byte,
+   *   feeRate: long (santoshi),
    *   outputs: [{
    *     address: base58 string,
-   *     value: long (btc -> santoshi)
+   *     value: long (santoshi)
    *   }]
    * }
    * @returns {Promise<prepareTx>}
    * {
-   *   total: long (btc -> santoshi)
-   *   fee: long (btc -> santoshi)
-   *   feeRate: long (btc -> santoshi) per byte,
+   *   total: long (santoshi)
+   *   fee: long (santoshi)
+   *   feeRate: long (santoshi),
    *   utxos: utxo array,
    *   outputs: [{
    *     address: base58 string,
-   *     value: long (btc -> santoshi)
+   *     value: long (santoshi)
    *   }]
    * }
    */
@@ -313,7 +324,7 @@ export default class BtcAccount {
         }
       }
       if (newTotal <= total) {
-        throw D.error.txNotEnoughValue
+        throw D.error.balanceNotEnough
       }
       return {newTotal, willSpentUtxos}
     }
@@ -327,7 +338,7 @@ export default class BtcAccount {
     let calculateFee = (utxos, outputs) => (utxos.length * 180 + 34 * outputs.length + 34 + 10) * details.feeRate
     let result
     while (true) {
-      if (total < fee + totalOut) throw D.error.txNotEnoughValue
+      if (total < fee + totalOut) throw D.error.balanceNotEnough
       result = getEnoughUtxo(totalOut + fee)
       // new fee calculated
       fee = calculateFee(result.willSpentUtxos, details.outputs)
@@ -347,14 +358,14 @@ export default class BtcAccount {
   /**
    * use the result of prepareTx to make transaction
    * @param prepareTx
-   * @returns {Promise<{txInfo, hex}>}
+   * @returns {Promise<{txInfo, utxos, hex}>}
    * @see prepareTx
    */
   async buildTx (prepareTx) {
     let totalOut = prepareTx.outputs.reduce((sum, output) => sum + output.value, 0)
     if (totalOut + prepareTx.fee !== prepareTx.total) throw D.error.unknown
     let totalIn = prepareTx.utxos.reduce((sum, utxo) => sum + utxo.value, 0)
-    if (totalIn < prepareTx.total) throw D.error.txNotEnoughValue
+    if (totalIn < prepareTx.total) throw D.error.balanceNotEnough
 
     let changeAddress = await this._getAddressFromDeviceRetry(D.address.change)
     let value = totalIn - prepareTx.total
@@ -364,7 +375,7 @@ export default class BtcAccount {
     }
     rawTx.outputs.push({address: changeAddress, value: value})
     console.log(rawTx)
-    let signedTx = await this._device.signTransaction(rawTx)
+    let signedTx = await this._device.signTransaction(this.coinType, rawTx)
     let txInfo = {
       accountId: this.accountId,
       coinType: this.coinType,
@@ -374,6 +385,7 @@ export default class BtcAccount {
       confirmations: -1,
       time: new Date().getTime(),
       direction: D.tx.direction.out,
+      value: prepareTx.total,
       inputs: prepareTx.utxos.map(utxo => {
         return {
           prevAddress: utxo.address,
@@ -387,16 +399,15 @@ export default class BtcAccount {
           isMine: output.address === changeAddress,
           value: output.value
         }
-      }),
-      value: prepareTx.total
+      })
     }
     return {txInfo: txInfo, utxos: prepareTx.utxos, hex: signedTx.hex}
   }
 
   /**
-   * broadcast transaction to network
+   * broadcast transaction to btcNetwork
    * @param signedTx
-   * @param test won't broadcast to network if true
+   * @param test won't broadcast to btcNetwork if true
    * @see signedTx
    */
   async sendTx (signedTx, test = false) {
@@ -421,11 +432,11 @@ export default class BtcAccount {
     let totalString = D.convertValue(this.coinType, total, D.unit.btc.santoshi, D.unit.btc.BTC) + ' btc.BTC'
     let apdu = ''
     let hexChars = '0123456789ABCDEF'
-    apdu += hexChars[totalString.length >> 4] + hexChars[totalString.length % 0x10] + D.arrayBufferToHex(enc.encode(totalString))
+    apdu += hexChars[totalString.length >> 4] + hexChars[totalString.length % 0x10] + D.toHex(enc.encode(totalString))
     console.log(apdu)
     apdu += '01'
     console.log(apdu)
-    apdu += hexChars[transaction.addresses[0].length >> 4] + hexChars[transaction.addresses[0].length % 0x10] + D.arrayBufferToHex(enc.encode(transaction.addresses[0]))
+    apdu += hexChars[transaction.addresses[0].length >> 4] + hexChars[transaction.addresses[0].length % 0x10] + D.toHex(enc.encode(transaction.addresses[0]))
     console.log(apdu)
     apdu = hexChars[parseInt(apdu.length / 2) % 0x10] + apdu
     apdu = hexChars[parseInt(apdu.length / 2) >> 4] + apdu
@@ -438,10 +449,10 @@ export default class BtcAccount {
     let intArray = new Uint8Array(new Array(2))
     intArray[0] = data[3]
     intArray[1] = data[4]
-    console.log('data ' + D.arrayBufferToHex(response))
-    console.log('data ' + D.arrayBufferToHex(data))
-    console.log('sw ' + D.arrayBufferToHex(intArray))
-    let sw = D.arrayBufferToHex(intArray)
+    console.log('data ' + D.toHex(response))
+    console.log('data ' + D.toHex(data))
+    console.log('sw ' + D.toHex(intArray))
+    let sw = D.toHex(intArray)
 
     if (sw === '6FFA') {
       this._device.sendBitCoin(transaction, callback)

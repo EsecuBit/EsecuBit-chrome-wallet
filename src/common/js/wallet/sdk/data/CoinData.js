@@ -7,7 +7,6 @@ import ExchangeCryptoCompareCom from './network/exchange/ExchangeCryptoCompareCo
 import EthGasStationInfo from './network/fee/EthGasStationInfo'
 import EtherScanIo from './network/EtherScanIo'
 
-// TODO CoinData only manage data, don't handle data. leave it to BtcAccount and EsWallet?
 export default class CoinData {
   constructor () {
     if (CoinData.prototype.Instance) {
@@ -19,10 +18,9 @@ export default class CoinData {
 
     const coinTypes = D.suppertedCoinTypes()
     this._network = coinTypes.reduce((obj, coinType) => {
-      // TODO read provider from settings
-      if (coinType.includes('btc')) {
+      if (D.isBtc(coinType)) {
         obj[coinType] = new BlockChainInfo(coinType)
-      } else if (coinType.includes('eth')) {
+      } else if (D.isEth(coinType)) {
         obj[coinType] = new EtherScanIo(coinType)
       }
       return obj
@@ -39,16 +37,16 @@ export default class CoinData {
       this._db = new IndexedDB(info.walletId)
       // db
       await this._db.init()
-      // network
+      // btcNetwork
       await Promise.all(Object.values(this._network).map(network => network.init()))
       // fee
       await Promise.all(Object.keys(this._networkFee).map(async coinType => {
         let fee = await this._db.getFee(coinType)
         fee = fee || {coinType}
-        if (coinType.includes('btc')) {
+        if (D.isBtc(coinType)) {
           this._networkFee[coinType] = new FeeBitCoinEarn(fee)
           this._networkFee[coinType].onUpdateFee = (fee) => this._db.saveOfUpdateFee(fee)
-        } else if (coinType.includes('eth')) {
+        } else if (D.isEth(coinType)) {
           this._networkFee[coinType] = new EthGasStationInfo(fee)
           this._networkFee[coinType].onUpdateFee = (fee) => this._db.saveOfUpdateFee(fee)
         }
@@ -160,7 +158,6 @@ export default class CoinData {
   }
 
   async saveOrUpdateTxInfo (txInfo) {
-    console.log('yeah', txInfo)
     await this._db.saveOrUpdateTxInfo(txInfo)
     this._listeners.forEach(listener => listener(D.error.succeed, txInfo))
   }
@@ -173,8 +170,10 @@ export default class CoinData {
     return this._db.getAddressInfos(filter)
   }
 
-  getTxInfos (filter) {
-    return this._db.getTxInfos(filter)
+  async getTxInfos (filter) {
+    let txInfos = await this._db.getTxInfos(filter)
+    txInfos.txInfos.forEach(txInfo => (txInfo.link = this._network[txInfo.coinType].getTxLink(txInfo)))
+    return txInfos
   }
 
   getUtxos (filter) {
@@ -184,6 +183,10 @@ export default class CoinData {
   async newTx (account, addressInfo, txInfo, utxos) {
     await this._db.newTx(account, addressInfo, txInfo, utxos)
     this._listeners.forEach(listener => listener(D.error.succeed, txInfo))
+  }
+
+  clearData () {
+    return this._db.clearDatabase()
   }
 
   checkAddresses (coinType, addressInfos) {

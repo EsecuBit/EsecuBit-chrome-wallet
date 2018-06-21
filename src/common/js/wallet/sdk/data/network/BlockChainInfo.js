@@ -51,7 +51,7 @@ export default class BlockchainInfo extends ICoinNetwork {
             }
           } else {
             console.warn(url, xmlhttp)
-            reject(D.error.networkUnVailable)
+            reject(D.error.networkUnavailable)
           }
         }
       }
@@ -59,6 +59,10 @@ export default class BlockchainInfo extends ICoinNetwork {
       xmlhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded')
       xmlhttp.send()
     })
+  }
+
+  getTxLink (txInfo) {
+    return [this._apiUrl, 'tx', txInfo.txId].join('/')
   }
 
   async getBlockHeight () {
