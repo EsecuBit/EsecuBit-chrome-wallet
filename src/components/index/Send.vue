@@ -306,7 +306,7 @@ export default {
       }
       if (!this.verifySubmitAddress()) return false
       let address = this.addressValue
-      let moneyValue = this.toTargetCoinUnit(this.amountValue)
+      let moneyValue = this.toMinCoinUnit(this.amountValue)
       let formData = {
         feeRate: Number(this.switchFee ? this.customFees : this.selected),
         outputs: [{
