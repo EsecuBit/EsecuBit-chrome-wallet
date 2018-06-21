@@ -72,9 +72,9 @@ img {
 ::-webkit-scrollbar-thumb:hover {
   background-color: rgba(50,50,50,0.5);
 }
-::-webkit-scrollbar-track {
-  background-color: rgba(50,50,50,0.05);
-}
+/*::-webkit-scrollbar-track {*/
+  /*background-color: rgba(50,50,50,0.05);*/
+/*}*/
 
 input[type="submit"] {
   -webkit-appearance: none;
@@ -250,7 +250,7 @@ body .layui-layer-dir .layui-layer-content{padding: 10px;}
     width: 740px;
   }
   .layui-form-item .input-width{
-    width: 400px;
+    width: 500px;
   }
 }
 @media screen and (min-width: 1200px){
@@ -288,4 +288,14 @@ blockquote{
 }
 .layui-laypage-btn:hover{
   border-color: #009688!important;
+}
+.customize-form .layui-input, .customize-form  .layui-select{
+  border-width: 0;
+  display: inline-block;
+  text-align: end;
+}
+.customize-form  .layui-textarea{
+  border-width: 0;
+  display: inline-block;
+  text-align: end;
 }
