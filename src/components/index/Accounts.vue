@@ -49,7 +49,7 @@
                 <col width="30%">
                 <col width="10%">
                 <col width="8%">
-                <col width="8%">
+                <col width="6%">
               </colgroup>
               <thead>
               <tr>
@@ -57,7 +57,7 @@
                 <th>{{$t('message.accounts_table_address')}}</th>
                 <th>{{$t('message.accounts_table_blockNumber')}}</th>
                 <th>{{$t('message.accounts_confirmations')}}</th>
-                <th>{{$t('message.accounts_table_operation')}}</th>
+                <th>{{$t('message.accounts_details')}}</th>
               </tr>
               </thead>
               <tbody v-for="table in tablecount">
@@ -67,14 +67,14 @@
                     <span :class ="[table.direction === 'in'?green:red]" class="text-opacity">{{toOrForm(table.direction)}}</span>
                     <span>{{getTableAddress(table)}}</span>
                   </td>
-                  <td :class="[table.blockNumber>0?green:red]" v-if="coinTypeList[index]">{{tableBlockNumber(coinTypeList[index], table.blockNumber)}}</td>
+                  <td :class="[table.blockNumber>0?green:red]" >{{tableBlockNumber(table)}}</td>
                   <td style="padding: 0">
                     <canvas class="canvas" width="100" height="30" :data-counts="table.confirmations"></canvas>
                   </td>
                   <td>
-                    <a title="Details" href="#" @click="getDescription(table, index); sendMsg()">
-                    <i class="layui-icon">&#xe63c;</i>
-                    </a>&nbsp;
+                    <!--<a title="Details" href="#" @click="getDescription(table, index);">-->
+                    <!--<i class="layui-icon">&#xe63c;</i>-->
+                    <!--</a>&nbsp;-->
                     <a title="search" :href="table.link" target="_blank">
                       <i class="layui-icon">&#xe615;</i>
                     </a>
@@ -131,7 +131,7 @@
           <td>{{description.blockNumber}}</td>
         </tr>
         <tr>
-          <td>{{$t('message.accounts_table_blockNumber')}}</td>
+          <td>{{$t('message.accounts_confirmations')}}</td>
           <td>{{description.confirmations}}</td>
         </tr>
       </tbody>
@@ -208,6 +208,7 @@ export default {
           }
           this.gridList = newGridList
           this.totalNum = total
+          console.log(newGridList)
           this.$nextTick(() => {
             this.tableCanvas()
             for (let index of this.gridList.keys()) {
@@ -231,8 +232,8 @@ export default {
       return value === 'in' ? 'from' : 'to'
     },
     getTableAddress (table) {
+      let address = ''
       if (table.direction === 'in') {
-        let address = ''
         if (table.inputs.length === 1) {
           address = table.inputs[0].prevAddress
         } else if (table.inputs.length > 1) {
@@ -242,7 +243,6 @@ export default {
         }
         return address
       } else {
-        let address = ''
         if (table.outputs.length === 1) {
           address = table.outputs[0].address
         } else if (table.outputs.length > 1) {
@@ -253,9 +253,9 @@ export default {
         return address
       }
     },
-    tableBlockNumber (coinType, value) {
-      let newValue = this.toTargetCoinUnit(coinType, value)
-      return newValue.toFixed(2) + ' ' + this.currentDisplayUnit(coinType)
+    tableBlockNumber (table) {
+      let newValue = this.toTargetCoinUnit(table.coinType, table.value)
+      return newValue.toFixed(2) + ' ' + this.currentDisplayUnit(table.coinType)
     },
     currentDisplayUnit (coinType) {
       return coinType.includes('btc') ? this.currentUnit : this.currentUnitEth
@@ -319,14 +319,15 @@ export default {
       }, 3000)
       let index = this.currentIndex
       let total = 0
+      this.clearCanvas()
       this.newAccount[index].sync(false).then(value => {
         this.newAccount[index].getTxInfos(0, 3).then(value => {
           this.$set(this.gridList, index, value.txInfos)
           total = value.total
-          console.log(value, 5666)
-        })
-        this.$nextTick(() => {
-          this.pageList(index, total)
+          this.$nextTick(() => {
+            this.tableCanvas()
+            this.pageList(index, total)
+          })
         })
         layer.msg(this.$t('message.accounts_sync_success'), { icon: 1 })
       }).catch(value => {
@@ -386,9 +387,6 @@ export default {
         })
           .catch(value => { layer.msg(this.$t('message.accounts_update_error'), { icon: 2 }) })
       }
-    },
-    sendMsg () {
-      Bus.$emit('test', '123')
     },
     pageList (i, totalCount) {
       let total = totalCount

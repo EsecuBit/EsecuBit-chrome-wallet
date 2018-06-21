@@ -10,7 +10,7 @@
       <form class="layui-form customize-form" action="" lay-filter="form1">
         <div class="layui-form-item">
           <label class="layui-form-label account-label" >{{$t('message.send_current_account')}}</label>
-          <div class="layui-input-block account-info" style="margin-left: 464px">
+          <div class="layui-input-block account-info" style="margin-left: 465px">
             <div class="account-msg">{{currentAccount.label}}</div>
           </div>
         </div>
@@ -33,8 +33,16 @@
           <div class="layui-form-item">
             <label class="layui-form-label">{{$t('message.send_address')}}</label>
             <div class="layui-input-block input-width">
-              <input type="text" v-model="addressValue" name="address"  lay-verify="isEmpty"  :placeholder="$t('message.send_address')" @blur="verifyAddress()"
+              <input type="text" v-model="addressValue" name="address"  lay-verify="isEmpty"  :placeholder="$t('message.send_address')"
                      class="layui-input" style="width: 300px;text-align: end;" id="transactionAddress">
+              <span v-show="isDisplayIcon">
+                <a v-show="isError" style="color: #e74c3c; vertical-align: sub">
+                  <i class="layui-icon">&#x1007;</i>
+                </a>
+                <a v-show="!isError" href="#" style="color: #009a61;vertical-align: sub">
+                  <i class="layui-icon">&#x1005;</i>
+                </a>
+              </span>
             </div>
             <!--<button class="layui-btn layui-btn-radius layui-btn-primary" type="button" @click="addAddressDom">Add</button>-->
           </div>
@@ -120,7 +128,9 @@ export default {
       totalFee: 0,
       isDisplayExchange: false,
       isDisplayDetails: false,
-      coinType: ''
+      coinType: '',
+      isDisplayIcon: false,
+      isError: true
     }
   },
   computed: {
@@ -147,6 +157,18 @@ export default {
     }
   },
   watch: {
+    addressValue: {
+      handler () {
+        this.isDisplayIcon = true
+        if (!this.currentAccount) return false
+        try {
+          this.currentAccount.checkAddress(this.addressValue)
+          this.isError = false
+        } catch (e) {
+          this.isError = true
+        }
+      }
+    },
     amountValue: {
       handler (newValue, oldValue) {
         this.isDisplayExchange = true
@@ -284,7 +306,7 @@ export default {
       }
       if (!this.verifySubmitAddress()) return false
       let address = this.addressValue
-      let moneyValue = this.amountValue
+      let moneyValue = this.toTargetCoinUnit(this.amountValue)
       let formData = {
         feeRate: Number(this.switchFee ? this.customFees : this.selected),
         outputs: [{
@@ -331,6 +353,10 @@ export default {
   input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{  /* chrome */
     -webkit-appearance: none!important;
     margin: 0;
+  }
+  input:-webkit-autofill {
+    background-color: #fff;
+      -webkit-box-shadow: 0 0 0 1000px white inset;
   }
   .account-msg {
     display: inline-block;
@@ -383,6 +409,9 @@ export default {
     height: 28px;
     line-height: 28px;
     font-size: 10px;
+  }
+  .layui-icon {
+    font-size: 20px;
   }
   .site-block {
     border: 1px solid #DCEBF7;
