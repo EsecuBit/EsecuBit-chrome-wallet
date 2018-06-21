@@ -151,7 +151,7 @@ export default {
       }
     },
     sendCoinTypeMsg () {
-      let coinTypeName = this.coinType.includes('btc') ? 'Bitcoin' : 'Ether'
+      let coinTypeName = D.isBtc(this.coinType) ? 'Bitcoin' : 'Ether'
       return this.$t('message.send_send_msg') + ' ' + coinTypeName
     }
   },
@@ -203,7 +203,7 @@ export default {
           let fastMsg = this.$t('message.send_fast_confirm')
           let standardMsg = this.$t('message.send_standard_confirm')
           let slowMsg = this.$t('message.send_slow_confirm')
-          if (this.coinType.includes('btc')) {
+          if (D.isBtc(this.coinType)) {
             newFeeList.push({label: fastMsg + '(' + oldFeeList.fast + ')', value: oldFeeList.fast})
             newFeeList.push({label: standardMsg + '(' + oldFeeList.normal + ')', value: oldFeeList.normal})
             newFeeList.push({label: slowMsg + '(' + oldFeeList.economic + ')', value: oldFeeList.economic})
@@ -242,25 +242,25 @@ export default {
     },
     selectedIndex (index) {
       if (this.coinType) {
-        return this.coinType.includes('btc') ? index === 1 : index === 2
+        return D.isBtc(this.coinType) ? index === 1 : index === 2
       }
     },
     currentDisplayUnit (coinType) {
-      return coinType.includes('btc') ? this.currentUnit : this.currentUnitEth
+      return D.isBtc(coinType) ? this.currentUnit : this.currentUnitEth
     },
     currentTransactionUnit (coinType) {
-      return coinType.includes('btc') ? 'santoshi per bitcoin' : 'wei per ether'
+      return D.isBtc(coinType) ? 'santoshi per bitcoin' : 'wei per ether'
     },
     toTargetCoinUnit (value) {
       if (this.coinType) {
-        let nowType = this.coinType.includes('btc') ? D.unit.btc.santoshi : D.unit.eth.Wei
+        let nowType = D.isBtc(this.coinType) ? D.unit.btc.santoshi : D.unit.eth.Wei
         let nowUnit = this.currentDisplayUnit(this.coinType)
         return esWallet.convertValue(this.coinType, value, nowType, nowUnit)
       }
     },
     toMinCoinUnit (value) {
       if (this.coinType) {
-        let nowType = this.coinType.includes('btc') ? D.unit.btc.santoshi : D.unit.eth.Wei
+        let nowType = D.isBtc(this.coinType) ? D.unit.btc.santoshi : D.unit.eth.Wei
         let nowUnit = this.currentDisplayUnit(this.coinType)
         return esWallet.convertValue(this.coinType, value, nowUnit, nowType)
       }

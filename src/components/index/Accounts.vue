@@ -257,14 +257,14 @@ export default {
       return newValue.toFixed(2) + ' ' + this.currentDisplayUnit(table.coinType)
     },
     currentDisplayUnit (coinType) {
-      return coinType.includes('btc') ? this.currentUnit : this.currentUnitEth
+      return D.isBtc(coinType) ? this.currentUnit : this.currentUnitEth
     },
     toExchangeText (coinType, value) {
       let newValue = this.toTargetCoinUnit(coinType, value)
-      return coinType.includes('btc') ? esWallet.convertValue(coinType, newValue, this.currentUnit, this.currentExchangeRate) : esWallet.convertValue(coinType, newValue, this.currentUnitEth, this.currentExchangeRate)
+      return D.isBtc(coinType) ? esWallet.convertValue(coinType, newValue, this.currentUnit, this.currentExchangeRate) : esWallet.convertValue(coinType, newValue, this.currentUnitEth, this.currentExchangeRate)
     },
     toTargetCoinUnit (coinType, value) {
-      return coinType.includes('btc') ? esWallet.convertValue(coinType, value, D.unit.btc.santoshi, this.currentUnit) : esWallet.convertValue(coinType, value, D.unit.eth.Wei, this.currentUnitEth)
+      return D.isBtc(coinType) ? esWallet.convertValue(coinType, value, D.unit.btc.santoshi, this.currentUnit) : esWallet.convertValue(coinType, value, D.unit.eth.Wei, this.currentUnitEth)
     },
     tableCanvas () {
       let canvasList = document.getElementsByClassName('canvas')

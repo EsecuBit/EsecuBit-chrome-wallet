@@ -41,6 +41,7 @@
 
 <script>
 import Bus from '../../common/js/bus'
+import {D} from 'chrome-excelsecu-wallet'
 // eslint-disable-next-line
 const form = layui.form
 export default {
@@ -65,7 +66,7 @@ export default {
       return this.$t('message.accept_qrcode_msg') + this.qrAddress
     },
     receiveCoinTypeMsg () {
-      let coinTypeName = this.coinType.includes('btc') ? 'Bitcoin' : 'Ether'
+      let coinTypeName = D.isBtc(this.coinType) ? 'Bitcoin' : 'Ether'
       return this.$t('message.accept_accept_msg') + ' ' + coinTypeName
     }
   },

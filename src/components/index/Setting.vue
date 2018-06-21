@@ -158,7 +158,7 @@ export default {
     currentAccount: {
       handler (newValue, oldValue) {
         this.coinType = newValue.coinType
-        if (this.coinType.includes('btc')) {
+        if (D.isBtc(this.coinType)) {
           this.isBitcoin = true
           if (!this.isBitFirst) return false
           this.bitUnitValueList = [
@@ -174,7 +174,7 @@ export default {
             })
           })
           this.isBitFirst = false
-        } else if (this.coinType.includes('eth')) {
+        } else if (D.isEth(this.coinType)) {
           this.isBitcoin = false
           if (!this.isEthFirst) return false
           this.ethUnitValueList = [
