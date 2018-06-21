@@ -67,7 +67,7 @@
                     <span :class ="[table.direction === 'in'?green:red]" class="text-opacity">{{toOrForm(table.direction)}}</span>
                     <span>{{getTableAddress(table)}}</span>
                   </td>
-                  <td :class="[table.blockNumber>0?green:red]" >{{tableBlockNumber(table)}}</td>
+                  <td :class="[table.value>0?green:red]" >{{tableBlockNumber(table)}}</td>
                   <td style="padding: 0">
                     <canvas class="canvas" width="100" height="30" :data-counts="table.confirmations"></canvas>
                   </td>
@@ -231,22 +231,13 @@ export default {
       return value === 'in' ? 'from' : 'to'
     },
     getTableAddress (table) {
-      let address = ''
-      if (table.direction === 'in') {
-        if (table.inputs.length === 1) {
-          address = table.inputs[0].prevAddress
-        } else if (table.inputs.length > 1) {
-          for (let item of table.inputs) {
-            address += item.prevAddress + '; '
-          }
-        }
-        return address
-      } else {
-        if (table.outputs.length === 1) {
-          address = table.outputs[0].address
-        } else if (table.outputs.length > 1) {
-          for (let item of table.outputs) {
-            address += item.address + '; '
+      if (table.showAddresses) {
+        let address = ''
+        if (table.showAddresses.length === 1) {
+          address = table.showAddresses[0]
+        } else if (table.showAddresses.length > 1) {
+          for (let item of table.showAddresses) {
+            address += item + '; '
           }
         }
         return address
@@ -380,7 +371,7 @@ export default {
       }
       if (this.newAccount[this.currentIndex].rename) {
         this.newAccount[this.currentIndex].rename(this.renameValue).then(value => {
-          // this.setMenuList(this.newAccount)
+          this.setMenuList(this.newAccount)
           layer.closeAll('page')
           layer.msg(this.$t('message.accounts_update_msg'), { icon: 1 })
         })

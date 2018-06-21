@@ -314,7 +314,9 @@ export default {
         }]
       }
       this.currentAccount.prepareTx(formData).then(value => this.currentAccount.buildTx(value))
-        .then(value => this.currentAccount.sendTx(value)).then(value => { layer.msg(this.$t('message.send_submit_success'), { icon: 1 }) })
+        .then(value => {
+          return this.currentAccount.sendTx(value)
+        }).then(value => { layer.msg(this.$t('message.send_submit_success'), { icon: 1 }) })
         .catch(value => { layer.msg(this.$t('message.send_submit_error'), { icon: 2 }) })
     },
     calculateTotal () {
@@ -334,7 +336,7 @@ export default {
       })
         .catch(value => {
           switch (value) {
-            case 501: layer.msg('余额不足', { icon: 2 })
+            case 501: layer.msg(this.$t('message.send_not_balance'), { icon: 2 })
               break
           }
         })
