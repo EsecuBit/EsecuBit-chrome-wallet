@@ -98,8 +98,8 @@ import Accounts from './components/index/Accounts'
 import Send from './components/index/Send'
 import Setting from './components/index/Setting'
 import Accept from './components/index/Accept'
-import EsWallet from './common/js/wallet/sdk/EsWallet'
-import D from './common/js/wallet/sdk/D'
+import {D, EsWallet} from 'chrome-excelsecu-wallet'
+
 const esWallet = new EsWallet()
 // eslint-disable-next-line
 const element = layui.element

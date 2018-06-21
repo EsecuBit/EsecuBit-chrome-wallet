@@ -99,8 +99,7 @@
 
 <script>
 import Bus from '../../common/js/bus'
-import D from '../../common/js/wallet/sdk/D'
-import EsWallet from '../../common/js/wallet/sdk/EsWallet'
+import {D, EsWallet} from 'chrome-excelsecu-wallet'
 const esWallet = new EsWallet()
 // eslint-disable-next-line
 const form = layui.form

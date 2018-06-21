@@ -11,20 +11,21 @@
     "build": "node build/build.js"
   },
   "dependencies": {
+    "bigi": "^1.4.2",
     "bitcoinjs-lib": "^3.3.2",
     "bitpony": "0.0.1",
+    "chrome-excelsecu-wallet": "git+http://gogs.sickworm.com/sickworm/chrome-excelsecu-wallet.git",
+    "create-hmac": "^1.1.7",
     "ecurve": "^1.0.6",
     "fs-promise": "^2.0.3",
     "jquery": "^3.3.1",
     "node-gyp": "^3.7.0",
     "qrcode": "^1.2.0",
+    "rlp": "^2.0.0",
     "tar": "^4.4.4",
-    "web3": "^1.0.0-beta.34",
     "vue": "^2.5.2",
     "vue-i18n": "^7.7.0",
-    "rlp": "^2.0.0",
-    "create-hmac": "^1.1.7",
-    "bigi": "^1.4.2"
+    "web3": "^1.0.0-beta.34"
   },
   "devDependencies": {
     "autoprefixer": "^7.1.2",
