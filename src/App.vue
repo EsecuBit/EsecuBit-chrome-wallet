@@ -98,6 +98,7 @@ import Accounts from './components/index/Accounts'
 import Send from './components/index/Send'
 import Setting from './components/index/Setting'
 import Accept from './components/index/Accept'
+import Store from './common/js/store'
 import {D, EsWallet} from 'chrome-excelsecu-wallet'
 
 const esWallet = new EsWallet()
@@ -125,7 +126,8 @@ export default {
       accountType: [],
       currentUnit: D.unit.btc.mBTC,
       currentUnitEth: D.unit.eth.GWei,
-      currentExchangeRate: D.unit.legal.USD
+      currentExchangeRate: D.unit.legal.USD,
+      seedDefaultValue: ''
     }
   },
   watch: {
@@ -142,9 +144,15 @@ export default {
     }
   },
   mounted () {
+    // 设定默认值
+    let seed = Store.fetch('seedValue') ? Store.fetch('seedValue') : this.generateSeed()
+    D.test.txSeed = seed
+    D.test.txWalletId = seed
+    this.seedDefaultValue = seed
     // 监听选择事件
     form.render('select', 'form1')
     this.listenLoginStatus()
+    this.listenTXInfo()
     // 菜单点击事件
     $('.menu-switch li a').click(function () {
       if ($(this).parent('li').hasClass('layui-this')) return false
@@ -156,6 +164,11 @@ export default {
     })
   },
   methods: {
+    generateSeed () {
+      let seed = D.test.generateSeed()
+      Store.save('seedValue', seed)
+      return seed
+    },
     setExchangeRate (...data) {
       this.currentExchangeRate = data[0]
     },
@@ -173,6 +186,9 @@ export default {
     },
     changelang () {
       // console.log(this.$t('message.hello'))
+    },
+    listenTXInfo () {
+      esWallet.listenTxInfo()
     },
     listenLoginStatus () {
       esWallet.listenStatus((errorNum, status) => {

@@ -79,6 +79,9 @@ export const message = {
   send_send_msg: 'Send',
   send_effective_address_mag: 'The address you entered is valid',
   send_invalid_address_mag: 'The address you entered is illegal, please re-enter',
+  send_not_balance: 'Insufficient account balance',
+  send_is_trading: 'Trading is in progress, please wait...',
+
 
   accept_prompt_msg: 'Please use the mobile phone to scan the QR code in the picture',
   accept_current_account: 'Current Account :',
@@ -93,9 +96,10 @@ export const message = {
   setting_skin: 'Skin',
   setting_name: 'Name',
   setting_information: 'Information',
-
-
-
+  setting_seed: 'Seed',
+  setting_current_seed: 'Current Seed',
+  setting_random_produce: 'Randomly generated',
+  setting_setting: 'Setting'
 
 
 }

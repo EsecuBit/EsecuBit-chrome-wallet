@@ -313,11 +313,17 @@ export default {
           value: moneyValue
         }]
       }
+      layer.msg(this.$t('message.send_is_trading'), { icon: 0 })
       this.currentAccount.prepareTx(formData).then(value => this.currentAccount.buildTx(value))
         .then(value => {
           return this.currentAccount.sendTx(value)
-        }).then(value => { layer.msg(this.$t('message.send_submit_success'), { icon: 1 }) })
-        .catch(value => { layer.msg(this.$t('message.send_submit_error'), { icon: 2 }) })
+        }).then(value => {
+          layer.closeAll('msg')
+          layer.msg(this.$t('message.send_submit_success'), { icon: 1 })
+        }).catch(value => {
+          layer.closeAll('msg')
+          layer.msg(value, { icon: 2 })
+        })
     },
     calculateTotal () {
       let getAmountValue = this.amountValue ? this.amountValue : 0

@@ -15,6 +15,12 @@
             <cite>{{$t('message.setting_information')}}</cite>
           </a>
         </li>
+        <li class="tab-title-2">
+          <a href="#">
+            <i class="layui-icon" style="top: 3px;">&#xe857;</i>
+            <cite>{{$t('message.setting_seed')}}</cite>
+          </a>
+        </li>
       </ul>
     </div>
     <div class="site-content">
@@ -80,13 +86,34 @@
             </tbody>
           </table>
         </div>
-      </div>
+        <!--设置种子-->
+        <div class="tab-item">
+          <div class="site-text site-block">
+            <form class="layui-form" lay-filter="seed">
+              <div class="layui-form-item">
+                <label class="layui-form-label">{{$t('message.setting_current_seed')}}</label>
+                <div class="layui-input-inline input-width">
+                  <input type="text" class="layui-input" v-model="seedValue"/>
+                </div>
+              </div>
+              <div class="layui-form-item">
+                <label class="layui-form-label"></label>
+                <div class="layui-input-inline input-width">
+                    <button class="layui-btn"  type="button" @click="randomGenerate">{{$t('message.setting_random_produce')}}</button>
+                  <button class="layui-btn"  type="button" @click="setSeed">{{$t('message.setting_setting')}}</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+        </div>
     </div>
   </div>
 </template>
 
 <script>
 import Bus from '../../common/js/bus'
+import Store from '../../common/js/store'
 import {D} from 'chrome-excelsecu-wallet'
 // eslint-disable-next-line
 const form = layui.form
@@ -139,7 +166,8 @@ export default {
       isBitcoin: true,
       isBitFirst: true,
       isEthFirst: true,
-      accountOrder: []
+      accountOrder: [],
+      seedValue: ''
     }
   },
   watch: {
@@ -195,6 +223,7 @@ export default {
     }
   },
   mounted () {
+    this.seedValue = Store.fetch('seedValue')
     Bus.$on('switchAccount', (index) => { this.currentAccount = this.accountOrder[index] })
     form.render('select', 'form3')
     this.switchLang()
@@ -226,6 +255,14 @@ export default {
         $('.tab-content-2 .layui-show').removeClass('layui-show')
         $('.tab-content-2 .tab-item').eq(tabIndex).addClass('layui-show')
       })
+    },
+    randomGenerate () {
+      this.seedValue = D.test.generateSeed()
+    },
+    setSeed () {
+      Store.save('seedValue', this.seedValue)
+      D.test.txSeed = this.seedValue
+      D.test.txWalletId = this.seedValue
     }
   }
 }

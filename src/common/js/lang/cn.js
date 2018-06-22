@@ -78,6 +78,8 @@ export const message = {
   send_send_msg: '发送',
   send_effective_address_mag: '地址有效',
   send_invalid_address_mag: '地址不合法，请重新输入',
+  send_not_balance: '账户余额不足',
+  send_is_trading: '正在进行交易， 请稍后。。。',
 
   accept_prompt_msg: '请使用手机扫描下面的二位码',
   accept_current_account: '当前账户 ：',
@@ -92,4 +94,10 @@ export const message = {
   setting_skin: '皮肤',
   setting_name: '名称',
   setting_information: '信息',
+  setting_seed: '选择种子',
+  setting_current_seed: '当前种子',
+  setting_random_produce: '随机生成',
+  setting_setting: '设定'
+
+
 }
