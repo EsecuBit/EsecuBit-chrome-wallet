@@ -102,6 +102,16 @@ import Accept from './components/index/Accept'
 import Store from './common/js/store'
 import {D, EsWallet} from 'chrome-excelsecu-wallet'
 
+let generateSeed = function () {
+  let seedValue = D.test.generateSeed()
+  Store.save('seedValue', seedValue)
+  return seedValue
+}
+let seed = Store.fetch('seedValue') ? Store.fetch('seedValue') : generateSeed()
+D.test.txSeed = seed
+D.test.txWalletId = seed
+console.log(D.test.txWalletId, 'seedId')
+
 const esWallet = new EsWallet()
 // eslint-disable-next-line
 const element = layui.element
@@ -128,7 +138,7 @@ export default {
       currentUnit: D.unit.btc.mBTC,
       currentUnitEth: D.unit.eth.GWei,
       currentExchangeRate: D.unit.legal.USD,
-      seedDefaultValue: ''
+      seedDefaultValue: seed
     }
   },
   watch: {
@@ -149,10 +159,7 @@ export default {
     this.currentUnit = Store.fetch('bitUnit') ? Store.fetch('bitUnit') : D.unit.btc.mBTC
     this.currentUnitEth = Store.fetch('ethUnit') ? Store.fetch('ethUnit') : D.unit.eth.GWei
     this.currentExchangeRate = Store.fetch('exchange') ? Store.fetch('exchange') : D.unit.legal.USD
-    let seed = Store.fetch('seedValue') ? Store.fetch('seedValue') : this.generateSeed()
-    console.log(seed, 909090)
-    D.test.txSeed = seed
-    D.test.txWalletId = seed
+
     // 监听选择事件
     form.render('select', 'form1')
     this.listenLoginStatus()
@@ -168,12 +175,6 @@ export default {
     })
   },
   methods: {
-    generateSeed () {
-      let seed = D.test.generateSeed()
-      this.seedDefaultValue = seed
-      Store.save('seedValue', seed)
-      return seed
-    },
     setExchangeRate (...data) {
       this.currentExchangeRate = data[0]
     },
