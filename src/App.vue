@@ -100,19 +100,7 @@ import Send from './components/index/Send'
 import Setting from './components/index/Setting'
 import Accept from './components/index/Accept'
 import Store from './common/js/store'
-import {D, EsWallet} from 'chrome-excelsecu-wallet'
 
-let generateSeed = function () {
-  let seedValue = D.test.generateSeed()
-  Store.save('seedValue', seedValue)
-  return seedValue
-}
-let seed = Store.fetch('seedValue') ? Store.fetch('seedValue') : generateSeed()
-D.test.txSeed = seed
-D.test.txWalletId = seed
-console.log(D.test.txWalletId, 'seedId')
-
-const esWallet = new EsWallet()
 // eslint-disable-next-line
 const element = layui.element
 // eslint-disable-next-line
@@ -135,10 +123,10 @@ export default {
       selected: '',
       isHasAccount: true,
       accountType: [],
-      currentUnit: D.unit.btc.mBTC,
-      currentUnitEth: D.unit.eth.GWei,
-      currentExchangeRate: D.unit.legal.USD,
-      seedDefaultValue: seed
+      currentUnit: this.D.unit.btc.mBTC,
+      currentUnitEth: this.D.unit.eth.GWei,
+      currentExchangeRate: this.D.unit.legal.USD,
+      seedDefaultValue: Store.fetch('seedValue')
     }
   },
   watch: {
@@ -156,14 +144,13 @@ export default {
   },
   mounted () {
     // 设定默认值
-    this.currentUnit = Store.fetch('bitUnit') ? Store.fetch('bitUnit') : D.unit.btc.mBTC
-    this.currentUnitEth = Store.fetch('ethUnit') ? Store.fetch('ethUnit') : D.unit.eth.GWei
-    this.currentExchangeRate = Store.fetch('exchange') ? Store.fetch('exchange') : D.unit.legal.USD
+    this.currentUnit = Store.fetch('bitUnit') ? Store.fetch('bitUnit') : this.D.unit.btc.mBTC
+    this.currentUnitEth = Store.fetch('ethUnit') ? Store.fetch('ethUnit') : this.D.unit.eth.GWei
+    this.currentExchangeRate = Store.fetch('exchange') ? Store.fetch('exchange') : this.D.unit.legal.USD
 
     // 监听选择事件
     form.render('select', 'form1')
     this.listenLoginStatus()
-    // this.listenTXInfo()
     // 菜单点击事件
     $('.menu-switch li a').click(function () {
       if ($(this).parent('li').hasClass('layui-this')) return false
@@ -193,25 +180,22 @@ export default {
     changelang () {
       // console.log(this.$t('message.hello'))
     },
-    listenTXInfo () {
-      esWallet.listenTxInfo()
-    },
     listenLoginStatus () {
-      esWallet.listenStatus((errorNum, status) => {
-        if (status === D.status.plugIn) this.loginStatus = 1
-        if (status === D.status.initializing) this.loginStatus = 2
-        if (status === D.status.syncing) this.loginStatus = 3
-        if (status === D.status.syncFinish) {
+      this.esWallet.listenStatus((errorNum, status) => {
+        if (status === this.D.status.plugIn) this.loginStatus = 1
+        if (status === this.D.status.initializing) this.loginStatus = 2
+        if (status === this.D.status.syncing) this.loginStatus = 3
+        if (status === this.D.status.syncFinish) {
           this.isLogin = !this.isLogin
-          esWallet.getWalletInfo().then(value => {
+          this.esWallet.getWalletInfo().then(value => {
             this.WalletInfo = value
           }).catch(value => { layer.msg(this.$t('message.app_error_get_wallet'), { icon: 2, anim: 6 }) })
-          esWallet.getAccounts().then(value => {
+          this.esWallet.getAccounts().then(value => {
             if (value) this.accounts = this.orderArr(value)
             console.log(value)
           }).catch(value => { layer.msg(this.$t('message.app_error_get_account'), { icon: 2, anim: 6 }) })
         }
-        if (status === D.status.plugOut) {
+        if (status === this.D.status.plugOut) {
           this.loginStatus = 99
           this.isLogin = !this.isLogin
         }
@@ -220,7 +204,7 @@ export default {
     addAccountContent () {
       let btnDisplay = [this.$t('message.app_submit_btn'), this.$t('message.app_cancel_btn')]
       // 获取可用的币类型
-      esWallet.availableNewAccountCoinTypes().then(value => {
+      this.esWallet.availableNewAccountCoinTypes().then(value => {
         if (Array.isArray(value) && value.length > 0) {
           this.accountType = value
           this.isHasAccount = true
@@ -246,7 +230,7 @@ export default {
               area: ['315px', '100px'],
               content: $('#loading')
             })
-            esWallet.newAccount(that.selected).then(value => {
+            this.esWallet.newAccount(that.selected).then(value => {
               layer.close(loadingIndex)
               layer.close(index)
               layer.msg('successful', { icon: 1 })

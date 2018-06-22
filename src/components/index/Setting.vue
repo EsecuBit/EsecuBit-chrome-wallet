@@ -114,23 +114,11 @@
 <script>
 import Bus from '../../common/js/bus'
 import Store from '../../common/js/store'
-import {D} from 'chrome-excelsecu-wallet'
 // eslint-disable-next-line
 const form = layui.form
 // eslint-disable-next-line
 const $ = layui.jquery
-const getExchangeList = D.suppertedLegals()
-const editExchangeList = function (arry) {
-  let exRate = []
-  if (Array.isArray(arry) && arry.length > 0) {
-    for (let item of arry) {
-      exRate.push({label: item, value: item})
-    }
-  }
-  return exRate
-}
-const currentExchangeList = editExchangeList(getExchangeList)
-const currentLang = Store.fetch('lang') ? Store.fetch('lang') : navigator.language
+
 export default {
   name: 'Setting',
   props: ['walletInfo', 'accountInfo', 'seedDefaultValue'],
@@ -156,12 +144,12 @@ export default {
         {label: 'BTC', value: 'btc'},
         {label: 'mBTC', value: 'mbtc'}
       ],
-      initLang: currentLang,
+      initLang: null,
       langList: [
         {label: 'English', value: 'en-US'},
         {label: '简体中文', value: 'zh-CN'}
       ],
-      exchangeRate: currentExchangeList,
+      exchangeRate: null,
       currentAccount: {},
       coinType: '',
       isBitcoin: true,
@@ -192,7 +180,7 @@ export default {
     currentAccount: {
       handler (newValue, oldValue) {
         this.coinType = newValue.coinType
-        if (D.isBtc(this.coinType)) {
+        if (this.D.isBtc(this.coinType)) {
           this.isBitcoin = true
           if (!this.isBitFirst) return false
           this.bitUnitValueList = [
@@ -208,7 +196,7 @@ export default {
             })
           })
           this.isBitFirst = false
-        } else if (D.isEth(this.coinType)) {
+        } else if (this.D.isEth(this.coinType)) {
           this.isBitcoin = false
           if (!this.isEthFirst) return false
           this.ethUnitValueList = [
@@ -230,9 +218,12 @@ export default {
   },
   mounted () {
     // 初始化默认值
-    this.unitBitChecked = Store.fetch('bitUnit') ? Store.fetch('bitUnit') : D.unit.btc.mBTC
-    this.unitEthChecked = Store.fetch('ethUnit') ? Store.fetch('ethUnit') : D.unit.eth.GWei
-    this.selectedExchangeRate = Store.fetch('exchange') ? Store.fetch('exchange') : D.unit.legal.USD
+    const getExchangeList = this.D.suppertedLegals()
+    this.initLang = Store.fetch('lang') ? Store.fetch('lang') : navigator.language
+    this.exchangeRate = this.editExchangeList(getExchangeList)
+    this.unitBitChecked = Store.fetch('bitUnit') ? Store.fetch('bitUnit') : this.D.unit.btc.mBTC
+    this.unitEthChecked = Store.fetch('ethUnit') ? Store.fetch('ethUnit') : this.D.unit.eth.GWei
+    this.selectedExchangeRate = Store.fetch('exchange') ? Store.fetch('exchange') : this.D.unit.legal.USD
     if (Store.fetch('seedValue')) this.seedValue = Store.fetch('seedValue')
     Bus.$on('switchAccount', (index) => { this.currentAccount = this.accountOrder[index] })
     this.$nextTick(() => {
@@ -243,6 +234,15 @@ export default {
     this.switchTab()
   },
   methods: {
+    editExchangeList (arry) {
+      let exRate = []
+      if (Array.isArray(arry) && arry.length > 0) {
+        for (let item of arry) {
+          exRate.push({label: item, value: item})
+        }
+      }
+      return exRate
+    },
     switchExchange () {
       form.on('select(exchange)', (data) => {
         this.selectedExchangeRate = data.value
@@ -271,12 +271,12 @@ export default {
       })
     },
     randomGenerate () {
-      this.seedValue = D.test.generateSeed()
+      this.seedValue = this.D.test.generateSeed()
     },
     setSeed () {
       Store.save('seedValue', this.seedValue)
-      D.test.txSeed = this.seedValue
-      D.test.txWalletId = this.seedValue
+      this.D.test.txSeed = this.seedValue
+      this.D.test.txWalletId = this.seedValue
     }
   }
 }

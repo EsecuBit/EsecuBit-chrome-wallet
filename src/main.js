@@ -4,7 +4,12 @@ import Vue from 'vue'
 import App from './App'
 import Store from './common/js/store'
 import VueI18n from 'vue-i18n'
+import {D, EsWallet} from 'chrome-excelsecu-wallet'
 
+Store.setSeed()
+
+Vue.prototype.esWallet = new EsWallet()
+Vue.prototype.D = D
 Vue.config.productionTip = false
 Vue.use(VueI18n)
 const currentLang = Store.fetch('lang') ? Store.fetch('lang') : navigator.language

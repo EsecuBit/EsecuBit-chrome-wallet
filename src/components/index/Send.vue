@@ -99,8 +99,6 @@
 
 <script>
 import Bus from '../../common/js/bus'
-import {D, EsWallet} from 'chrome-excelsecu-wallet'
-const esWallet = new EsWallet()
 // eslint-disable-next-line
 const form = layui.form
 // eslint-disable-next-line
@@ -138,7 +136,7 @@ export default {
         let nowUnit = this.currentDisplayUnit(this.coinType)
         if (this.isDisplayDetails) {
           return this.totalFee.toFixed(2) + ' ' + nowUnit + ' (' +
-            esWallet.convertValue(this.coinType, this.totalFee, nowUnit, this.currentExchangeRate).toFixed(2) + ' ' + this.currentExchangeRate + ')' + ' '
+            this.esWallet.convertValue(this.coinType, this.totalFee, nowUnit, this.currentExchangeRate).toFixed(2) + ' ' + this.currentExchangeRate + ')' + ' '
         } else {
           return ''
         }
@@ -147,11 +145,11 @@ export default {
     toExchangeText () {
       if (this.currentUnit && this.currentExchangeRate) {
         let nowUnit = this.currentDisplayUnit(this.coinType)
-        return esWallet.convertValue(this.coinType, this.amountValue, nowUnit, this.currentExchangeRate).toFixed(2) + ' ' + this.currentExchangeRate
+        return this.esWallet.convertValue(this.coinType, this.amountValue, nowUnit, this.currentExchangeRate).toFixed(2) + ' ' + this.currentExchangeRate
       }
     },
     sendCoinTypeMsg () {
-      let coinTypeName = D.isBtc(this.coinType) ? 'Bitcoin' : 'Ether'
+      let coinTypeName = this.D.isBtc(this.coinType) ? 'Bitcoin' : 'Ether'
       return this.$t('message.send_send_msg') + ' ' + coinTypeName
     }
   },
@@ -203,7 +201,7 @@ export default {
           let fastMsg = this.$t('message.send_fast_confirm')
           let standardMsg = this.$t('message.send_standard_confirm')
           let slowMsg = this.$t('message.send_slow_confirm')
-          if (D.isBtc(this.coinType)) {
+          if (this.D.isBtc(this.coinType)) {
             newFeeList.push({label: fastMsg + '(' + oldFeeList.fast + ')', value: oldFeeList.fast})
             newFeeList.push({label: standardMsg + '(' + oldFeeList.normal + ')', value: oldFeeList.normal})
             newFeeList.push({label: slowMsg + '(' + oldFeeList.economic + ')', value: oldFeeList.economic})
@@ -242,27 +240,27 @@ export default {
     },
     selectedIndex (index) {
       if (this.coinType) {
-        return D.isBtc(this.coinType) ? index === 1 : index === 2
+        return this.D.isBtc(this.coinType) ? index === 1 : index === 2
       }
     },
     currentDisplayUnit (coinType) {
-      return D.isBtc(coinType) ? this.currentUnit : this.currentUnitEth
+      return this.D.isBtc(coinType) ? this.currentUnit : this.currentUnitEth
     },
     currentTransactionUnit (coinType) {
-      return D.isBtc(coinType) ? 'santoshi per bitcoin' : 'wei per ether'
+      return this.D.isBtc(coinType) ? 'santoshi per bitcoin' : 'wei per ether'
     },
     toTargetCoinUnit (value) {
       if (this.coinType) {
-        let nowType = D.isBtc(this.coinType) ? D.unit.btc.santoshi : D.unit.eth.Wei
+        let nowType = this.D.isBtc(this.coinType) ? this.D.unit.btc.santoshi : this.D.unit.eth.Wei
         let nowUnit = this.currentDisplayUnit(this.coinType)
-        return esWallet.convertValue(this.coinType, value, nowType, nowUnit)
+        return this.esWallet.convertValue(this.coinType, value, nowType, nowUnit)
       }
     },
     toMinCoinUnit (value) {
       if (this.coinType) {
-        let nowType = D.isBtc(this.coinType) ? D.unit.btc.santoshi : D.unit.eth.Wei
+        let nowType = this.D.isBtc(this.coinType) ? this.D.unit.btc.santoshi : this.D.unit.eth.Wei
         let nowUnit = this.currentDisplayUnit(this.coinType)
-        return esWallet.convertValue(this.coinType, value, nowUnit, nowType)
+        return this.esWallet.convertValue(this.coinType, value, nowUnit, nowType)
       }
     },
     maxAmount () {

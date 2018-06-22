@@ -142,8 +142,6 @@
 
 <script>
 import Bus from '../../common/js/bus'
-import {D, EsWallet} from 'chrome-excelsecu-wallet'
-const esWallet = new EsWallet()
 
 // eslint-disable-next-line
 const $ = layui.jquery
@@ -225,8 +223,32 @@ export default {
   },
   mounted () {
     this.createTab()
+    this.listenTXInfo()
   },
   methods: {
+    listenTXInfo () {
+      this.esWallet.listenTxInfo((error, txInfo) => {
+        console.log('新交易记录', error, txInfo)
+        let nowIndex = 0
+        console.log(this.newAccount, '新账户')
+        this.newAccount.forEach((item, index) => {
+          console.log(item)
+          if (item.accountId === txInfo.accountId) nowIndex = index
+        })
+        console.log(nowIndex, 'index')
+        // 刷新交易记录
+        let total = 0
+        this.clearCanvas()
+        this.newAccount[nowIndex].getTxInfos(0, 3).then(value => {
+          this.$set(this.gridList, nowIndex, value.txInfos)
+          total = value.total
+          this.$nextTick(() => {
+            this.tableCanvas()
+            this.pageList(nowIndex, total)
+          })
+        })
+      })
+    },
     toOrForm (value) {
       return value === 'in' ? 'from' : 'to'
     },
@@ -248,14 +270,14 @@ export default {
       return newValue.toFixed(2) + ' ' + this.currentDisplayUnit(table.coinType)
     },
     currentDisplayUnit (coinType) {
-      return D.isBtc(coinType) ? this.currentUnit : this.currentUnitEth
+      return this.D.isBtc(coinType) ? this.currentUnit : this.currentUnitEth
     },
     toExchangeText (coinType, value) {
       let newValue = this.toTargetCoinUnit(coinType, value)
-      return D.isBtc(coinType) ? esWallet.convertValue(coinType, newValue, this.currentUnit, this.currentExchangeRate) : esWallet.convertValue(coinType, newValue, this.currentUnitEth, this.currentExchangeRate)
+      return this.D.isBtc(coinType) ? this.esWallet.convertValue(coinType, newValue, this.currentUnit, this.currentExchangeRate) : this.esWallet.convertValue(coinType, newValue, this.currentUnitEth, this.currentExchangeRate)
     },
     toTargetCoinUnit (coinType, value) {
-      return D.isBtc(coinType) ? esWallet.convertValue(coinType, value, D.unit.btc.santoshi, this.currentUnit) : esWallet.convertValue(coinType, value, D.unit.eth.Wei, this.currentUnitEth)
+      return this.D.isBtc(coinType) ? this.esWallet.convertValue(coinType, value, this.D.unit.btc.santoshi, this.currentUnit) : this.esWallet.convertValue(coinType, value, this.D.unit.eth.Wei, this.currentUnitEth)
     },
     tableCanvas () {
       let canvasList = document.getElementsByClassName('canvas')
