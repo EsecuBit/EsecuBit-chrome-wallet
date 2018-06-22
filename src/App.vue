@@ -44,7 +44,8 @@
                 <Accept :account-info ="accounts"/>
               </div>
               <div class="main-tab-item">
-                <Setting @switchSetting = "switchSetting" @settingColor = "settingColor" @setExchangeRate="setExchangeRate" @setBitUnit="setBitUnit"  @setEthUnit="setEthUnit" :account-info ="accounts" :wallet-info="WalletInfo"/>
+                <Setting @switchSetting = "switchSetting" @settingColor = "settingColor" @setExchangeRate="setExchangeRate"
+                         :seed-default-value="seedDefaultValue" @setBitUnit="setBitUnit"  @setEthUnit="setEthUnit" :account-info ="accounts" :wallet-info="WalletInfo"/>
               </div>
             </div>
           </div>
@@ -149,12 +150,13 @@ export default {
     this.currentUnitEth = Store.fetch('ethUnit') ? Store.fetch('ethUnit') : D.unit.eth.GWei
     this.currentExchangeRate = Store.fetch('exchange') ? Store.fetch('exchange') : D.unit.legal.USD
     let seed = Store.fetch('seedValue') ? Store.fetch('seedValue') : this.generateSeed()
+    console.log(seed, 909090)
     D.test.txSeed = seed
     D.test.txWalletId = seed
     // 监听选择事件
     form.render('select', 'form1')
     this.listenLoginStatus()
-    this.listenTXInfo()
+    // this.listenTXInfo()
     // 菜单点击事件
     $('.menu-switch li a').click(function () {
       if ($(this).parent('li').hasClass('layui-this')) return false
@@ -168,6 +170,7 @@ export default {
   methods: {
     generateSeed () {
       let seed = D.test.generateSeed()
+      this.seedDefaultValue = seed
       Store.save('seedValue', seed)
       return seed
     },

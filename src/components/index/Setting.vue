@@ -130,10 +130,10 @@ const editExchangeList = function (arry) {
   return exRate
 }
 const currentExchangeList = editExchangeList(getExchangeList)
-const currentLang = navigator.language
+const currentLang = Store.fetch('lang') ? Store.fetch('lang') : navigator.language
 export default {
   name: 'Setting',
-  props: ['walletInfo', 'accountInfo'],
+  props: ['walletInfo', 'accountInfo', 'seedDefaultValue'],
   data () {
     return {
       hardwareList: [
@@ -177,6 +177,11 @@ export default {
         this.hardwareList = newValue
       },
       deep: true
+    },
+    seedDefaultValue: {
+      handler (newValue, oldValue) {
+        this.seedValue = newValue
+      }
     },
     accountInfo: {
       handler (newValue, oldValue) {
@@ -228,9 +233,11 @@ export default {
     this.unitBitChecked = Store.fetch('bitUnit') ? Store.fetch('bitUnit') : D.unit.btc.mBTC
     this.unitEthChecked = Store.fetch('ethUnit') ? Store.fetch('ethUnit') : D.unit.eth.GWei
     this.selectedExchangeRate = Store.fetch('exchange') ? Store.fetch('exchange') : D.unit.legal.USD
-    this.seedValue = Store.fetch('seedValue')
+    if (Store.fetch('seedValue')) this.seedValue = Store.fetch('seedValue')
     Bus.$on('switchAccount', (index) => { this.currentAccount = this.accountOrder[index] })
-    form.render('select', 'form3')
+    this.$nextTick(() => {
+      form.render('select', 'form3')
+    })
     this.switchLang()
     this.switchExchange()
     this.switchTab()
