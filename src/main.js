@@ -2,10 +2,11 @@
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue'
 import App from './App'
+import Store from './common/js/store'
 import VueI18n from 'vue-i18n'
 Vue.config.productionTip = false
 Vue.use(VueI18n)
-const currentLang = navigator.language
+const currentLang = Store.fetch('lang') ? Store.fetch('lang') : navigator.language
 const i18n = new VueI18n({
   locale: currentLang,
   messages: {

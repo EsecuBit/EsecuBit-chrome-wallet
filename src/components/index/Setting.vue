@@ -39,13 +39,13 @@
               <div class="layui-form-item" v-show="isBitcoin">
                 <label class="layui-form-label">{{$t('message.setting_units')}}</label>
                 <div class="layui-input-block" >
-                  <input type="radio" lay-filter="bitUnit" name="bitUnit" :value="item.value" :title="item.label" :checked="index === 1" v-for="(item, index) in bitUnitValueList">
+                  <input type="radio" lay-filter="bitUnit" name="bitUnit" :value="item.value" :title="item.label" :checked="item.value === unitBitChecked" v-for="item in bitUnitValueList">
                 </div>
               </div>
               <div class="layui-form-item" v-show="!isBitcoin">
                 <label class="layui-form-label">{{$t('message.setting_units')}}</label>
                 <div class="layui-input-block" >
-                  <input type="radio" lay-filter="ethUnit" name="ethUnit" :value="item.value" :title="item.label" :checked="index === 1" v-for="(item, index) in ethUnitValueList">
+                  <input type="radio" lay-filter="ethUnit" name="ethUnit" :value="item.value" :title="item.label" :checked="item.value === unitEthChecked" v-for="item in ethUnitValueList">
                 </div>
               </div>
               <div class="layui-form-item">
@@ -145,8 +145,9 @@ export default {
         {name: 'blue', colorClass: 'blue-skin'},
         {name: 'red', colorClass: 'red-skin'}
       ],
-      unitChecked: '',
-      selectedExchangeRate: 'USD',
+      unitBitChecked: '',
+      unitEthChecked: '',
+      selectedExchangeRate: '',
       bitUnitValueList: [
         {label: 'BTC', value: 'btc'},
         {label: 'mBTC', value: 'mbtc'}
@@ -197,7 +198,7 @@ export default {
           this.$nextTick(() => {
             form.render('radio', 'form3')
             form.on('radio(bitUnit)', data => {
-              this.unitChecked = data.value
+              Store.save('bitUnit', data.value)
               this.$emit('setBitUnit', data.value)
             })
           })
@@ -213,7 +214,7 @@ export default {
           this.$nextTick(() => {
             form.render('radio', 'form3')
             form.on('radio(ethUnit)', data => {
-              this.unitChecked = data.value
+              Store.save('ethUnit', data.value)
               this.$emit('setEthUnit', data.value)
             })
           })
@@ -223,6 +224,10 @@ export default {
     }
   },
   mounted () {
+    // 初始化默认值
+    this.unitBitChecked = Store.fetch('bitUnit') ? Store.fetch('bitUnit') : D.unit.btc.mBTC
+    this.unitEthChecked = Store.fetch('ethUnit') ? Store.fetch('ethUnit') : D.unit.eth.GWei
+    this.selectedExchangeRate = Store.fetch('exchange') ? Store.fetch('exchange') : D.unit.legal.USD
     this.seedValue = Store.fetch('seedValue')
     Bus.$on('switchAccount', (index) => { this.currentAccount = this.accountOrder[index] })
     form.render('select', 'form3')
@@ -234,12 +239,14 @@ export default {
     switchExchange () {
       form.on('select(exchange)', (data) => {
         this.selectedExchangeRate = data.value
+        Store.save('exchange', data.value)
         this.$emit('setExchangeRate', data.value)
       })
     },
     switchLang () {
       form.on('select(lang)', (data) => {
         this.$i18n.locale = data.value
+        Store.save('lang', data.value)
         this.$emit('switchSetting', this.$t('message.app_setting'))
       })
     },

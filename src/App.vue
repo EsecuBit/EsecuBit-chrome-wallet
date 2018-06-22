@@ -145,10 +145,12 @@ export default {
   },
   mounted () {
     // 设定默认值
+    this.currentUnit = Store.fetch('bitUnit') ? Store.fetch('bitUnit') : D.unit.btc.mBTC
+    this.currentUnitEth = Store.fetch('ethUnit') ? Store.fetch('ethUnit') : D.unit.eth.GWei
+    this.currentExchangeRate = Store.fetch('exchange') ? Store.fetch('exchange') : D.unit.legal.USD
     let seed = Store.fetch('seedValue') ? Store.fetch('seedValue') : this.generateSeed()
     D.test.txSeed = seed
     D.test.txWalletId = seed
-    this.seedDefaultValue = seed
     // 监听选择事件
     form.render('select', 'form1')
     this.listenLoginStatus()
