@@ -72,7 +72,7 @@
         </div>
         <div class="layui-form-item" v-show="!switchFee">
           <label class="layui-form-label">{{$t('message.send_transaction_fees')}}</label>
-          <div class="layui-input-block input-width" style="margin-left: 270px">
+          <div class="layui-input-block input-width" style="margin-left: 220px">
             <div style="display: inline-block;width: 250px">
               <select name="fee" lay-filter="fee"  style="width: 250px">
               <option v-for="(fee, index) in feeList"  :value="index" :selected="selectedIndex(index)">{{fee.label}}</option>

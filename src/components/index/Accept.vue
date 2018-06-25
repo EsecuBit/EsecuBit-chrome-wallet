@@ -24,14 +24,19 @@
           </div>
         </div>
         <div class="layui-form-item">
-          <div id="code" class="qrcode"></div>
+          <div class="address-container" v-text="promptMsg">
+          </div>
+          <div class="qrcode" v-show="!showAddress" style="line-height: 210px;text-align: center;border: 1px solid #eee">
+            <i class="icon iconfont icon-erweima" style="font-size: 50px"></i>
+          </div>
+          <div id="code" class="qrcode" v-show="showAddress"></div>
         </div>
-        <!--<div class="layui-form-item">-->
-          <!--<div class="address-btn">-->
-            <!--<button class="layui-btn" id="change_address" type="button">&nbsp;Change Address&nbsp;</button>-->
-          <!--</div>-->
-        <!--</div>-->
-        <div class="layui-form-item">
+        <div class="layui-form-item" v-show="showButton" style="text-align: center">
+          <a href="#" class="layui-btn layui-btn-radius address-btn" @click="generateAddress">Generate Address
+            <i class="layui-icon">&#xe623;</i>
+          </a>
+        </div>
+        <div class="layui-form-item" v-show="showAddress">
           <div class="description">{{qrAddressMsg}}</div>
         </div>
       </form>
@@ -50,14 +55,19 @@ export default {
     return {
       selected: '',
       isSelect: false,
+      isFirst: true,
       qrAddress: null,
       accountIndex: 0,
       accountOrder: [],
       currentAccount: {label: ''},
       accountQrcode: null,
-      count: 1,
-      coinType: '123',
-      accountAddress: [ { label: 'accout 1', value: '2313131352' }, {label: 'accout 2', value: 'https://www.baidu.com'} ]
+      coinType: '',
+      accountAddress: [ { label: 'accout 1', value: '2313131352' }, {label: 'accout 2', value: 'https://www.baidu.com'} ],
+      showButton: true,
+      showAddress: false,
+      promptMsg: 'Click the button below to generate a QR code, please check the address and confirm on the device',
+      msg1: 'Click the button below to generate a QR code, please check the address and confirm on the device',
+      msg2: 'Please double-check that your address from the page matches the address on your device'
     }
   },
   computed: {
@@ -75,25 +85,14 @@ export default {
         this.coinType = newValue[0].coinType
         this.accountOrder = newValue
         this.currentAccount = this.accountOrder[0]
-        if (this.count === 1) {
-          console.log('xiaowang')
-          this.accountOrder[0].getAddress().then(value => {
-            console.log(value)
-            this.generateQRCode(value.qrAddress)
-            this.qrAddress = value.address
-          }).catch(value => { console.log('xiaowang') })
-        }
-        this.count++
       }
     },
     accountIndex: {
       handler (newValue, oldValue) {
         this.coinType = this.accountOrder[newValue].coinType
         this.currentAccount = this.accountOrder[newValue]
-        this.accountOrder[newValue].getAddress().then(value => {
-          this.changeQRCode(value.qrAddress)
-          this.qrAddress = value.address
-        }).catch(value => { console.log(value) })
+        this.showButton = true
+        this.showAddress = false
       }
     }
   },
@@ -102,11 +101,26 @@ export default {
     Bus.$on('switchAccount', (index) => {
       this.accountIndex = index
     })
-    Bus.$on('test', function (msg) {
-      console.log(msg)
-    })
   },
   methods: {
+    generateAddress () {
+      if (this.isFirst) {
+        this.currentAccount.getAddress().then(value => {
+          this.generateQRCode(value.qrAddress)
+          this.qrAddress = value.address
+          this.showButton = false
+          this.showAddress = true
+        }).catch(value => { console.log(value) })
+        this.isFirst = false
+      } else {
+        this.currentAccount.getAddress().then(value => {
+          this.changeQRCode(value.qrAddress)
+          this.qrAddress = value.address
+          this.showButton = false
+          this.showAddress = true
+        }).catch(value => { console.log(value) })
+      }
+    },
     generateQRCode (address) {
       // eslint-disable-next-line
       this.accountQrcode = new QRCode('code', {
@@ -149,13 +163,23 @@ export default {
     display: block;
     width: 210px;
     height: 210px;
-    margin: 20px auto 10px;
+    margin: 15px auto 10px;
 
   }
+  .address-container {
+    display: block;
+    position: relative;
+    text-align: center;
+    font-size: 14px;
+    color: #444;
+    width: 450px;
+    height: 45px;
+    line-height: 150%;
+    margin: 0 auto 5px;
+  }
   .address-btn {
-    margin: 0 auto;
-    text-align: center ;
-
+    color: #fff;
+    background-color: rgb(42, 195, 148);
   }
   .description{
     padding: 9px 0!important;
