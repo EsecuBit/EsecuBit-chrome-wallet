@@ -230,7 +230,7 @@ export default {
               area: ['315px', '100px'],
               content: $('#loading')
             })
-            this.esWallet.newAccount(that.selected).then(value => {
+            that.esWallet.newAccount(that.selected).then(value => {
               layer.close(loadingIndex)
               layer.close(index)
               layer.msg('successful', { icon: 1 })
@@ -240,7 +240,6 @@ export default {
               }
             }).catch(value => {
               layer.closeAll()
-              console.log(value, 908909890989)
               layer.msg(that.$t('message.app_error_add_account'), { icon: 2, anim: 6 })
             })
           }

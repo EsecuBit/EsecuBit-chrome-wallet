@@ -183,7 +183,10 @@ export default {
       active: 'active-count',
       green: 'green-font',
       red: 'red-font',
-      currentIndex: 0
+      currentIndex: 0,
+      limit: 5,
+      pageStartIndex: 0,
+      pageEndIndex: 5
     }
   },
   watch: {
@@ -197,7 +200,7 @@ export default {
         this.newAccount = newValue
         let newGridList = []
         let total = []
-        let txInfoPromise = this.newAccount.map(item => item.getTxInfos(0, 3))
+        let txInfoPromise = this.newAccount.map(item => item.getTxInfos(this.pageStartIndex, this.pageEndIndex))
         Promise.all(txInfoPromise).then(data => {
           for (let value of data) {
             newGridList.push(value.txInfos)
@@ -239,7 +242,7 @@ export default {
         // 刷新交易记录
         let total = 0
         this.clearCanvas()
-        this.newAccount[nowIndex].getTxInfos(0, 3).then(value => {
+        this.newAccount[nowIndex].getTxInfos(this.pageStartIndex, this.pageEndIndex).then(value => {
           this.$set(this.gridList, nowIndex, value.txInfos)
           total = value.total
           this.$nextTick(() => {
@@ -333,7 +336,7 @@ export default {
       let total = 0
       this.clearCanvas()
       this.newAccount[index].sync(false).then(value => {
-        this.newAccount[index].getTxInfos(0, 3).then(value => {
+        this.newAccount[index].getTxInfos(this.pageStartIndex, this.pageEndIndex).then(value => {
           this.$set(this.gridList, index, value.txInfos)
           total = value.total
           this.$nextTick(() => {
@@ -403,7 +406,7 @@ export default {
     pageList (i, totalCount) {
       let total = totalCount
       let page = 1
-      let limit = 3
+      let limit = this.limit
       let that = this
       laypage.render({
         elem: 'grid_pager' + i,
@@ -412,7 +415,7 @@ export default {
         curr: page,
         prev: that.$t('message.accounts_prev'),
         next: that.$t('message.accounts_next'),
-        layout: ['prev', 'page', 'next', 'count'],
+        layout: ['first', 'prev', 'page', 'next', 'last ', 'count'],
         jump: function (obj, first) {
           // obj包含了当前分页的所有参数，比如：
           // console.log(obj.curr) // 得到当前页，以便向服务端请求对应页的数据。

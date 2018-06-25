@@ -97,7 +97,8 @@ export const message = {
   setting_seed: '选择种子',
   setting_current_seed: '当前种子',
   setting_random_produce: '随机生成',
-  setting_setting: '设定'
+  setting_setting: '设定',
+  setting_setting_success: '设置成功'
 
 
 }

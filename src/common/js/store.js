@@ -6,6 +6,18 @@ export default {
   save (key, value){
     window.localStorage.setItem(key,JSON.stringify(value))
   },
+  fetchApp (key) {
+    let res = null
+    chrome.storage.local.get(key, function (result) {
+      res = result
+    })
+    return res
+  },
+  saveApp (key, value){
+    let obj = {}
+    obj[key] = value
+    chrome.storage.local.set(obj)
+  },
   generateSeed () {
     let seedValue = D.test.generateSeed()
     this.save('seedValue', seedValue)

@@ -7,7 +7,7 @@ export const message = {
   app_add_accounts: ' Add Accounts',
   app_select_prompt: 'Please select the type of account you want to create!',
   app_accounts_type: 'Account Type',
-  app_error_prompt_msg: 'The current account does not have permission to create an account !!',
+  app_error_prompt_msg: 'You cannot register an account if you already have an empty account !!',
   app_init_new_account: 'Initializing new account, please wait a moment...',
 
   app_error_get_wallet: 'Failed to get wallet information',
@@ -99,7 +99,8 @@ export const message = {
   setting_seed: 'Seed',
   setting_current_seed: 'Current Seed',
   setting_random_produce: 'Randomly generated',
-  setting_setting: 'Setting'
+  setting_setting: 'Setting',
+  setting_setting_success: 'Successfully set up'
 
 
 }

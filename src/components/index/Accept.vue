@@ -93,7 +93,7 @@ export default {
         this.accountOrder[newValue].getAddress().then(value => {
           this.changeQRCode(value.qrAddress)
           this.qrAddress = value.address
-        }).catch(value => { console.log(value)  })
+        }).catch(value => { console.log(value) })
       }
     }
   },

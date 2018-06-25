@@ -99,8 +99,8 @@
               <div class="layui-form-item">
                 <label class="layui-form-label"></label>
                 <div class="layui-input-inline input-width">
-                    <button class="layui-btn"  type="button" @click="randomGenerate">{{$t('message.setting_random_produce')}}</button>
-                  <button class="layui-btn"  type="button" @click="setSeed">{{$t('message.setting_setting')}}</button>
+                    <button class="layui-btn layui-btn-sm "  type="button" @click="randomGenerate">{{$t('message.setting_random_produce')}}</button>
+                  <button class="layui-btn layui-btn-sm layui-btn-normal"  type="button" @click="setSeed">{{$t('message.setting_setting')}}</button>
                 </div>
               </div>
             </form>
@@ -118,7 +118,8 @@ import Store from '../../common/js/store'
 const form = layui.form
 // eslint-disable-next-line
 const $ = layui.jquery
-
+// eslint-disable-next-line
+const layer = layui.layer
 export default {
   name: 'Setting',
   props: ['walletInfo', 'accountInfo', 'seedDefaultValue'],
@@ -277,6 +278,7 @@ export default {
       Store.save('seedValue', this.seedValue)
       this.D.test.txSeed = this.seedValue
       this.D.test.txWalletId = this.seedValue
+      layer.msg(this.$t('message.setting_setting_success'), { icon: 1 })
     }
   }
 }
@@ -309,5 +311,10 @@ export default {
   }
   .layui-form-label {
     font-size: 13px;
+  }
+  .layui-btn-normal {
+    background:#4898d5;
+    border-color:#4898d5;
+    color: #fff;
   }
 </style>

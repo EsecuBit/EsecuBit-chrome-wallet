@@ -36,7 +36,7 @@
               <input type="text" v-model="addressValue" name="address"  lay-verify="isEmpty"  :placeholder="$t('message.send_address')"
                      class="layui-input" style="width: 300px;text-align: end;" id="transactionAddress">
               <span v-show="isDisplayIcon">
-                <a v-show="isError" style="color: #e74c3c; vertical-align: sub">
+                <a v-show="isError" style="color: #e74c3c; vertical-align: sub" @click="clearAddress">
                   <i class="layui-icon">&#x1007;</i>
                 </a>
                 <a v-show="!isError" href="#" style="color: #009a61;vertical-align: sub">
@@ -73,8 +73,8 @@
         <div class="layui-form-item" v-show="!switchFee">
           <label class="layui-form-label">{{$t('message.send_transaction_fees')}}</label>
           <div class="layui-input-block input-width" style="margin-left: 270px">
-            <div style="display: inline-block;width: 200px">
-              <select name="fee" lay-filter="fee"  style="width: 200px">
+            <div style="display: inline-block;width: 250px">
+              <select name="fee" lay-filter="fee"  style="width: 250px">
               <option v-for="(fee, index) in feeList"  :value="index" :selected="selectedIndex(index)">{{fee.label}}</option>
               </select>
             </div>
@@ -230,6 +230,9 @@ export default {
     Bus.$on('switchAccount', (index) => { this.currentAccount = this.accountOrder[index] })
   },
   methods: {
+    clearAddress () {
+      this.addressValue = ''
+    },
     verifyForm () {
       let that = this
       form.verify({
@@ -295,6 +298,7 @@ export default {
       this.customFees = null
     },
     submitSendData () {
+      layer.msg(this.$t('message.send_is_trading'), { icon: 0 })
       // 验证表单
       if (!this.switchFee) {
         if (!(this.selected && this.amountValue !== '' && this.addressValue)) return false
@@ -311,9 +315,9 @@ export default {
           value: moneyValue
         }]
       }
-      layer.msg(this.$t('message.send_is_trading'), { icon: 0 })
       this.currentAccount.prepareTx(formData).then(value => this.currentAccount.buildTx(value))
         .then(value => {
+          console.log(value, 909090)
           return this.currentAccount.sendTx(value)
         }).then(value => {
           layer.closeAll('msg')
