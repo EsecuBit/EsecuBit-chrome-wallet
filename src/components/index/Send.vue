@@ -10,20 +10,23 @@
       <form class="layui-form customize-form" action="" lay-filter="form1">
         <div class="layui-form-item">
           <label class="layui-form-label account-label" >{{$t('message.send_current_account')}}</label>
-          <div class="layui-input-block account-info" style="margin-left: 465px">
+          <div class="layui-input-block account-info " >
             <div class="account-msg">{{currentAccount.label}}</div>
           </div>
         </div>
         <div class="layui-form-item" style="margin-bottom: 5px">
-          <label class="layui-form-label">{{$t('message.send_amount')}}</label>
-          <div class="layui-input-block input-width">
-            <input type="number" v-model.number="amountValue" name="money" id="money" lay-verify="isEmpty" v-if="coinType"
-                   :placeholder="$t('message.send_amount')"
-                   autocomplete="off" class="layui-input" style="width: 300px;text-align: end;">
-            <span v-if="coinType" style="font-size: 16px;font-weight: 600;color:#000;opacity: 0.6">{{currentDisplayUnit(currentAccount.coinType)}}</span>
-            <span class="usd-amount" v-if="coinType && currentUnit && currentExchangeRate && isDisplayExchange">{{toExchangeText}}</span>
+          <label class="layui-form-label" style="padding: 17px 15px">{{$t('message.send_amount')}}</label>
+          <div class="layui-input-block input-width" style="position: relative;height: 55px">
+            <div style="width: 300px">
+              <div v-if="coinType" class="unit-display" >{{currentDisplayUnit(currentAccount.coinType)}}</div>
+              <input type="number" v-model.number="amountValue" name="money" id="money" lay-verify="isEmpty" v-if="coinType"
+                     :placeholder="$t('message.send_amount')"
+                     autocomplete="off" class="layui-input amount-input">
+            </div>
+            <button class="layui-btn layui-btn-radius layui-btn-sm max-btn" type="button" @click="maxAmount">MAX</button>
+            <div class="usd-amount" v-if="coinType && currentUnit && currentExchangeRate && isDisplayExchange">{{toExchangeText}}</div>
           </div>
-          <!--<button class="layui-btn layui-btn-radius layui-btn-primary pull-left" type="button" @click="maxAmount">MAX</button>-->
+
         </div>
         <!--<div class="switch-money">-->
           <!--<label class="blank-label"></label>-->
@@ -34,7 +37,7 @@
             <label class="layui-form-label">{{$t('message.send_address')}}</label>
             <div class="layui-input-block input-width">
               <input type="text" v-model="addressValue" name="address"  lay-verify="isEmpty"  :placeholder="$t('message.send_address')"
-                     class="layui-input" style="width: 300px;text-align: end;" id="transactionAddress">
+                     class="layui-input" style="width: 300px;text-align: right;" id="transactionAddress">
               <span v-show="isDisplayIcon">
                 <a v-show="isError" style="color: #e74c3c; vertical-align: sub" @click="clearAddress">
                   <i class="layui-icon">&#x1007;</i>
@@ -267,7 +270,21 @@ export default {
       }
     },
     maxAmount () {
-      this.amountValue = 200
+      let getAmountValue = this.amountValue ? this.amountValue : 0
+      let sendAmountValue = this.toMinCoinUnit(getAmountValue)
+      let getAddress = this.addressValue
+      let formData = {
+        sendAll: true,
+        feeRate: Number(this.switchFee ? this.customFees : this.selected),
+        outputs: [{
+          address: getAddress,
+          value: sendAmountValue
+        }]
+      }
+      this.currentAccount.prepareTx(formData).then(result => {
+        this.amountValue = this.toTargetCoinUnit(result.outputs[0].value)
+      })
+        .catch(value => {})
     },
     verifyAddress () {
       if (!this.currentAccount) return false
@@ -317,7 +334,6 @@ export default {
       }
       this.currentAccount.prepareTx(formData).then(value => this.currentAccount.buildTx(value))
         .then(value => {
-          console.log(value, 909090)
           return this.currentAccount.sendTx(value)
         }).then(value => {
           layer.closeAll('msg')
@@ -385,11 +401,54 @@ export default {
     display: block;
     padding: 9px 15px;
   }
+  .amount-input{
+    padding-left: 0;
+    padding-right: 8px;
+    max-width: 210px;
+    text-align: end;
+    height: 55px;
+    font-size: 20px;
+    float: right;
+  }
+  .amount-input:after {
+    content: "";
+    height: 0;
+    line-height: 0;
+    clear: both;
+  }
+  .unit-display:after {
+    content: "";
+    height: 0;
+    line-height: 0;
+    clear: both;
+  }
+  .unit-display {
+    display: inline-block;
+    float: right;
+    font-size: 20px;
+    font-weight: 600;
+    color:#000;
+    height: 55px;
+    line-height: 55px;
+    opacity: 0.6
+  }
   .usd-amount{
+    position: absolute;
+    right: 198px;
+    bottom: 3px;
     font-size: 12px;
     margin-left: 5px;
     color: #999;
     padding-left: 3px;
+  }
+  .max-btn {
+    position: absolute;
+    left: 320px;
+    top:13px;
+  }
+  .account-info {
+    text-align: right;
+    width: 300px;
   }
   .unit{
     color: #999;

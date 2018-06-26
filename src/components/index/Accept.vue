@@ -8,36 +8,33 @@
     </div>
     <div class="site-text site-block">
       <form class="layui-form"  lay-filter="form2">
-        <div class="layui-form-item">
+        <div class="layui-form-item" style="margin-bottom: 0">
           <label class="layui-form-label account-label" >{{$t('message.accept_current_account')}}</label>
           <div class="layui-input-block account-info">
             <div class="account-msg">{{currentAccount.label}}</div>
           </div>
         </div>
-        <div class="layui-form-item" v-if="isSelect">
-          <label class="layui-form-label account-label" >Choose an Account</label>
-          <div class="layui-input-block">
-            <select name="receiveAccount" lay-verify="required" lay-filter="receiveAccount" v-model="selected">
-              <option disabled value="">please choose</option>
-              <option v-for="account in accountAddress" v-bind:value="account.value">{{account.label}}</option>
-            </select>
-          </div>
-        </div>
         <div class="layui-form-item">
-          <div class="address-container" v-text="promptMsg">
+          <div class="layui-form-label tips">Tips：</div>
+          <div class="layui-input-block address-container" v-text="promptMsg">
           </div>
           <div class="qrcode" v-show="!showAddress" style="line-height: 210px;text-align: center;border: 1px solid #eee">
             <i class="icon iconfont icon-erweima" style="font-size: 50px"></i>
           </div>
           <div id="code" class="qrcode" v-show="showAddress"></div>
         </div>
-        <div class="layui-form-item" v-show="showButton" style="text-align: center">
-          <a href="#" class="layui-btn layui-btn-radius address-btn" @click="generateAddress">Generate Address
-            <i class="layui-icon">&#xe623;</i>
-          </a>
+        <div class="layui-form-item" v-show="showButton" >
+          <div class="layui-input-block account-info">
+            <a href="#" class="layui-btn layui-btn-radius address-btn" @click="generateAddress">Generate Address
+              <i class="layui-icon">&#xe623;</i>
+            </a>
+          </div>
         </div>
         <div class="layui-form-item" v-show="showAddress">
-          <div class="description">{{qrAddressMsg}}</div>
+          <label class="layui-form-label account-label" >{{$t('message.accept_qrcode_msg')}}</label>
+          <div class="layui-input-block account-info">
+            <div class="description">{{qrAddress}}</div>
+          </div>
         </div>
       </form>
     </div>
@@ -53,8 +50,6 @@ export default {
   props: ['accountInfo'],
   data () {
     return {
-      selected: '',
-      isSelect: false,
       isFirst: true,
       qrAddress: null,
       accountIndex: 0,
@@ -62,7 +57,6 @@ export default {
       currentAccount: {label: ''},
       accountQrcode: null,
       coinType: '',
-      accountAddress: [ { label: 'accout 1', value: '2313131352' }, {label: 'accout 2', value: 'https://www.baidu.com'} ],
       showButton: true,
       showAddress: false,
       promptMsg: 'Click the button below to generate a QR code, please check the address and confirm on the device',
@@ -71,9 +65,6 @@ export default {
     }
   },
   computed: {
-    qrAddressMsg () {
-      return this.$t('message.accept_qrcode_msg') + this.qrAddress
-    },
     receiveCoinTypeMsg () {
       let coinTypeName = this.D.isBtc(this.coinType) ? 'Bitcoin' : 'Ether'
       return this.$t('message.accept_accept_msg') + ' ' + coinTypeName
@@ -91,8 +82,7 @@ export default {
       handler (newValue, oldValue) {
         this.coinType = this.accountOrder[newValue].coinType
         this.currentAccount = this.accountOrder[newValue]
-        this.showButton = true
-        this.showAddress = false
+        this.initDisplay()
       }
     }
   },
@@ -108,18 +98,26 @@ export default {
         this.currentAccount.getAddress().then(value => {
           this.generateQRCode(value.qrAddress)
           this.qrAddress = value.address
-          this.showButton = false
-          this.showAddress = true
+          this.switchDisplay()
         }).catch(value => { console.log(value) })
         this.isFirst = false
       } else {
         this.currentAccount.getAddress().then(value => {
           this.changeQRCode(value.qrAddress)
           this.qrAddress = value.address
-          this.showButton = false
-          this.showAddress = true
+          this.switchDisplay()
         }).catch(value => { console.log(value) })
       }
+    },
+    initDisplay () {
+      this.showButton = true
+      this.showAddress = false
+      this.promptMsg = this.msg1
+    },
+    switchDisplay () {
+      this.showButton = false
+      this.showAddress = true
+      this.promptMsg = this.msg2
     },
     generateQRCode (address) {
       // eslint-disable-next-line
@@ -149,7 +147,7 @@ export default {
   .account-label{
     font-size: 13px;
     padding-left: 0;
-    width: 150px;
+    width: 180px;
   }
   .account-msg {
     display: inline-block;
@@ -158,35 +156,42 @@ export default {
     color: #e74c3c;
     font-weight: 600;
   }
+  .account-info {
+    margin-left: 190px;
+  }
   /*自定义的qrcode*/
   .qrcode{
     display: block;
     width: 210px;
     height: 210px;
-    margin: 15px auto 10px;
-
+    margin-left: 190px;
   }
   .address-container {
-    display: block;
-    position: relative;
-    text-align: center;
+    text-align: left;
     font-size: 14px;
     color: #444;
-    width: 450px;
-    height: 45px;
+    width: 550px;
+    height: 63px;
+    padding: 9px 0;
     line-height: 150%;
-    margin: 0 auto 5px;
+    margin-left: 190px;
+    margin-bottom: 5px;
+  }
+  .tips {
+    height: 45px;
+    width: 180px;
+    line-height: 150%;
+    text-align: right;
   }
   .address-btn {
     color: #fff;
     background-color: rgb(42, 195, 148);
+    width: 210px;
   }
   .description{
+    display: inline-block;
     padding: 9px 0!important;
-    margin: 0 auto;
-    display: block;
-    line-height: 20px;
-    color: #999!important;
-    text-align: center ;
+    color: #333!important;
+    font-weight: bold;
   }
 </style>
