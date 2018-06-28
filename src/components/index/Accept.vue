@@ -15,7 +15,7 @@
           </div>
         </div>
         <div class="layui-form-item">
-          <div class="layui-form-label tips">Tips：</div>
+          <div class="layui-form-label tips">{{$t('message.accept_tips')}}</div>
           <div class="layui-input-block address-container" v-text="promptMsg">
           </div>
           <div class="qrcode" v-show="!showAddress" style="line-height: 210px;text-align: center;border: 1px solid #eee">
@@ -25,7 +25,7 @@
         </div>
         <div class="layui-form-item" v-show="showButton" >
           <div class="layui-input-block account-info">
-            <a href="#" class="layui-btn layui-btn-radius address-btn" @click="generateAddress">Generate Address
+            <a href="#" class="layui-btn layui-btn-radius address-btn" @click="generateAddress">{{$t('message.accept_generate_address')}}
               <i class="layui-icon">&#xe623;</i>
             </a>
           </div>
@@ -59,9 +59,9 @@ export default {
       coinType: '',
       showButton: true,
       showAddress: false,
-      promptMsg: 'Click the button below to generate a QR code, please check the address and confirm on the device',
-      msg1: 'Click the button below to generate a QR code, please check the address and confirm on the device',
-      msg2: 'Please double-check that your address from the page matches the address on your device'
+      promptMsg: this.$t('message.accept_prompt_msg1'),
+      msg1: this.$t('message.accept_prompt_msg1'),
+      msg2: this.$t('message.accept_prompt_msg2')
     }
   },
   computed: {

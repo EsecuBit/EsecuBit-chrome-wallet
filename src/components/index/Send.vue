@@ -137,9 +137,10 @@ export default {
     totalFeeDesc () {
       if (this.coinType && this.currentUnit && this.currentExchangeRate) {
         let nowUnit = this.currentDisplayUnit(this.coinType)
+        let exchange = this.esWallet.convertValue(this.coinType, this.totalFee, nowUnit, this.currentExchangeRate).toFixed(2)
         if (this.isDisplayDetails) {
           return this.totalFee.toFixed(2) + ' ' + nowUnit + ' (' +
-            this.esWallet.convertValue(this.coinType, this.totalFee, nowUnit, this.currentExchangeRate).toFixed(2) + ' ' + this.currentExchangeRate + ')' + ' '
+             this.formatNum(exchange) + ' ' + this.currentExchangeRate + ')' + ' '
         } else {
           return ''
         }
@@ -148,7 +149,8 @@ export default {
     toExchangeText () {
       if (this.currentUnit && this.currentExchangeRate) {
         let nowUnit = this.currentDisplayUnit(this.coinType)
-        return this.esWallet.convertValue(this.coinType, this.amountValue, nowUnit, this.currentExchangeRate).toFixed(2) + ' ' + this.currentExchangeRate
+        let exchange = this.esWallet.convertValue(this.coinType, this.amountValue, nowUnit, this.currentExchangeRate).toFixed(2)
+        return this.formatNum(exchange) + ' ' + this.currentExchangeRate
       }
     },
     sendCoinTypeMsg () {
@@ -197,6 +199,7 @@ export default {
       handler (newValue, oldValue) {
         this.coinType = newValue.coinType
         this.isDisplayDetails = false
+        this.isDisplayExchange = false
         if (newValue.getSuggestedFee) {
           let oldFeeList = newValue.getSuggestedFee()
           let newFeeList = []
@@ -369,6 +372,9 @@ export default {
       let name = 'Bitcoin Address ' + this.count
       this.addressList.push(name)
       this.count++
+    },
+    formatNum (num) {
+      return parseFloat(num).toLocaleString()
     }
   }
 }

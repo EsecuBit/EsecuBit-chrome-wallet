@@ -39,7 +39,7 @@ export const message = {
   accounts_table_operation: '操作',
   accounts_table_search: '查询',
   accounts_details: '明细',
-  accounts_enter_username: '请输入用户名 !',
+  accounts_enter_username: '请输入用户名 ！',
   accounts_form_username: '账户名',
   accounts_form_placeholder: '输入一个新账户名',
   accounts_name: '名称',
@@ -58,7 +58,7 @@ export const message = {
   accounts_sync_error: '同步失败',
   accounts_sync_success: '同步成功',
 
-  send_prompt_msg: '请确认您输入的地址是有效的 ！！',
+  send_prompt_msg: '在交易前请确认您输入的地址、金额、交易费用正确 ！！',
   send_current_account: '当前账户',
   send_amount: '金额',
   send_address: '地址',
@@ -85,6 +85,10 @@ export const message = {
   accept_current_account: '当前账户 ：',
   accept_qrcode_msg: '二维码地址 ：',
   accept_accept_msg: '接收',
+  accept_generate_address: '生成地址',
+  accept_prompt_msg1: '请点击下面的按钮生成账户的地址，同时核对是否与USB设备上的地址匹配',
+  accept_prompt_msg2: '请核对下面的地址与设备上的地址是否匹配',
+  accept_tips: '温馨提示：',
 
   setting_display: '显示',
   setting_hardware: '硬件信息',

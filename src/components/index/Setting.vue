@@ -122,7 +122,7 @@ const $ = layui.jquery
 const layer = layui.layer
 export default {
   name: 'Setting',
-  props: ['walletInfo', 'accountInfo', 'seedDefaultValue'],
+  props: ['walletInfo', 'accountInfo'],
   data () {
     return {
       hardwareList: [
@@ -167,11 +167,6 @@ export default {
       },
       deep: true
     },
-    seedDefaultValue: {
-      handler (newValue, oldValue) {
-        this.seedValue = newValue
-      }
-    },
     accountInfo: {
       handler (newValue, oldValue) {
         this.accountOrder = newValue
@@ -192,7 +187,8 @@ export default {
           this.$nextTick(() => {
             form.render('radio', 'form3')
             form.on('radio(bitUnit)', data => {
-              Store.save('bitUnit', data.value)
+              // Store.save('bitUnit', data.value)
+              Store.saveChromeStore('bitUnit', data.value)
               this.$emit('setBitUnit', data.value)
             })
           })
@@ -208,7 +204,8 @@ export default {
           this.$nextTick(() => {
             form.render('radio', 'form3')
             form.on('radio(ethUnit)', data => {
-              Store.save('ethUnit', data.value)
+              // Store.save('ethUnit', data.value)
+              Store.saveChromeStore('ethUnit', data.value)
               this.$emit('setEthUnit', data.value)
             })
           })
@@ -218,23 +215,39 @@ export default {
     }
   },
   mounted () {
-    // 初始化默认值
-    const getExchangeList = this.D.suppertedLegals()
-    this.initLang = Store.fetch('lang') ? Store.fetch('lang') : navigator.language
-    this.exchangeRate = this.editExchangeList(getExchangeList)
-    this.unitBitChecked = Store.fetch('bitUnit') ? Store.fetch('bitUnit') : this.D.unit.btc.mBTC
-    this.unitEthChecked = Store.fetch('ethUnit') ? Store.fetch('ethUnit') : this.D.unit.eth.GWei
-    this.selectedExchangeRate = Store.fetch('exchange') ? Store.fetch('exchange') : this.D.unit.legal.USD
-    if (Store.fetch('seedValue')) this.seedValue = Store.fetch('seedValue')
+    this.init()
     Bus.$on('switchAccount', (index) => { this.currentAccount = this.accountOrder[index] })
-    this.$nextTick(() => {
-      form.render('select', 'form3')
-    })
     this.switchLang()
     this.switchExchange()
     this.switchTab()
   },
   methods: {
+    async init () {
+      // 初始化默认值
+      const getExchangeList = this.D.suppertedLegals()
+      this.exchangeRate = this.editExchangeList(getExchangeList)
+      if (localStorage) {
+        this.initLang = Store.fetch('lang') ? Store.fetch('lang') : navigator.language
+        this.unitBitChecked = Store.fetch('bitUnit') ? Store.fetch('bitUnit') : this.D.unit.btc.mBTC
+        this.unitEthChecked = Store.fetch('ethUnit') ? Store.fetch('ethUnit') : this.D.unit.eth.GWei
+        this.selectedExchangeRate = Store.fetch('exchange') ? Store.fetch('exchange') : this.D.unit.legal.USD
+        if (Store.fetch('seedValue')) this.seedValue = Store.fetch('seedValue')
+      } else {
+        const lang = await Store.setPromise('lang')
+        const bitUnit = await Store.setPromise('bitUnit')
+        const ethUnit = await Store.setPromise('ethUnit')
+        const exchange = await Store.setPromise('exchange')
+        const seedValue = await Store.setPromise('seedValue')
+        this.initLang = lang['lang'] ? lang['lang'] : navigator.language
+        this.unitBitChecked = bitUnit['bitUnit'] ? bitUnit['bitUnit'] : this.D.unit.btc.mBTC
+        this.unitEthChecked = ethUnit['ethUnit'] ? ethUnit['ethUnit'] : this.D.unit.eth.GWei
+        this.selectedExchangeRate = exchange['exchange'] ? exchange['exchange'] : this.D.unit.legal.USD
+        this.seedValue = seedValue['seedValue'] ? seedValue['seedValue'] : ''
+      }
+      this.$nextTick(() => {
+        form.render('select', 'form3')
+      })
+    },
     editExchangeList (arry) {
       let exRate = []
       if (Array.isArray(arry) && arry.length > 0) {
@@ -247,14 +260,16 @@ export default {
     switchExchange () {
       form.on('select(exchange)', (data) => {
         this.selectedExchangeRate = data.value
-        Store.save('exchange', data.value)
+        Store.saveChromeStore('exchange', data.value)
+        // Store.save('exchange', data.value)
         this.$emit('setExchangeRate', data.value)
       })
     },
     switchLang () {
       form.on('select(lang)', (data) => {
         this.$i18n.locale = data.value
-        Store.save('lang', data.value)
+        Store.saveChromeStore('lang', data.value)
+        // Store.save('lang', data.value)
         this.$emit('switchSetting', this.$t('message.app_setting'))
       })
     },
@@ -275,7 +290,8 @@ export default {
       this.seedValue = this.D.test.generateSeed()
     },
     setSeed () {
-      Store.save('seedValue', this.seedValue)
+      Store.saveChromeStore('seedValue', this.seedValue)
+      // Store.save('seedValue', this.seedValue)
       this.D.test.txSeed = this.seedValue
       this.D.test.txWalletId = this.seedValue
       layer.msg(this.$t('message.setting_setting_success'), { icon: 1 })

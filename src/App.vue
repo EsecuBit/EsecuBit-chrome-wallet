@@ -45,7 +45,7 @@
               </div>
               <div class="main-tab-item">
                 <Setting @switchSetting = "switchSetting" @settingColor = "settingColor" @setExchangeRate="setExchangeRate"
-                         :seed-default-value="seedDefaultValue" @setBitUnit="setBitUnit"  @setEthUnit="setEthUnit" :account-info ="accounts" :wallet-info="WalletInfo"/>
+                         @setBitUnit="setBitUnit"  @setEthUnit="setEthUnit" :account-info ="accounts" :wallet-info="WalletInfo"/>
               </div>
             </div>
           </div>
@@ -123,10 +123,9 @@ export default {
       selected: '',
       isHasAccount: true,
       accountType: [],
-      currentUnit: this.D.unit.btc.mBTC,
-      currentUnitEth: this.D.unit.eth.GWei,
-      currentExchangeRate: this.D.unit.legal.USD,
-      seedDefaultValue: Store.fetch('seedValue')
+      currentUnit: '',
+      currentUnitEth: '',
+      currentExchangeRate: ''
     }
   },
   watch: {
@@ -142,12 +141,10 @@ export default {
       }
     }
   },
+  beforeMount () {
+    this.init()
+  },
   mounted () {
-    // 设定默认值
-    this.currentUnit = Store.fetch('bitUnit') ? Store.fetch('bitUnit') : this.D.unit.btc.mBTC
-    this.currentUnitEth = Store.fetch('ethUnit') ? Store.fetch('ethUnit') : this.D.unit.eth.GWei
-    this.currentExchangeRate = Store.fetch('exchange') ? Store.fetch('exchange') : this.D.unit.legal.USD
-
     // 监听选择事件
     form.render('select', 'form1')
     this.listenLoginStatus()
@@ -162,6 +159,20 @@ export default {
     })
   },
   methods: {
+    async init () {
+      if (localStorage) {
+        this.currentUnit = Store.fetch('bitUnit') ? Store.fetch('bitUnit') : this.D.unit.btc.mBTC
+        this.currentUnitEth = Store.fetch('ethUnit') ? Store.fetch('ethUnit') : this.D.unit.eth.GWei
+        this.currentExchangeRate = Store.fetch('exchange') ? Store.fetch('exchange') : this.D.unit.legal.USD
+      } else {
+        const bitUnit = await Store.setPromise('bitUnit')
+        const ethUnit = await Store.setPromise('ethUnit')
+        const exchange = await Store.setPromise('exchange')
+        this.currentUnit = bitUnit['bitUnit'] ? bitUnit['bitUnit'] : this.D.unit.btc.mBTC
+        this.currentUnitEth = ethUnit['ethUnit'] ? ethUnit['ethUnit'] : this.D.unit.eth.GWei
+        this.currentExchangeRate = exchange['exchange'] ? exchange['exchange'] : this.D.unit.legal.USD
+      }
+    },
     setExchangeRate (...data) {
       this.currentExchangeRate = data[0]
     },

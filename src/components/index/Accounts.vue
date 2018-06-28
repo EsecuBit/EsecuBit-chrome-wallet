@@ -3,8 +3,8 @@
   <div class="site-tree">
     <ul class="layui-tree">
       <template v-for="item in wallet">
-        <li class="menu-title"><h2>{{item.label}}</h2></li>
-        <li class="site-tree-noicon tab-title-1" v-for="accout in item.account"><a href="#"><cite>{{accout}}</cite><em>{{accout}}</em></a></li>
+        <li class="menu-title" v-if="item.label"><h2>{{item.label}}</h2></li>
+        <li class="site-tree-noicon tab-title-1" v-for="account in item.account"><a href="#"><cite>{{account}}</cite><em>{{account}}</em></a></li>
       </template>
     </ul>
   </div>
@@ -15,7 +15,7 @@
           <div class="account-msg">
             <span class="layui-badge-dot layui-bg-green"></span>
             <span>{{$t('message.accounts_account')}}</span>
-           <span style="color: #e74c3c">{{newAccount[index].label}}</span>
+           <span style="color: #e74c3c" v-if="newAccount.length > 0">{{newAccount[index].label}}</span>
             <a title="edit" href="#" class="edit-account" @click="editAccount(index)">
               <i class="icon iconfont icon-bianji1 "></i>
             </a>
@@ -23,10 +23,10 @@
           <div class="account-msg">
             <span class="layui-badge-dot layui-bg-green"></span>
             <span>{{$t('message.accounts_balance')}}</span>
-            <span v-if="coinTypeList[index]">{{toTargetCoinUnit(coinTypeList[index], newAccount[index].balance).toFixed(2)}}</span>
+            <span v-if="coinTypeList[index] && newAccount.length > 0">{{formatBalance(newAccount[index].coinType, newAccount[index].balance)}}</span>
             <span v-if="coinTypeList[index]">{{currentDisplayUnit(coinTypeList[index])}}</span>
             <span class="exchange-rate">(</span>
-            <span v-if="currentExchangeRate && coinTypeList[index]" class="exchange-rate">{{toExchangeText(coinTypeList[index], newAccount[index].balance).toFixed(2)}}</span>
+            <span v-if="currentExchangeRate && coinTypeList[index] && newAccount[index].balance" class="exchange-rate">{{toExchangeText(coinTypeList[index], newAccount[index].balance)}}</span>
             <span class="exchange-rate">{{currentExchangeRate}}</span>
             <span class="exchange-rate">)</span>
           </div>
@@ -168,7 +168,7 @@ export default {
         'layui-anim-loop': false
       },
       renameValue: '',
-      newAccount: [{label: '', balance: 0}],
+      newAccount: [],
       wallet: [
         {
           label: 'bitcoin',
@@ -268,6 +268,9 @@ export default {
         return address
       }
     },
+    formatBalance (coinType, value) {
+      return this.toTargetCoinUnit(coinType, value).toFixed(2)
+    },
     tableBlockNumber (table) {
       let newValue = this.toTargetCoinUnit(table.coinType, table.value)
       return newValue.toFixed(2) + ' ' + this.currentDisplayUnit(table.coinType)
@@ -277,7 +280,8 @@ export default {
     },
     toExchangeText (coinType, value) {
       let newValue = this.toTargetCoinUnit(coinType, value)
-      return this.D.isBtc(coinType) ? this.esWallet.convertValue(coinType, newValue, this.currentUnit, this.currentExchangeRate) : this.esWallet.convertValue(coinType, newValue, this.currentUnitEth, this.currentExchangeRate)
+      let exchange = this.D.isBtc(coinType) ? this.esWallet.convertValue(coinType, newValue, this.currentUnit, this.currentExchangeRate) : this.esWallet.convertValue(coinType, newValue, this.currentUnitEth, this.currentExchangeRate)
+      return this.formatNum(exchange.toFixed(2))
     },
     toTargetCoinUnit (coinType, value) {
       return this.D.isBtc(coinType) ? this.esWallet.convertValue(coinType, value, this.D.unit.btc.santoshi, this.currentUnit) : this.esWallet.convertValue(coinType, value, this.D.unit.eth.Wei, this.currentUnitEth)
@@ -498,6 +502,9 @@ export default {
       arr.push(':')
       arr.push(ss)
       return arr.join('')
+    },
+    formatNum (num) {
+      return parseFloat(num).toLocaleString()
     }
   }
 }

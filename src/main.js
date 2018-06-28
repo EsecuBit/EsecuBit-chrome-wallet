@@ -6,24 +6,24 @@ import Store from './common/js/store'
 import VueI18n from 'vue-i18n'
 import {D, EsWallet} from 'chrome-excelsecu-wallet'
 
-Store.setSeed()
-
-Vue.prototype.esWallet = new EsWallet()
-Vue.prototype.D = D
-Vue.config.productionTip = false
-Vue.use(VueI18n)
-const currentLang = Store.fetch('lang') ? Store.fetch('lang') : navigator.language
-const i18n = new VueI18n({
-  locale: currentLang,
-  messages: {
-    'zh-CN': require('./common/js/lang/cn'),
-    'en-US': require('./common/js/lang/en')
-  }
-})
-/* eslint-disable no-new */
-new Vue({
-  el: '#app',
-  i18n,
-  components: { App },
-  template: '<App/>'
+Store.init().then(value => {
+  Vue.prototype.esWallet = new EsWallet()
+  Vue.prototype.D = D
+  Vue.config.productionTip = false
+  Vue.use(VueI18n)
+  Store.getLang().then(value => {
+    const i18n = new VueI18n({
+      locale: value,
+      messages: {
+        'zh-CN': require('./common/js/lang/cn'),
+        'en-US': require('./common/js/lang/en')
+      }
+    })
+    /* eslint-disable no-new */
+    new Vue({
+      el: '#app',
+      i18n,
+      render: h => h(App)
+    })
+  })
 })
