@@ -233,12 +233,10 @@ export default {
       this.esWallet.listenTxInfo((error, txInfo) => {
         console.log('新交易记录', error, txInfo)
         let nowIndex = 0
-        console.log(this.newAccount, '新账户')
+        if (this.newAccount.length === 0) return false
         this.newAccount.forEach((item, index) => {
-          console.log(item)
           if (item.accountId === txInfo.accountId) nowIndex = index
         })
-        console.log(nowIndex, 'index')
         // 刷新交易记录
         let total = 0
         this.clearCanvas()

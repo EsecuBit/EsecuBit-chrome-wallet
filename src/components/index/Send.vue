@@ -38,12 +38,15 @@
             <div class="layui-input-block input-width">
               <input type="text" v-model="addressValue" name="address"  lay-verify="isEmpty"  :placeholder="$t('message.send_address')"
                      class="layui-input" style="width: 300px;text-align: right;" id="transactionAddress">
-              <span v-show="isDisplayIcon">
-                <a v-show="isError" style="color: #e74c3c; vertical-align: sub" @click="clearAddress">
+              <span v-show="isDisplayIcon" style="margin-left: 10px">
+                <a v-show="isAddressError" style="color: #e74c3c; vertical-align: sub" @click="clearAddress">
                   <i class="layui-icon">&#x1007;</i>
                 </a>
-                <a v-show="!isError" href="#" style="color: #009a61;vertical-align: sub">
+                <a v-show="isAddressTrue" href="#" style="color: #009a61;vertical-align: sub">
                   <i class="layui-icon">&#x1005;</i>
+                </a>
+                <a v-show="!isAddressError && !isAddressTrue" style="color: #f9c94f; vertical-align: sub" @click="clearAddress">
+                  <i class="layui-icon">&#xe702;</i>
                 </a>
               </span>
             </div>
@@ -130,7 +133,8 @@ export default {
       isDisplayDetails: false,
       coinType: '',
       isDisplayIcon: false,
-      isError: true
+      isAddressError: false,
+      isAddressTrue: false
     }
   },
   computed: {
@@ -165,9 +169,16 @@ export default {
         if (!this.currentAccount) return false
         try {
           this.currentAccount.checkAddress(this.addressValue)
-          this.isError = false
+          this.isAddressError = false
+          this.isAddressTrue = true
         } catch (e) {
-          this.isError = true
+          if (e === 602) {
+            this.isAddressError = false
+            this.isAddressTrue = false
+          } else {
+            this.isAddressError = true
+            this.isAddressTrue = false
+          }
         }
       }
     },
