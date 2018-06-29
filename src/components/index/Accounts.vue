@@ -25,10 +25,12 @@
             <span>{{$t('message.accounts_balance')}}</span>
             <span v-if="coinTypeList[index] && newAccount.length > 0">{{formatBalance(newAccount[index].coinType, newAccount[index].balance)}}</span>
             <span v-if="coinTypeList[index]">{{currentDisplayUnit(coinTypeList[index])}}</span>
-            <span class="exchange-rate">(</span>
-            <span v-if="currentExchangeRate && coinTypeList[index] && newAccount[index].balance" class="exchange-rate">{{toExchangeText(coinTypeList[index], newAccount[index].balance)}}</span>
-            <span class="exchange-rate">{{currentExchangeRate}}</span>
-            <span class="exchange-rate">)</span>
+            <span v-if="newAccount.length > 0 && newAccount[index].balance">
+              <span class="exchange-rate">(</span>
+              <span v-if="currentExchangeRate && coinTypeList[index] && newAccount[index].balance" class="exchange-rate">{{toExchangeText(coinTypeList[index], newAccount[index].balance)}}</span>
+              <span class="exchange-rate">{{currentExchangeRate}}</span>
+              <span class="exchange-rate">)</span>
+            </span>
           </div>
           <div class="account-msg">
             <a title="refresh" href="#" class="refresh-data" @click="refresh">

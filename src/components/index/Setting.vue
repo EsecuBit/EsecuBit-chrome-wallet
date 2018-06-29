@@ -180,9 +180,9 @@ export default {
           this.isBitcoin = true
           if (!this.isBitFirst) return false
           this.bitUnitValueList = [
-            {label: 'BTC', value: 'BTC'},
-            {label: 'mBTC', value: 'mBTC'},
-            {label: 'santoshi', value: 'santoshi'}
+            {label: 'BTC', value: this.D.unit.btc.BTC},
+            {label: 'mBTC', value: this.D.unit.btc.mBTC},
+            {label: 'santoshi', value: this.D.unit.btc.santoshi}
           ]
           this.$nextTick(() => {
             form.render('radio', 'form3')
@@ -197,9 +197,9 @@ export default {
           this.isBitcoin = false
           if (!this.isEthFirst) return false
           this.ethUnitValueList = [
-            {label: 'Ether', value: 'Ether'},
-            {label: 'GWei', value: 'GWei'},
-            {label: 'Wei', value: 'Wei'}
+            {label: 'ETH', value: this.D.unit.eth.ETH},
+            {label: 'GWei', value: this.D.unit.eth.GWei},
+            {label: 'Wei', value: this.D.unit.eth.Wei}
           ]
           this.$nextTick(() => {
             form.render('radio', 'form3')

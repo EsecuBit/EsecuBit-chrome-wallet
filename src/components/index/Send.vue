@@ -68,7 +68,7 @@
             <!--</select>-->
           <!--</div>-->
         <!--</div>-->
-        <div class="layui-form-item" v-show="switchFee">
+        <div class="layui-form-item" v-if="switchFee">
           <label class="layui-form-label">{{$t('message.send_transaction_fees')}}</label>
           <div class="layui-input-block input-width">
             <input type="number"  lay-verify="isEmpty" v-model.number="customFees" :placeholder="currentTransactionUnit(coinType)" autocomplete="off" class="layui-input" style="width: 300px;text-align: end;  ">
@@ -120,7 +120,7 @@ export default {
       amountValue: null,
       addressValue: '',
       selected: null,
-      customFees: 0.00,
+      customFees: 0,
       accountList: ['account 1', 'account 2'],
       feeList: [
         {label: 'slow（10 usd）', value: 10}
@@ -185,7 +185,7 @@ export default {
     amountValue: {
       handler (newValue, oldValue) {
         this.isDisplayExchange = true
-        if (this.currentAccount.prepareTx) {
+        if (this.currentAccount.prepareTx && newValue !== null) {
           this.calculateTotal()
         }
       }
@@ -196,8 +196,8 @@ export default {
       }
     },
     customFees: {
-      handler () {
-        if (this.switchFee) this.calculateTotal()
+      handler (newValue, oldValue) {
+        if (this.switchFee && newValue !== null) this.calculateTotal()
       }
     },
     accountInfo: {
@@ -211,6 +211,7 @@ export default {
         this.coinType = newValue.coinType
         this.isDisplayDetails = false
         this.isDisplayExchange = false
+        this.clearFormData()
         if (newValue.getSuggestedFee) {
           let oldFeeList = newValue.getSuggestedFee()
           let newFeeList = []
@@ -331,7 +332,7 @@ export default {
     },
     switchSelectButton () {
       this.switchFee = !this.switchFee
-      this.customFees = 0.00
+      this.customFees = 0
     },
     switchCustomButton () {
       this.switchFee = !this.switchFee
