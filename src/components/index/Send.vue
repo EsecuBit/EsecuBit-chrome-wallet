@@ -71,7 +71,7 @@
         <div class="layui-form-item" v-show="switchFee">
           <label class="layui-form-label">{{$t('message.send_transaction_fees')}}</label>
           <div class="layui-input-block input-width">
-            <input type="number"  lay-verify="isEmpty" v-model="customFees" :placeholder="currentTransactionUnit(coinType)" autocomplete="off" class="layui-input" style="width: 300px;text-align: end;  ">
+            <input type="number"  lay-verify="isEmpty" v-model.number="customFees" :placeholder="currentTransactionUnit(coinType)" autocomplete="off" class="layui-input" style="width: 300px;text-align: end;  ">
             <button class="layui-btn layui-btn-sm layui-btn-radius "
                     style="margin-left: 5px" type="button" @click="switchSelectButton">{{$t('message.send_select_fee')}}</button>
           </div>
@@ -96,7 +96,7 @@
         </div>
         <div class="layui-form-item" style="border:none">
           <button class="layui-btn" lay-submit type="button" @click="submitSendData">{{$t('message.send_submit_btn')}}</button>
-          <button type="reset" class="layui-btn layui-btn-primary">{{$t('message.send_reset_btn')}}</button>
+          <button type="button" class="layui-btn layui-btn-primary" @click="clearFormData">{{$t('message.send_reset_btn')}}</button>
         </div>
       </form>
     </div>
@@ -141,9 +141,9 @@ export default {
     totalFeeDesc () {
       if (this.coinType && this.currentUnit && this.currentExchangeRate) {
         let nowUnit = this.currentDisplayUnit(this.coinType)
-        let exchange = this.esWallet.convertValue(this.coinType, this.totalFee, nowUnit, this.currentExchangeRate).toFixed(2)
+        let exchange = this.esWallet.convertValue(this.coinType, this.totalFee, nowUnit, this.currentExchangeRate)
         if (this.isDisplayDetails) {
-          return this.totalFee.toFixed(2) + ' ' + nowUnit + ' (' +
+          return this.totalFee + ' ' + nowUnit + ' (' +
              this.formatNum(exchange) + ' ' + this.currentExchangeRate + ')' + ' '
         } else {
           return ''
@@ -250,6 +250,15 @@ export default {
     clearAddress () {
       this.addressValue = ''
     },
+    clearFormData () {
+      this.amountValue = null
+      this.addressValue = ''
+      this.customFees = null
+      this.$nextTick(() => {
+        this.isDisplayIcon = false
+        this.isDisplayExchange = false
+      })
+    },
     verifyForm () {
       let that = this
       form.verify({
@@ -350,6 +359,7 @@ export default {
         .then(value => {
           return this.currentAccount.sendTx(value)
         }).then(value => {
+          this.clearFormData()
           layer.closeAll('msg')
           layer.msg(this.$t('message.send_submit_success'), { icon: 1 })
         }).catch(value => {

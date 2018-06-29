@@ -193,5 +193,6 @@ export default {
     padding: 9px 0!important;
     color: #333!important;
     font-weight: bold;
+    cursor: text;
   }
 </style>

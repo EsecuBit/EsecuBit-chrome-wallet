@@ -65,7 +65,7 @@
                   <td>{{getFormatTime(table.time)}}</td>
                   <td>
                     <span :class ="[table.direction === 'in'?green:red]" class="text-opacity">{{toOrForm(table.direction)}}</span>
-                    <span>{{getTableAddress(table)}}</span>
+                    <span style="cursor: text;">{{getTableAddress(table)}}</span>
                   </td>
                   <td :class="[table.value>0?green:red]" >{{tableBlockNumber(table)}}</td>
                   <td style="padding: 0">
