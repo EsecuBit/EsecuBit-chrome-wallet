@@ -134,7 +134,8 @@ export default {
       coinType: '',
       isDisplayIcon: false,
       isAddressError: false,
-      isAddressTrue: false
+      isAddressTrue: false,
+      isInit: true
     }
   },
   computed: {
@@ -203,7 +204,8 @@ export default {
     accountInfo: {
       handler (newValue, oldValue) {
         this.accountOrder = newValue
-        this.currentAccount = this.accountOrder[0]
+        if (this.isInit) this.currentAccount = this.accountOrder[0]
+        this.isInit = false
       }
     },
     currentAccount: {

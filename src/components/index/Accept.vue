@@ -62,6 +62,7 @@ export default {
       showButton: true,
       showAddress: false,
       isInitDisplay: true,
+      isInit: true,
       msg1: this.$t('message.accept_prompt_msg1'),
       msg2: this.$t('message.accept_prompt_msg2')
     }
@@ -75,9 +76,12 @@ export default {
   watch: {
     accountInfo: {
       handler (newValue, oldValue) {
-        this.coinType = newValue[0].coinType
+        if (this.isInit) {
+          this.coinType = newValue[0].coinType
+          this.currentAccount = this.accountOrder[0]
+        }
+        this.isInit = false
         this.accountOrder = newValue
-        this.currentAccount = this.accountOrder[0]
       }
     },
     accountIndex: {
