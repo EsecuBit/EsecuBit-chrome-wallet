@@ -16,7 +16,9 @@
         </div>
         <div class="layui-form-item">
           <div class="layui-form-label tips">{{$t('message.accept_tips')}}</div>
-          <div class="layui-input-block address-container" v-text="promptMsg">
+          <div class="layui-input-block address-container" v-text="msg1" v-show="isInitDisplay">
+          </div>
+          <div class="layui-input-block address-container" v-text="msg2" v-show="!isInitDisplay">
           </div>
           <div class="qrcode" v-show="!showAddress" style="line-height: 210px;text-align: center;border: 1px solid #eee">
             <i class="icon iconfont icon-erweima" style="font-size: 50px"></i>
@@ -59,7 +61,7 @@ export default {
       coinType: '',
       showButton: true,
       showAddress: false,
-      promptMsg: this.$t('message.accept_prompt_msg1'),
+      isInitDisplay: true,
       msg1: this.$t('message.accept_prompt_msg1'),
       msg2: this.$t('message.accept_prompt_msg2')
     }
@@ -112,12 +114,12 @@ export default {
     initDisplay () {
       this.showButton = true
       this.showAddress = false
-      this.promptMsg = this.msg1
+      this.isInitDisplay = true
     },
     switchDisplay () {
       this.showButton = false
       this.showAddress = true
-      this.promptMsg = this.msg2
+      this.isInitDisplay = false
     },
     generateQRCode (address) {
       // eslint-disable-next-line

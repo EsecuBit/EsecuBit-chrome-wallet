@@ -16,7 +16,7 @@
         <div style="position: relative;">
           <div class="loader-anim">
             <i class="layui-icon layui-anim layui-anim-rotate layui-anim-loop" v-if="isLoadingIcon" style="font-size: 50px;"> </i>
-            <i class="icon iconfont icon-thumbDrive" style="font-size: 50px" v-else></i>
+            <i class="icon iconfont icon-thumbDrive usb-blinking-anim" style="font-size: 50px" v-else></i>
           </div>
           <h3 v-text="promptMsg"></h3>
         </div>
@@ -169,6 +169,31 @@ export default {
     }
     .layadmin-user-login-main {
       width: 300px
+    }
+  }
+  .usb-blinking-anim {
+    display: inline-block;
+    -webkit-animation-name: usb-anim;
+    animation-name: usb-anim;
+    -webkit-animation-duration: 2s;
+    animation-duration: 2s;
+    -webkit-animation-timing-function: ease;
+    animation-timing-function: ease;
+    -webkit-animation-iteration-count: infinite;
+    animation-iteration-count: infinite;
+  }
+  @keyframes usb-anim {
+    from{
+      opacity: 0.5;
+      transform: scale(1, 1);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.2, 1.2);
+    }
+    to{
+      opacity: 0.5;
+      transform: scale(1, 1);
     }
   }
 </style>

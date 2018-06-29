@@ -360,7 +360,9 @@ export default {
         .then(value => {
           return this.currentAccount.sendTx(value)
         }).then(value => {
+          // 格式化表格
           this.clearFormData()
+          this.calculateTotal()
           layer.closeAll('msg')
           layer.msg(this.$t('message.send_submit_success'), { icon: 1 })
         }).catch(value => {

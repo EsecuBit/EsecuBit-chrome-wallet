@@ -146,6 +146,9 @@ export default {
   },
   mounted () {
     // 监听选择事件
+    document.oncontextmenu = function () {
+      event.returnValue = false
+    }
     form.render('select', 'form1')
     this.listenLoginStatus()
     // 菜单点击事件
