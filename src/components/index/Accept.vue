@@ -11,7 +11,7 @@
         <div class="layui-form-item" style="margin-bottom: 0">
           <label class="layui-form-label account-label" >{{$t('message.accept_current_account')}}</label>
           <div class="layui-input-block account-info">
-            <div class="account-msg">{{currentAccount.label}}</div>
+            <div class="account-msg" v-if="currentAccount.label">{{currentAccount.label}}</div>
           </div>
         </div>
         <div class="layui-form-item">
@@ -76,12 +76,12 @@ export default {
   watch: {
     accountInfo: {
       handler (newValue, oldValue) {
+        this.accountOrder = newValue
         if (this.isInit) {
           this.coinType = newValue[0].coinType
           this.currentAccount = this.accountOrder[0]
         }
         this.isInit = false
-        this.accountOrder = newValue
       }
     },
     accountIndex: {

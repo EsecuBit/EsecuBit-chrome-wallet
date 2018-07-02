@@ -91,7 +91,7 @@
         <div class="layui-form-item">
           <label class="layui-form-label">{{$t('message.send_total_fee')}}</label>
           <div class="layui-input-inline input-width">
-            <textarea disabled  class="layui-textarea" v-bind:value= "totalFeeDesc" name="desc"></textarea>
+            <textarea disabled  class="layui-textarea" v-bind:value= "totalDisplayFee" name="desc"></textarea>
           </div>
         </div>
         <div class="layui-form-item" style="border:none">
@@ -129,6 +129,7 @@ export default {
       accountOrder: [],
       currentAccount: {label: ''},
       totalFee: 0,
+      totalDisplayFee: '',
       isDisplayExchange: false,
       isDisplayDetails: false,
       coinType: '',
@@ -139,18 +140,6 @@ export default {
     }
   },
   computed: {
-    totalFeeDesc () {
-      if (this.coinType && this.currentUnit && this.currentExchangeRate) {
-        let nowUnit = this.currentDisplayUnit(this.coinType)
-        let exchange = this.esWallet.convertValue(this.coinType, this.totalFee, nowUnit, this.currentExchangeRate)
-        if (this.isDisplayDetails) {
-          return this.totalFee + ' ' + nowUnit + ' (' +
-             this.formatNum(exchange) + ' ' + this.currentExchangeRate + ')' + ' '
-        } else {
-          return ''
-        }
-      }
-    },
     toExchangeText () {
       if (this.currentUnit && this.currentExchangeRate) {
         let nowUnit = this.currentDisplayUnit(this.coinType)
@@ -173,13 +162,23 @@ export default {
           this.isAddressError = false
           this.isAddressTrue = true
         } catch (e) {
-          if (e === 602) {
+          if (e === this.D.error.noAddressCheckSum) {
             this.isAddressError = false
             this.isAddressTrue = false
           } else {
             this.isAddressError = true
             this.isAddressTrue = false
           }
+        }
+      }
+    },
+    totalFee: {
+      handler (newValue, oldValue) {
+        if (this.coinType && this.currentUnit && this.currentExchangeRate && this.isDisplayDetails) {
+          let nowUnit = this.currentDisplayUnit(this.coinType)
+          let exchange = this.esWallet.convertValue(this.coinType, newValue, nowUnit, this.currentExchangeRate)
+          this.totalDisplayFee = newValue + ' ' + nowUnit + ' (' +
+            this.formatNum(exchange) + ' ' + this.currentExchangeRate + ')' + ' '
         }
       }
     },
@@ -257,6 +256,7 @@ export default {
       this.amountValue = null
       this.addressValue = ''
       this.customFees = null
+      this.totalDisplayFee = ''
       this.$nextTick(() => {
         this.isDisplayIcon = false
         this.isDisplayExchange = false
@@ -327,9 +327,13 @@ export default {
         this.currentAccount.checkAddress(this.addressValue)
         return true
       } catch (e) {
-        layer.msg(this.$t('message.send_invalid_address_mag'), { icon: 2, anim: 6 })
-        document.getElementById('transactionAddress').focus()
-        return false
+        if (e === this.D.error.noAddressCheckSum) {
+          return true
+        } else {
+          layer.msg(this.$t('message.send_invalid_address_mag'), { icon: 2, anim: 6 })
+          document.getElementById('transactionAddress').focus()
+          return false
+        }
       }
     },
     switchSelectButton () {
@@ -389,7 +393,7 @@ export default {
       })
         .catch(value => {
           switch (value) {
-            case 501: layer.msg(this.$t('message.send_not_balance'), { icon: 2 })
+            case this.D.error.balanceNotEnough: layer.msg(this.$t('message.send_not_balance'), { icon: 2 })
               break
           }
         })

@@ -71,7 +71,7 @@
                   </td>
                   <td :class="[table.value>0?green:red]" >{{tableBlockNumber(table)}}</td>
                   <td style="padding: 0">
-                    <canvas class="canvas" width="100" height="30" :data-counts="table.confirmations"></canvas>
+                    <canvas class="canvas" :class="'canvas-'+ index" width="100" height="30" :data-counts="table.confirmations"></canvas>
                   </td>
                   <td>
                     <!--<a title="Details" href="#" @click="getDescription(table, index);">-->
@@ -241,12 +241,12 @@ export default {
         })
         // 刷新交易记录
         let total = 0
-        this.clearCanvas()
+        this.clearCanvas(nowIndex)
         this.newAccount[nowIndex].getTxInfos(this.pageStartIndex, this.pageEndIndex).then(value => {
           this.$set(this.gridList, nowIndex, value.txInfos)
           total = value.total
           this.$nextTick(() => {
-            this.tableCanvas()
+            this.tableCanvas(nowIndex)
             this.pageList(nowIndex, total)
           })
         })
@@ -286,8 +286,9 @@ export default {
     toTargetCoinUnit (coinType, value) {
       return this.D.isBtc(coinType) ? this.esWallet.convertValue(coinType, value, this.D.unit.btc.santoshi, this.currentUnit) : this.esWallet.convertValue(coinType, value, this.D.unit.eth.Wei, this.currentUnitEth)
     },
-    tableCanvas () {
-      let canvasList = document.getElementsByClassName('canvas')
+    tableCanvas (index) {
+      let canvasClass = index ? ('canvas-' + index) : 'canvas'
+      let canvasList = document.getElementsByClassName(canvasClass)
       for (let canvas of canvasList) {
         let context = canvas.getContext('2d') // 获取画图环境，指明为2d
         let centerX = canvas.width / 2 // Canvas中心点x轴坐标
@@ -318,8 +319,9 @@ export default {
         }
       }
     },
-    clearCanvas () {
-      let canvasList = document.getElementsByClassName('canvas')
+    clearCanvas (index) {
+      let canvasClass = index ? ('canvas-' + index) : 'canvas'
+      let canvasList = document.getElementsByClassName(canvasClass)
       for (let canvas of canvasList) {
         let context = canvas.getContext('2d') // 获取画图环境，指明为2d
         let centerX = canvas.width
@@ -338,13 +340,13 @@ export default {
       }, 3000)
       let index = this.currentIndex
       let total = 0
-      this.clearCanvas()
+      this.clearCanvas(index)
       this.newAccount[index].sync(false).then(value => {
         this.newAccount[index].getTxInfos(this.pageStartIndex, this.pageEndIndex).then(value => {
           this.$set(this.gridList, index, value.txInfos)
           total = value.total
           this.$nextTick(() => {
-            this.tableCanvas()
+            this.tableCanvas(index)
             this.pageList(index, total)
           })
         })
@@ -428,7 +430,7 @@ export default {
           if (!first) {
             limit = obj.limit
             page = obj.curr
-            that.clearCanvas()
+            that.clearCanvas(i)
             that.changeTableData(i, limit, page)
           }
         }
@@ -441,7 +443,7 @@ export default {
       this.newAccount[id].getTxInfos(startItem, endItem).then(data => {
         this.$set(this.gridList, id, data.txInfos)
         this.$nextTick(() => {
-          this.tableCanvas()
+          this.tableCanvas(id)
         })
       }).catch(value => { layer.msg(this.$t('message.accounts_get_data'), { icon: 2 }) })
     },
