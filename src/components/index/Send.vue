@@ -7,7 +7,7 @@
       <fieldset><legend><a name="use">{{sendCoinTypeMsg}}</a></legend></fieldset>
     </div>
     <div class="site-text site-block">
-      <form class="layui-form customize-form" action="" lay-filter="form1">
+      <form class="layui-form customize-form" action="" lay-filter="form1" autocomplete="off">
         <div class="layui-form-item">
           <label class="layui-form-label account-label" >{{$t('message.send_current_account')}}</label>
           <div class="layui-input-block account-info " >
@@ -105,9 +105,8 @@
 
 <script>
 import Bus from '../../common/js/bus'
-// eslint-disable-next-line
+
 const form = layui.form
-// eslint-disable-next-line
 const layer = layui.layer
 export default {
   name: 'Sending',
@@ -257,6 +256,7 @@ export default {
       this.addressValue = ''
       this.customFees = null
       this.totalDisplayFee = ''
+      this.switchFee = false
       this.$nextTick(() => {
         this.isDisplayIcon = false
         this.isDisplayExchange = false
@@ -308,9 +308,10 @@ export default {
         }]
       }
       this.currentAccount.prepareTx(formData).then(result => {
+        console.log(result)
         this.amountValue = this.toTargetCoinUnit(result.outputs[0].value)
       })
-        .catch(value => {})
+        .catch(value => { console.log(value) })
     },
     verifyAddress () {
       if (!this.currentAccount) return false
@@ -368,7 +369,6 @@ export default {
         }).then(value => {
           // 格式化表格
           this.clearFormData()
-          this.calculateTotal()
           layer.closeAll('msg')
           layer.msg(this.$t('message.send_submit_success'), { icon: 1 })
         }).catch(value => {

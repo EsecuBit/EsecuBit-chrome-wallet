@@ -26,5 +26,9 @@ module.exports = {
     // allow debugger during development
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
     'vue/require-v-for-key': 'off'
+  },
+  globals: {
+    chrome: true,
+    layui: true
   }
 }

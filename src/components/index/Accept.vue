@@ -45,7 +45,7 @@
 
 <script>
 import Bus from '../../common/js/bus'
-// eslint-disable-next-line
+
 const form = layui.form
 export default {
   name: 'accept',
@@ -141,9 +141,7 @@ export default {
       // })
     },
     changeQRCode (address) {
-      if (this.accountQrcode) {
-        this.accountQrcode.makeCode(address)
-      }
+      if (this.accountQrcode) this.accountQrcode.makeCode(address)
     }
   }
 }

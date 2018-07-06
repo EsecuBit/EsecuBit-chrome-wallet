@@ -145,11 +145,8 @@
 <script>
 import Bus from '../../common/js/bus'
 
-// eslint-disable-next-line
 const $ = layui.jquery
-// eslint-disable-next-line
 const layer = layui.layer
-// eslint-disable-next-line
 const laypage = layui.laypage
 export default {
   name: 'accouts',
@@ -522,8 +519,6 @@ export default {
     padding: 15px;
     margin-right: auto;
     margin-left: auto;
-    padding-left: 15px;
-    padding-right: 15px;
   }
   .account-information {
     display: block;

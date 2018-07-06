@@ -103,11 +103,8 @@ import Store from './common/js/store'
 
 // eslint-disable-next-line
 const element = layui.element
-// eslint-disable-next-line
 const $ = layui.jquery
-// eslint-disable-next-line
 const layer = layui.layer
-// eslint-disable-next-line
 const form = layui.form
 
 export default {
