@@ -311,7 +311,12 @@ export default {
         console.log(result)
         this.amountValue = this.toTargetCoinUnit(result.outputs[0].value)
       })
-        .catch(value => { console.log(value) })
+        .catch(value => {
+          switch (value) {
+            case this.D.error.balanceNotEnough: layer.msg(this.$t('message.send_not_balance'), { icon: 2 })
+              break
+          }
+        })
     },
     verifyAddress () {
       if (!this.currentAccount) return false
