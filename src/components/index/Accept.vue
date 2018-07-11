@@ -68,7 +68,7 @@ export default {
     }
   },
   computed: {
-    receiveCoinTypeMsg () {
+    receiveCoinTypeMsg  () {
       let coinTypeName = this.D.isBtc(this.coinType) ? 'Bitcoin' : 'Ether'
       return this.$t('message.accept_accept_msg') + ' ' + coinTypeName
     }
@@ -136,9 +136,6 @@ export default {
         // eslint-disable-next-line
         correctLevel: QRCode.CorrectLevel.H
       })
-      // form.on('select(receiveAccount)', function (data) {
-      //   accountQrcode.makeCode(data.value)
-      // })
     },
     changeQRCode (address) {
       if (this.accountQrcode) this.accountQrcode.makeCode(address)

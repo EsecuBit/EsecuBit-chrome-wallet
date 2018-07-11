@@ -8,14 +8,15 @@
             "scripts": ["background.js"]
         }
     },
-    "icons": { 
-        "16": "icon16.png",             
-        "48": "icon48.png",            
-        "128": "icon128.png" 
+    "icons": {
+        "16": "icon16.png",
+        "48": "icon48.png",
+        "128": "icon128.png"
     },
     "permissions": [
         "https://*.excelseu.com/*",
-		"https://*.blockchain.info/*",
+		    "https://*.blockchain.info/*",
+        "https://*.blockchain.com/*",
         "storage",
         "unlimitedStorage",
         "hid",

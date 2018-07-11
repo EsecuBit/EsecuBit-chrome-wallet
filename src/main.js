@@ -6,7 +6,7 @@ import Store from './common/js/store'
 import VueI18n from 'vue-i18n'
 import {D, EsWallet} from 'chrome-excelsecu-wallet'
 
-Store.init().then(value => {
+Store.init().then(result => {
   Vue.prototype.esWallet = new EsWallet()
   Vue.prototype.D = D
   Vue.config.productionTip = false
