@@ -107,14 +107,20 @@ export default {
           this.generateQRCode(value.qrAddress)
           this.qrAddress = value.address
           this.switchDisplay()
-        }).catch(value => { layer.msg(String(value)) })
+        }).catch(value => {
+          console.warn(value)
+          layer.msg(String(value))
+        })
         this.isFirst = false
       } else {
         this.currentAccount.getAddress().then(value => {
           this.changeQRCode(value.qrAddress)
           this.qrAddress = value.address
           this.switchDisplay()
-        }).catch(value => { layer.msg(String(value)) })
+        }).catch(value => {
+          console.warn(value)
+          layer.msg(String(value))
+        })
       }
     },
     initDisplay () {

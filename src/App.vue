@@ -200,11 +200,17 @@ export default {
           this.isLogin = !this.isLogin
           this.esWallet.getWalletInfo().then(value => {
             this.WalletInfo = value
-          }).catch(value => { layer.msg(this.$t('message.app_error_get_wallet'), { icon: 2, anim: 6 }) })
+          }).catch(value => {
+            console.warn(value)
+            layer.msg(this.$t('message.app_error_get_wallet'), { icon: 2, anim: 6 })
+          })
           this.esWallet.getAccounts().then(value => {
             if (value) this.accounts = this.orderArr(value)
             console.log(value)
-          }).catch(value => { layer.msg(this.$t('message.app_error_get_account'), { icon: 2, anim: 6 }) })
+          }).catch(value => {
+            console.warn(value)
+            layer.msg(this.$t('message.app_error_get_account'), { icon: 2, anim: 6 })
+          })
         }
         if (status === this.D.status.plugOut) {
           this.loginStatus = 99
@@ -251,11 +257,15 @@ export default {
               }
             }).catch(value => {
               layer.closeAll()
+              console.warn(value)
               layer.msg(that.$t('message.app_error_add_account'), { icon: 2, anim: 6 })
             })
           }
         })
-      }).catch(value => layer.msg(this.$t('message.app_error_get_type'), { icon: 2, anim: 6 }))
+      }).catch(value => {
+        console.warn(value)
+        layer.msg(this.$t('message.app_error_get_type'), { icon: 2, anim: 6 })
+      })
     },
     showAddAccount () {
       this.isAddAccounts = true

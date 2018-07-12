@@ -214,7 +214,10 @@ export default {
               this.pageList(index, total[index])
             }
           })
-        }).catch(value => { layer.msg(String(value)) })
+        }).catch(value => {
+          console.warn(value)
+          layer.msg(String(value))
+        })
       }
     },
     newAccount: {
@@ -349,6 +352,7 @@ export default {
         })
         layer.msg(this.$t('message.accounts_sync_success'), { icon: 1 })
       }).catch(value => {
+        console.warn(value)
         layer.msg(this.$t('message.accounts_sync_error'), { icon: 2 })
       })
     },
@@ -403,7 +407,10 @@ export default {
           layer.closeAll('page')
           layer.msg(this.$t('message.accounts_update_msg'), { icon: 1 })
         })
-          .catch(value => { layer.msg(this.$t('message.accounts_update_error'), { icon: 2 }) })
+          .catch(value => {
+            console.warn(value)
+            layer.msg(this.$t('message.accounts_update_error'), { icon: 2 })
+          })
       }
     },
     pageList (i, totalCount) {
@@ -442,7 +449,10 @@ export default {
         this.$nextTick(() => {
           this.tableCanvas(id)
         })
-      }).catch(value => { layer.msg(this.$t('message.accounts_get_data'), { icon: 2 }) })
+      }).catch(value => {
+        console.warn(value)
+        layer.msg(this.$t('message.accounts_get_data'), { icon: 2 })
+      })
     },
     createTab () {
       // 初始化第一個tab标签

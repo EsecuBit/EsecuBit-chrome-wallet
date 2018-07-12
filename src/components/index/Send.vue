@@ -161,6 +161,7 @@ export default {
           this.isAddressError = false
           this.isAddressTrue = true
         } catch (e) {
+          console.warn(e)
           if (e === this.D.error.noAddressCheckSum) {
             this.isAddressError = false
             this.isAddressTrue = false
@@ -312,6 +313,7 @@ export default {
         this.amountValue = this.toTargetCoinUnit(result.outputs[0].value)
       })
         .catch(value => {
+          console.warn(value)
           switch (value) {
             case this.D.error.balanceNotEnough: layer.msg(this.$t('message.send_not_balance'), { icon: 2 })
               break
@@ -324,6 +326,7 @@ export default {
         this.currentAccount.checkAddress(this.addressValue)
         layer.msg(this.$t('message.send_effective_address_mag'), { icon: 1, anim: 2, time: 1500 })
       } catch (e) {
+        console.warn(e)
         layer.msg(this.$t('message.send_invalid_address_mag'), { icon: 2, anim: 6 })
       }
     },
@@ -336,6 +339,7 @@ export default {
         if (e === this.D.error.noAddressCheckSum) {
           return true
         } else {
+          console.warn(e)
           layer.msg(this.$t('message.send_invalid_address_mag'), { icon: 2, anim: 6 })
           document.getElementById('transactionAddress').focus()
           return false
@@ -377,6 +381,7 @@ export default {
           layer.closeAll('msg')
           layer.msg(this.$t('message.send_submit_success'), { icon: 1 })
         }).catch(value => {
+          console.warn(value)
           layer.closeAll('msg')
           layer.msg(String(value), { icon: 2 })
         })
@@ -397,6 +402,7 @@ export default {
         this.totalFee = this.toTargetCoinUnit(value.total)
       })
         .catch(value => {
+          console.warn(value)
           switch (value) {
             case this.D.error.balanceNotEnough: layer.msg(this.$t('message.send_not_balance'), { icon: 2 })
               break
