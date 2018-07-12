@@ -266,7 +266,7 @@ export default {
       }
     },
     formatBalance (coinType, value) {
-      return this.toTargetCoinUnit(coinType, value).toFixed(2)
+      return this.toTargetCoinUnit(coinType, value)
     },
     tableBlockNumber (table) {
       let newValue = this.toTargetCoinUnit(table.coinType, table.value)
@@ -278,7 +278,7 @@ export default {
     toExchangeText (coinType, value) {
       let newValue = this.toTargetCoinUnit(coinType, value)
       let exchange = this.D.isBtc(coinType) ? this.esWallet.convertValue(coinType, newValue, this.currentUnit, this.currentExchangeRate) : this.esWallet.convertValue(coinType, newValue, this.currentUnitEth, this.currentExchangeRate)
-      return this.formatNum(exchange.toFixed(2))
+      return this.formatNum(exchange)
     },
     toTargetCoinUnit (coinType, value) {
       return this.D.isBtc(coinType) ? this.esWallet.convertValue(coinType, value, this.D.unit.btc.santoshi, this.currentUnit) : this.esWallet.convertValue(coinType, value, this.D.unit.eth.Wei, this.currentUnitEth)
