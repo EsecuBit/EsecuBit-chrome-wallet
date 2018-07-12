@@ -106,7 +106,9 @@ export const message = {
   setting_init: '初始化设置',
   setting_swift_device: '切换设备',
   setting_software: '软件',
-  setting_set_hardware: '硬件'
+  setting_set_hardware: '硬件',
+  setting_net_type: '网络类型'
+
 
 
 

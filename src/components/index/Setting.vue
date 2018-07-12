@@ -93,8 +93,15 @@
               <div class="layui-form-item" >
                 <label class="layui-form-label">{{$t('message.setting_swift_device')}}</label>
                 <div class="layui-input-block" >
-                  <input type="radio" lay-filter="device" name="device" title="http network" value="soft" :checked="'soft' === deviceChecked">
+                  <input type="radio" lay-filter="device" name="device" title="software" value="soft" :checked="'soft' === deviceChecked">
                   <input type="radio" lay-filter="device" name="device" title="hardware" value="hard" :checked="'hard' === deviceChecked">
+                </div>
+              </div>
+              <div class="layui-form-item" >
+                <label class="layui-form-label">{{$t('message.setting_net_type')}}</label>
+                <div class="layui-input-block" >
+                  <input type="radio" lay-filter="net" name="net" title="main net" value="main" :checked="'main' === netChecked">
+                  <input type="radio" lay-filter="net" name="net" title="test net" value="test" :checked="'test' === netChecked">
                 </div>
               </div>
               <div class="layui-form-item">
@@ -163,7 +170,8 @@ export default {
       isEthFirst: true,
       accountOrder: [],
       seedValue: '',
-      deviceChecked: 'hard'
+      deviceChecked: '',
+      netChecked: ''
     }
   },
   watch: {
@@ -238,6 +246,7 @@ export default {
         this.unitEthChecked = Store.fetch('ethUnit') ? Store.fetch('ethUnit') : this.D.unit.eth.GWei
         this.selectedExchangeRate = Store.fetch('exchange') ? Store.fetch('exchange') : this.D.unit.legal.USD
         this.deviceChecked = Store.fetch('device') ? Store.fetch('device') : 'soft'
+        this.netChecked = Store.fetch('net') ? Store.fetch('net') : 'test'
         if (Store.fetch('seedValue')) this.seedValue = Store.fetch('seedValue')
       } else {
         const lang = await Store.setPromise('lang')
@@ -246,18 +255,22 @@ export default {
         const exchange = await Store.setPromise('exchange')
         const seedValue = await Store.setPromise('seedValue')
         const device = await Store.setPromise('device')
+        const net = await Store.setPromise('net')
         this.initLang = lang['lang'] ? lang['lang'] : navigator.language
         this.unitBitChecked = bitUnit['bitUnit'] ? bitUnit['bitUnit'] : this.D.unit.btc.mBTC
         this.unitEthChecked = ethUnit['ethUnit'] ? ethUnit['ethUnit'] : this.D.unit.eth.GWei
         this.selectedExchangeRate = exchange['exchange'] ? exchange['exchange'] : this.D.unit.legal.USD
         this.seedValue = seedValue['seedValue'] ? seedValue['seedValue'] : ''
         this.deviceChecked = device['device'] ? seedValue['device'] : 'soft'
+        this.netChecked = net['net'] ? net['net'] : 'test'
       }
       this.$nextTick(() => {
         form.render('select', 'form3')
         form.render('radio', 'form4')
+        form.on('radio(net)', data => {
+          Store.saveChromeStore('net', data.value)
+        })
         form.on('radio(device)', data => {
-          // Store.save('ethUnit', data.value)
           Store.saveChromeStore('device', data.value)
         })
       })

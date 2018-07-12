@@ -107,9 +107,10 @@ export const message = {
   setting_setting: 'Setting',
   setting_setting_success: 'Successfully set up',
   setting_init: 'Initialization settings',
-  setting_swift_device: 'Switching device',
+  setting_swift_device: 'Device Type',
   setting_software: 'software',
-  setting_set_hardware: 'hardware'
+  setting_set_hardware: 'hardware',
+  setting_net_type: 'Net Type'
 
 
 }
