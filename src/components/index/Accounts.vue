@@ -214,7 +214,7 @@ export default {
               this.pageList(index, total[index])
             }
           })
-        }).catch(value => { console.log(value) })
+        }).catch(value => { layer.msg(String(value)) })
       }
     },
     newAccount: {

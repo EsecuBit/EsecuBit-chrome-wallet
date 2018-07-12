@@ -47,6 +47,8 @@
 import Bus from '../../common/js/bus'
 
 const form = layui.form
+const layer = layui.layer
+
 export default {
   name: 'accept',
   props: ['accountInfo'],
@@ -105,14 +107,14 @@ export default {
           this.generateQRCode(value.qrAddress)
           this.qrAddress = value.address
           this.switchDisplay()
-        }).catch(value => { console.log(value) })
+        }).catch(value => { layer.msg(String(value)) })
         this.isFirst = false
       } else {
         this.currentAccount.getAddress().then(value => {
           this.changeQRCode(value.qrAddress)
           this.qrAddress = value.address
           this.switchDisplay()
-        }).catch(value => { console.log(value) })
+        }).catch(value => { layer.msg(String(value)) })
       }
     },
     initDisplay () {

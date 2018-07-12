@@ -378,7 +378,7 @@ export default {
           layer.msg(this.$t('message.send_submit_success'), { icon: 1 })
         }).catch(value => {
           layer.closeAll('msg')
-          layer.msg(value, { icon: 2 })
+          layer.msg(String(value), { icon: 2 })
         })
     },
     calculateTotal () {
