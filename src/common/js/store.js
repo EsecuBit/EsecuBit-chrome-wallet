@@ -37,18 +37,26 @@ export default {
   },
   async init () {
     let seed = null
-      if (localStorage) {
+    let device = ''
+    if (localStorage) {
       seed = this.fetch('seedValue') ? this.fetch('seedValue') : this.generateSeed()
-      } else {
-        const seedValue = await this.setPromise('seedValue')
-        seed = seedValue['seedValue'] ? seedValue['seedValue'] : D.test.generateSeed()
-        chrome.storage.local.set({
-          seedValue : seed
-        })
-      }
-    D.test.coin = true
-    D.test.jsWallet = true
-    D.test.sync = false
+      device = this.fetch('device') ? this.fetch('device') : 'soft'
+    } else {
+      const seedValue = await this.setPromise('seedValue')
+      const deviceValue = await this.setPromise('device')
+      device = deviceValue['device'] ? deviceValue['device'] : 'soft'
+      seed = seedValue['seedValue'] ? seedValue['seedValue'] : D.test.generateSeed()
+      chrome.storage.local.set({
+        seedValue : seed
+      })
+    }
+    if (device === 'soft') {
+      D.test.coin = true
+      D.test.jsWallet = true
+    } else {
+      D.test.coin = false
+      D.test.jsWallet = false
+    }
     D.test.txSeed = seed
     D.test.txWalletId = seed
   }

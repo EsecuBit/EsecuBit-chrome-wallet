@@ -105,7 +105,11 @@ export const message = {
   setting_current_seed: 'Current Seed',
   setting_random_produce: 'Randomly generated',
   setting_setting: 'Setting',
-  setting_setting_success: 'Successfully set up'
+  setting_setting_success: 'Successfully set up',
+  setting_init: 'Initialization settings',
+  setting_swift_device: 'Switching device',
+  setting_software: 'software',
+  setting_set_hardware: 'hardware'
 
 
 }

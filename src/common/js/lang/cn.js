@@ -102,7 +102,12 @@ export const message = {
   setting_current_seed: '当前种子',
   setting_random_produce: '随机生成',
   setting_setting: '设定',
-  setting_setting_success: '设置成功'
+  setting_setting_success: '设置成功',
+  setting_init: '初始化设置',
+  setting_swift_device: '切换设备',
+  setting_software: '软件',
+  setting_set_hardware: '硬件'
+
 
 
 }

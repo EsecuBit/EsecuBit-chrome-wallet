@@ -18,7 +18,7 @@
         <li class="tab-title-2">
           <a href="#">
             <i class="layui-icon" style="top: 3px;">&#xe857;</i>
-            <cite>{{$t('message.setting_seed')}}</cite>
+            <cite>{{$t('message.setting_init')}}</cite>
           </a>
         </li>
       </ul>
@@ -89,7 +89,14 @@
         <!--设置种子-->
         <div class="tab-item">
           <div class="site-text site-block">
-            <form class="layui-form" lay-filter="seed">
+            <form class="layui-form" lay-filter="form4">
+              <div class="layui-form-item" >
+                <label class="layui-form-label">{{$t('message.setting_swift_device')}}</label>
+                <div class="layui-input-block" >
+                  <input type="radio" lay-filter="device" name="device" title="http network" value="soft" :checked="'soft' === deviceChecked">
+                  <input type="radio" lay-filter="device" name="device" title="hardware" value="hard" :checked="'hard' === deviceChecked">
+                </div>
+              </div>
               <div class="layui-form-item">
                 <label class="layui-form-label">{{$t('message.setting_current_seed')}}</label>
                 <div class="layui-input-inline input-width">
@@ -155,7 +162,8 @@ export default {
       isBitFirst: true,
       isEthFirst: true,
       accountOrder: [],
-      seedValue: ''
+      seedValue: '',
+      deviceChecked: 'hard'
     }
   },
   watch: {
@@ -229,6 +237,7 @@ export default {
         this.unitBitChecked = Store.fetch('bitUnit') ? Store.fetch('bitUnit') : this.D.unit.btc.mBTC
         this.unitEthChecked = Store.fetch('ethUnit') ? Store.fetch('ethUnit') : this.D.unit.eth.GWei
         this.selectedExchangeRate = Store.fetch('exchange') ? Store.fetch('exchange') : this.D.unit.legal.USD
+        this.deviceChecked = Store.fetch('device') ? Store.fetch('device') : 'soft'
         if (Store.fetch('seedValue')) this.seedValue = Store.fetch('seedValue')
       } else {
         const lang = await Store.setPromise('lang')
@@ -236,14 +245,21 @@ export default {
         const ethUnit = await Store.setPromise('ethUnit')
         const exchange = await Store.setPromise('exchange')
         const seedValue = await Store.setPromise('seedValue')
+        const device = await Store.setPromise('device')
         this.initLang = lang['lang'] ? lang['lang'] : navigator.language
         this.unitBitChecked = bitUnit['bitUnit'] ? bitUnit['bitUnit'] : this.D.unit.btc.mBTC
         this.unitEthChecked = ethUnit['ethUnit'] ? ethUnit['ethUnit'] : this.D.unit.eth.GWei
         this.selectedExchangeRate = exchange['exchange'] ? exchange['exchange'] : this.D.unit.legal.USD
         this.seedValue = seedValue['seedValue'] ? seedValue['seedValue'] : ''
+        this.deviceChecked = device['device'] ? seedValue['device'] : 'soft'
       }
       this.$nextTick(() => {
         form.render('select', 'form3')
+        form.render('radio', 'form4')
+        form.on('radio(device)', data => {
+          // Store.save('ethUnit', data.value)
+          Store.saveChromeStore('device', data.value)
+        })
       })
     },
     editExchangeList (arry) {
