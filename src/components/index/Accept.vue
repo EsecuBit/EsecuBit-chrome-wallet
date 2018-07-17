@@ -16,9 +16,11 @@
         </div>
         <div class="layui-form-item">
           <div class="layui-form-label tips">{{$t('message.accept_tips')}}</div>
-          <div class="layui-input-block address-container" v-text="msg1" v-show="isInitDisplay">
+          <div class="layui-input-block address-container" v-show="isInitDisplay">
+            {{$t('message.accept_prompt_msg1')}}
           </div>
-          <div class="layui-input-block address-container" v-text="msg2" v-show="!isInitDisplay">
+          <div class="layui-input-block address-container" v-show="!isInitDisplay">
+            {{$t('message.accept_prompt_msg2')}}
           </div>
           <div class="qrcode" v-show="!showAddress" style="line-height: 210px;text-align: center;border: 1px solid #eee">
             <i class="icon iconfont icon-erweima" style="font-size: 50px"></i>
@@ -64,9 +66,7 @@ export default {
       showButton: true,
       showAddress: false,
       isInitDisplay: true,
-      isInit: true,
-      msg1: this.$t('message.accept_prompt_msg1'),
-      msg2: this.$t('message.accept_prompt_msg2')
+      isInit: true
     }
   },
   computed: {

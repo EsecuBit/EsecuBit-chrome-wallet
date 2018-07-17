@@ -21,8 +21,8 @@ export const message = {
   login_title: 'Bitcion Wallet',
   login_detail: 'A secure offline management tool',
   login_contact_us: 'If you need help, please contact us.',
-  login_prompt_msg: 'Please insert your key on your computer and unlock your wallet',
-  login_prompt_msg1: 'Please insert your key on your computer and unlock your wallet',
+  login_prompt_msg: 'Please insert your wallet on your computer and unlock your wallet',
+  login_prompt_msg1: 'Please insert your wallet on your computer and unlock your wallet',
   login_prompt_msg2: 'initializing... please wait a moment !!',
   login_prompt_msg3: 'Syncing... It may take a few minutes !!',
   login_prompt_msg4: 'Loading... please wait a moment',
@@ -57,6 +57,8 @@ export const message = {
   accounts_confirmations: 'Confirmations',
   accounts_sync_error: 'Synchronization failed',
   accounts_sync_success: 'Successful synchronization',
+  accounts_total: 'total',
+  accounts_items: 'items',
 
 
   send_prompt_msg: 'Before the transaction, please confirm that the address, amount and transaction fee you entered are correct !!',

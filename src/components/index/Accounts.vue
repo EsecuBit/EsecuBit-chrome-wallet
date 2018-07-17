@@ -27,7 +27,7 @@
             <span v-if="coinTypeList[index]">{{currentDisplayUnit(coinTypeList[index])}}</span>
             <span v-if="newAccount.length > 0 && newAccount[index].balance">
               <span class="exchange-rate">(</span>
-              <span class="max-width-200" v-if="currentExchangeRate && coinTypeList[index] && newAccount[index].balance" class="exchange-rate">{{toExchangeText(coinTypeList[index], newAccount[index].balance)}}</span>
+              <span class="max-width-200 exchange-rate" v-if="currentExchangeRate && coinTypeList[index] && newAccount[index].balance">{{toExchangeText(coinTypeList[index], newAccount[index].balance)}}</span>
               <span class="exchange-rate">{{currentExchangeRate}}</span>
               <span class="exchange-rate">)</span>
             </span>
@@ -84,7 +84,14 @@
                 </tr>
               </tbody>
             </table>
-            <div v-bind:id="grid_pager + index"></div>
+            <div class="page-wrapper">
+              <div v-bind:id="grid_pager + index" class="page-content"></div>
+              <div class="total-num-wrapper">
+                <div class="total-num">
+                  <span>{{$t('message.accounts_total') + ' ' + totalNum[index] + ' ' + $t('message.accounts_items')}}</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -252,6 +259,9 @@ export default {
         })
       })
     },
+    toTwoPoint (num) {
+      return Math.round(num * 100) / 100
+    },
     toOrForm (value) {
       return value === 'in' ? 'from' : 'to'
     },
@@ -273,7 +283,7 @@ export default {
     },
     tableBlockNumber (table) {
       let newValue = this.toTargetCoinUnit(table.coinType, table.value)
-      return newValue.toFixed(2) + ' ' + this.currentDisplayUnit(table.coinType)
+      return this.toTwoPoint(newValue) + ' ' + this.currentDisplayUnit(table.coinType)
     },
     currentDisplayUnit (coinType) {
       return this.D.isBtc(coinType) ? this.currentUnit : this.currentUnitEth
@@ -423,9 +433,9 @@ export default {
         count: total,
         limit: limit,
         curr: page,
-        prev: that.$t('message.accounts_prev'),
-        next: that.$t('message.accounts_next'),
-        layout: ['first', 'prev', 'page', 'next', 'last ', 'count'],
+        prev: '<',
+        next: '>',
+        layout: ['first', 'prev', 'page', 'next', 'last'],
         jump: function (obj, first) {
           // obj包含了当前分页的所有参数，比如：
           // console.log(obj.curr) // 得到当前页，以便向服务端请求对应页的数据。
@@ -666,5 +676,32 @@ export default {
   }
   canvas{
     vertical-align: middle;
+  }
+  .page-wrapper{
+    display: block;
+  }
+  .page-content {
+    display: inline;
+  }
+  .total-num-wrapper {
+    display: inline;
+    font-size: 12px;
+    margin-left: 10px;
+  }
+  .total-num {
+    display: inline-block;
+    vertical-align: middle;
+    margin: 10px 0;
+    box-sizing: content-box;
+  }
+  .total-num span{
+    display: inline-block;
+    vertical-align: middle;
+    height: 28px;
+    line-height: 28px;
+    margin: 0 -1px 5px 0;
+    background-color: #fff;
+    color: #333;
+    font-size: 12px;
   }
 </style>

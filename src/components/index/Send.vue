@@ -135,7 +135,8 @@ export default {
       isDisplayIcon: false,
       isAddressError: false,
       isAddressTrue: false,
-      isInit: true
+      isInit: true,
+      currentSelectedIndex: null
     }
   },
   computed: {
@@ -217,43 +218,49 @@ export default {
         this.coinType = newValue.coinType
         this.isDisplayDetails = false
         this.isDisplayExchange = false
+        this.currentSelectedIndex = null
         this.clearFormData()
-        if (newValue.getSuggestedFee) {
-          let oldFeeList = newValue.getSuggestedFee()
-          let newFeeList = []
-          let fastestMsg = this.$t('message.send_fastest_confirm')
-          let fastMsg = this.$t('message.send_fast_confirm')
-          let standardMsg = this.$t('message.send_standard_confirm')
-          let slowMsg = this.$t('message.send_slow_confirm')
-          if (this.D.isBtc(this.coinType)) {
-            newFeeList.push({label: fastMsg + '(' + oldFeeList.fast + ')', value: oldFeeList.fast})
-            newFeeList.push({label: standardMsg + '(' + oldFeeList.normal + ')', value: oldFeeList.normal})
-            newFeeList.push({label: slowMsg + '(' + oldFeeList.economic + ')', value: oldFeeList.economic})
-          } else {
-            newFeeList.push({label: fastestMsg + '(' + oldFeeList.fastest + ')', value: oldFeeList.fastest})
-            newFeeList.push({label: fastMsg + '(' + oldFeeList.fast + ')', value: oldFeeList.fast})
-            newFeeList.push({label: standardMsg + '(' + oldFeeList.normal + ')', value: oldFeeList.normal})
-            newFeeList.push({label: slowMsg + '(' + oldFeeList.economic + ')', value: oldFeeList.economic})
-          }
-          this.feeList = newFeeList
-          this.selected = oldFeeList.normal
-          this.$nextTick(() => {
-            form.render('select', 'form1')
-            form.on('select(fee)', data => {
-              let index = Number(data.value)
-              this.selected = this.feeList[index].value
-              this.calculateTotal()
-            })
-          })
-        }
+        this.renderFeeForm(newValue)
       }
     }
   },
   mounted () {
     this.verifyForm()
     Bus.$on('switchAccount', (index) => { this.currentAccount = this.accountOrder[index] })
+    Bus.$on('switchLang', () => { this.renderFeeForm(this.currentAccount) })
   },
   methods: {
+    renderFeeForm (newValue) {
+      if (newValue.getSuggestedFee) {
+        let oldFeeList = newValue.getSuggestedFee()
+        let newFeeList = []
+        let fastestMsg = this.$t('message.send_fastest_confirm')
+        let fastMsg = this.$t('message.send_fast_confirm')
+        let standardMsg = this.$t('message.send_standard_confirm')
+        let slowMsg = this.$t('message.send_slow_confirm')
+        if (this.D.isBtc(this.coinType)) {
+          newFeeList.push({label: fastMsg + '(' + oldFeeList.fast + ')', value: oldFeeList.fast})
+          newFeeList.push({label: standardMsg + '(' + oldFeeList.normal + ')', value: oldFeeList.normal})
+          newFeeList.push({label: slowMsg + '(' + oldFeeList.economic + ')', value: oldFeeList.economic})
+        } else {
+          newFeeList.push({label: fastestMsg + '(' + oldFeeList.fastest + ')', value: oldFeeList.fastest})
+          newFeeList.push({label: fastMsg + '(' + oldFeeList.fast + ')', value: oldFeeList.fast})
+          newFeeList.push({label: standardMsg + '(' + oldFeeList.normal + ')', value: oldFeeList.normal})
+          newFeeList.push({label: slowMsg + '(' + oldFeeList.economic + ')', value: oldFeeList.economic})
+        }
+        this.feeList = newFeeList
+        this.selected = oldFeeList.normal
+        this.$nextTick(() => {
+          form.render('select', 'form1')
+          form.on('select(fee)', data => {
+            let index = Number(data.value)
+            this.currentSelectedIndex = index
+            this.selected = this.feeList[index].value
+            this.calculateTotal()
+          })
+        })
+      }
+    },
     clearAddress () {
       this.addressValue = ''
     },
@@ -277,6 +284,7 @@ export default {
       })
     },
     selectedIndex (index) {
+      if (this.currentSelectedIndex) return this.currentSelectedIndex
       if (this.coinType) {
         return this.D.isBtc(this.coinType) ? index === 1 : index === 2
       }
@@ -285,7 +293,7 @@ export default {
       return this.D.isBtc(coinType) ? this.currentUnit : this.currentUnitEth
     },
     currentTransactionUnit (coinType) {
-      return this.D.isBtc(coinType) ? 'santoshi per bitcoin' : 'wei per ether'
+      return this.D.isBtc(coinType) ? 'satoshi per byte' : 'wei per ether'
     },
     toTargetCoinUnit (value) {
       if (this.coinType) {
@@ -302,15 +310,13 @@ export default {
       }
     },
     maxAmount () {
-      let getAmountValue = this.amountValue ? this.amountValue : 0
-      let sendAmountValue = this.toMinCoinUnit(getAmountValue)
       let getAddress = this.addressValue
       let formData = {
         sendAll: true,
         feeRate: Number(this.switchFee ? this.customFees : this.selected),
         outputs: [{
           address: getAddress,
-          value: sendAmountValue
+          value: 0
         }]
       }
       this.currentAccount.prepareTx(formData).then(result => {

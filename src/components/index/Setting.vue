@@ -194,9 +194,9 @@ export default {
           this.isBitcoin = true
           if (!this.isBitFirst) return false
           this.bitUnitValueList = [
-            {label: 'BTC', value: this.D.unit.btc.BTC},
-            {label: 'mBTC', value: this.D.unit.btc.mBTC},
-            {label: 'santoshi', value: this.D.unit.btc.santoshi}
+            {label: this.D.unit.btc.BTC, value: this.D.unit.btc.BTC},
+            {label: this.D.unit.btc.mBTC, value: this.D.unit.btc.mBTC},
+            {label: this.D.unit.btc.santoshi, value: this.D.unit.btc.santoshi}
           ]
           this.$nextTick(() => {
             form.render('radio', 'form3')
@@ -211,9 +211,9 @@ export default {
           this.isBitcoin = false
           if (!this.isEthFirst) return false
           this.ethUnitValueList = [
-            {label: 'ETH', value: this.D.unit.eth.ETH},
-            {label: 'GWei', value: this.D.unit.eth.GWei},
-            {label: 'Wei', value: this.D.unit.eth.Wei}
+            {label: this.D.unit.eth.ETH, value: this.D.unit.eth.ETH},
+            {label: this.D.unit.eth.GWei, value: this.D.unit.eth.GWei},
+            {label: this.D.unit.eth.Wei, value: this.D.unit.eth.Wei}
           ]
           this.$nextTick(() => {
             form.render('radio', 'form3')
@@ -298,6 +298,7 @@ export default {
         Store.saveChromeStore('lang', data.value)
         // Store.save('lang', data.value)
         this.$emit('switchSetting', this.$t('message.app_setting'))
+        Bus.$emit('switchLang', true)
       })
     },
     switchColor (color) {

@@ -57,6 +57,8 @@ export const message = {
   accounts_confirmations: '确认数',
   accounts_sync_error: '同步失败',
   accounts_sync_success: '同步成功',
+  accounts_total: '共',
+  accounts_items: '条',
 
   send_prompt_msg: '在交易前请确认您输入的地址、金额、交易费用正确 ！！',
   send_current_account: '当前账户',
