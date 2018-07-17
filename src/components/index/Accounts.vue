@@ -15,7 +15,7 @@
           <div class="account-msg">
             <span class="layui-badge-dot layui-bg-green"></span>
             <span>{{$t('message.accounts_account')}}</span>
-           <span style="color: #e74c3c" v-if="newAccount.length > 0">{{newAccount[index].label}}</span>
+           <span class="max-width-200" style="color: #e74c3c" v-if="newAccount.length > 0">{{newAccount[index].label}}</span>
             <a title="edit" href="#" class="edit-account" @click="editAccount(index)">
               <i class="icon iconfont icon-bianji1 "></i>
             </a>
@@ -23,11 +23,11 @@
           <div class="account-msg">
             <span class="layui-badge-dot layui-bg-green"></span>
             <span>{{$t('message.accounts_balance')}}</span>
-            <span v-if="coinTypeList[index] && newAccount.length > 0">{{formatBalance(newAccount[index].coinType, newAccount[index].balance)}}</span>
+            <span class="max-width-200" v-if="coinTypeList[index] && newAccount.length > 0">{{formatBalance(newAccount[index].coinType, newAccount[index].balance)}}</span>
             <span v-if="coinTypeList[index]">{{currentDisplayUnit(coinTypeList[index])}}</span>
             <span v-if="newAccount.length > 0 && newAccount[index].balance">
               <span class="exchange-rate">(</span>
-              <span v-if="currentExchangeRate && coinTypeList[index] && newAccount[index].balance" class="exchange-rate">{{toExchangeText(coinTypeList[index], newAccount[index].balance)}}</span>
+              <span class="max-width-200" v-if="currentExchangeRate && coinTypeList[index] && newAccount[index].balance" class="exchange-rate">{{toExchangeText(coinTypeList[index], newAccount[index].balance)}}</span>
               <span class="exchange-rate">{{currentExchangeRate}}</span>
               <span class="exchange-rate">)</span>
             </span>
@@ -50,7 +50,7 @@
                 <col width="15%">
                 <col width="30%">
                 <col width="10%">
-                <col width="8%">
+                <col width="10%">
                 <col width="6%">
               </colgroup>
               <thead>
@@ -542,9 +542,12 @@ export default {
   }
   .account-msg {
     display: inline-block;
-    max-width: 350px;
     max-height: 19px;
     margin-right: 30px;
+
+  }
+  .max-width-200 {
+    max-width: 200px;
     text-overflow: ellipsis;
     overflow: hidden;
     white-space:nowrap;

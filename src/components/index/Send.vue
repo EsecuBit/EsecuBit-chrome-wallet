@@ -35,9 +35,9 @@
         <div class="money-address">
           <div class="layui-form-item">
             <label class="layui-form-label">{{$t('message.send_address')}}</label>
-            <div class="layui-input-block input-width">
+            <div class="layui-input-block input-width" style="margin-left: 100px">
               <input type="text" v-model="addressValue" name="address"  lay-verify="isEmpty"  :placeholder="$t('message.send_address')"
-                     class="layui-input" style="width: 300px;text-align: right;" id="transactionAddress">
+                     class="layui-input" style="width: 360px;text-align: right;" id="transactionAddress">
               <span v-show="isDisplayIcon" style="margin-left: 10px">
                 <a v-show="isAddressError" style="color: #e74c3c; vertical-align: sub" @click="clearAddress">
                   <i class="layui-icon">&#x1007;</i>
@@ -185,6 +185,11 @@ export default {
     amountValue: {
       handler (newValue, oldValue) {
         this.isDisplayExchange = true
+        if (newValue < 0) {
+          this.amountValue = 0
+          layer.msg(this.$t('message.send_positive_number'), { icon: 2, anim: 6 })
+          return
+        }
         if (this.currentAccount.prepareTx && newValue !== null) {
           this.calculateTotal()
         }
@@ -355,7 +360,7 @@ export default {
       this.customFees = null
     },
     submitSendData () {
-      layer.msg(this.$t('message.send_is_trading'), { icon: 0 })
+      layer.msg(this.$t('message.send_is_trading'), { icon: 0, time: 6000000000000 })
       // 验证表单
       if (!this.switchFee) {
         if (!(this.selected && this.amountValue !== '' && this.addressValue)) return false

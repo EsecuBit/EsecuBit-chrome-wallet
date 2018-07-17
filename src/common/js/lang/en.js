@@ -81,7 +81,7 @@ export const message = {
   send_invalid_address_mag: 'The address you entered is illegal, please re-enter',
   send_not_balance: 'Insufficient account balance',
   send_is_trading: 'Trading is in progress, please wait...',
-
+  send_positive_number: 'The amount cannot be less than 0',
 
   accept_prompt_msg: 'Please use the mobile phone to scan the QR code in the picture',
   accept_current_account: 'Current Account :',

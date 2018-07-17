@@ -80,6 +80,7 @@ export const message = {
   send_invalid_address_mag: '地址不合法，请重新输入',
   send_not_balance: '账户余额不足',
   send_is_trading: '正在进行交易， 请稍后。。。',
+  send_positive_number: '金额不能小于0',
 
   accept_prompt_msg: '请使用手机扫描下面的二位码',
   accept_current_account: '当前账户 ：',
