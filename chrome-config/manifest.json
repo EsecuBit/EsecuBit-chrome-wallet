@@ -38,5 +38,6 @@
         }
       ]
     }
-  ]
+  ],
+    "optional_permissions": [ {"usbDevices": [{"vendorId": 7848, "productId": 49189}]}]
 }
