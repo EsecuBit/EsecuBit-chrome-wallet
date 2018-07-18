@@ -26,7 +26,6 @@
             <button class="layui-btn layui-btn-radius layui-btn-sm max-btn" type="button" @click="maxAmount">MAX</button>
             <div class="usd-amount" v-if="coinType && currentUnit && currentExchangeRate && isDisplayExchange">{{toExchangeText}}</div>
           </div>
-
         </div>
         <!--<div class="switch-money">-->
           <!--<label class="blank-label"></label>-->
@@ -69,11 +68,13 @@
           <!--</div>-->
         <!--</div>-->
         <div class="layui-form-item" v-if="switchFee">
-          <label class="layui-form-label">{{$t('message.send_transaction_fees')}}</label>
-          <div class="layui-input-block input-width">
-            <input type="number"  lay-verify="isEmpty" v-model.number="customFees" :placeholder="currentTransactionUnit(coinType)" autocomplete="off" class="layui-input" style="width: 300px;text-align: end;  ">
-            <button class="layui-btn layui-btn-sm layui-btn-radius "
-                    style="margin-left: 5px" type="button" @click="switchSelectButton">{{$t('message.send_select_fee')}}</button>
+          <label class="layui-form-label" >{{$t('message.send_transaction_fees')}}</label>
+          <div class="layui-input-block input-width" style="position: relative;">
+            <div style="width: 300px">
+              <div v-if="coinType" class="transFee-unit" >{{currentTransactionUnit(coinType)}}</div>
+              <input type="number"  lay-verify="isEmpty" v-model.number="customFees" :placeholder="$t('message.send_amount')" autocomplete="off" class="layui-input transFee-input">
+            </div>
+            <button class="layui-btn layui-btn-sm layui-btn-radius transFee-btn" type="button" @click="switchSelectButton">{{$t('message.send_select_fee')}}</button>
           </div>
         </div>
         <div class="layui-form-item" v-show="!switchFee">
@@ -293,7 +294,7 @@ export default {
       return this.D.isBtc(coinType) ? this.currentUnit : this.currentUnitEth
     },
     currentTransactionUnit (coinType) {
-      return this.D.isBtc(coinType) ? 'satoshi per byte' : 'wei per ether'
+      return this.D.isBtc(coinType) ? 'satoshi per byte' : 'Gwei per byte'
     },
     toTargetCoinUnit (value) {
       if (this.coinType) {
@@ -365,6 +366,9 @@ export default {
       this.switchFee = !this.switchFee
       this.customFees = null
     },
+    gweiToWei (value) {
+      return this.esWallet.convertValue(this.coinType, value, this.D.unit.eth.GWei, this.D.unit.eth.Wei)
+    },
     submitSendData () {
       layer.msg(this.$t('message.send_is_trading'), { icon: 0, time: 6000000000000 })
       // 验证表单
@@ -376,8 +380,9 @@ export default {
       if (!this.verifySubmitAddress()) return false
       let address = this.addressValue
       let moneyValue = this.toMinCoinUnit(this.amountValue)
+      let customFees = this.D.isBtc(this.coinType) ? this.customFees : this.gweiToWei(this.customFees)
       let formData = {
-        feeRate: Number(this.switchFee ? this.customFees : this.selected),
+        feeRate: Number(this.switchFee ? customFees : this.selected),
         outputs: [{
           address: address,
           value: moneyValue
@@ -401,8 +406,9 @@ export default {
       let getAmountValue = this.amountValue ? this.amountValue : 0
       let sendAmountValue = this.toMinCoinUnit(getAmountValue)
       let getAddress = this.addressValue
+      let customFees = this.D.isBtc(this.coinType) ? this.customFees : this.gweiToWei(this.customFees)
       let formData = {
-        feeRate: Number(this.switchFee ? this.customFees : this.selected),
+        feeRate: Number(this.switchFee ? customFees : this.selected),
         outputs: [{
           address: getAddress,
           value: sendAmountValue
@@ -489,6 +495,27 @@ export default {
     height: 55px;
     line-height: 55px;
     opacity: 0.6
+  }
+  .transFee-unit{
+    display: inline-block;
+    float: right;
+    font-size: 16px;
+    font-weight: 600;
+    height:38px;
+    line-height: 38px;
+    color:#000;
+    opacity: 0.6
+  }
+  .transFee-btn{
+    position: absolute;
+    left: 320px;
+    top: 5px;
+  }
+  .transFee-input{
+    width: 160px;
+    text-align: end;
+    float: right;
+    padding-right: 8px;
   }
   .usd-amount{
     position: absolute;
