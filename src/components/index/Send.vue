@@ -111,7 +111,7 @@ const form = layui.form
 const layer = layui.layer
 export default {
   name: 'Sending',
-  props: ['accountInfo', 'currentUnit', 'currentUnitEth', 'currentExchangeRate'],
+  props: ['accountInfo', 'currentUnit', 'currentUnitEth', 'currentExchangeRate', 'resetStatus'],
   data () {
     return {
       addressList: [],
@@ -154,6 +154,13 @@ export default {
     }
   },
   watch: {
+    resetStatus: {
+      handler (newValue, oldValue) {
+        if (newValue) {
+          this.isInit = true
+        }
+      }
+    },
     addressValue: {
       handler () {
         this.isDisplayIcon = true

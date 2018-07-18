@@ -17,6 +17,7 @@ export const message = {
   app_submit_btn: 'submit',
   app_cancel_btn: 'cancel',
   app_add_accounts_title: 'Add Account',
+  app_plug_out: 'Wallet has been pulled out',
 
   login_title: 'Bitcion Wallet',
   login_detail: 'A secure offline management tool',

@@ -17,6 +17,7 @@ export const message = {
   app_submit_btn: '确定',
   app_cancel_btn: '取消',
   app_add_accounts_title: '添加用户',
+  app_plug_out: '钱包已拔出',
 
   login_title: '比特币钱包',
   login_detail: '一套安全的离线管理工具',

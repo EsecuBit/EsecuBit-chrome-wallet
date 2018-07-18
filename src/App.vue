@@ -38,10 +38,10 @@
                 <Accounts :account-info ="accounts" :current-unit="currentUnit" :current-unit-eth="currentUnitEth" :current-exchange-rate="currentExchangeRate"/>
               </div>
               <div class="main-tab-item">
-                <Send :account-info ="accounts" :current-unit="currentUnit" :current-unit-eth="currentUnitEth" :current-exchange-rate="currentExchangeRate"/>
+                <Send :account-info ="accounts" :current-unit="currentUnit" :current-unit-eth="currentUnitEth" :current-exchange-rate="currentExchangeRate" :reset-status="resetStatus"/>
               </div>
               <div class="main-tab-item">
-                <Accept :account-info ="accounts"/>
+                <Accept :account-info ="accounts" :reset-status="resetStatus"/>
               </div>
               <div class="main-tab-item">
                 <Setting @switchSetting = "switchSetting" @settingColor = "settingColor" @setExchangeRate="setExchangeRate"
@@ -122,7 +122,8 @@ export default {
       accountType: [],
       currentUnit: '',
       currentUnitEth: '',
-      currentExchangeRate: ''
+      currentExchangeRate: '',
+      resetStatus: false
     }
   },
   watch: {
@@ -214,7 +215,9 @@ export default {
         }
         if (status === this.D.status.plugOut) {
           this.loginStatus = 99
-          this.isLogin = !this.isLogin
+          this.isLogin = true
+          this.resetStatus = true
+          layer.msg(this.$t('message.app_plug_out'))
         }
       })
     },

@@ -53,7 +53,7 @@ const layer = layui.layer
 
 export default {
   name: 'accept',
-  props: ['accountInfo'],
+  props: ['accountInfo', 'resetStatus'],
   data () {
     return {
       isFirst: true,
@@ -76,6 +76,13 @@ export default {
     }
   },
   watch: {
+    resetStatus: {
+      handler (newValue, oldValue) {
+        if (newValue) {
+          this.isInit = true
+        }
+      }
+    },
     accountInfo: {
       handler (newValue, oldValue) {
         this.accountOrder = newValue
