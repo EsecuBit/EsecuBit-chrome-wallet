@@ -294,7 +294,7 @@ export default {
       return this.formatNum(exchange)
     },
     toTargetCoinUnit (coinType, value) {
-      return this.D.isBtc(coinType) ? this.esWallet.convertValue(coinType, value, this.D.unit.btc.santoshi, this.currentUnit) : this.esWallet.convertValue(coinType, value, this.D.unit.eth.Wei, this.currentUnitEth)
+      return this.D.isBtc(coinType) ? this.esWallet.convertValue(coinType, value, this.D.unit.btc.satoshi, this.currentUnit) : this.esWallet.convertValue(coinType, value, this.D.unit.eth.Wei, this.currentUnitEth)
     },
     tableCanvas (index) {
       let canvasClass = index ? ('canvas-' + index) : 'canvas'

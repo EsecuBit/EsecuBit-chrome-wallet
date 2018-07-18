@@ -196,7 +196,7 @@ export default {
           this.bitUnitValueList = [
             {label: this.D.unit.btc.BTC, value: this.D.unit.btc.BTC},
             {label: this.D.unit.btc.mBTC, value: this.D.unit.btc.mBTC},
-            {label: this.D.unit.btc.santoshi, value: this.D.unit.btc.santoshi}
+            {label: this.D.unit.btc.satoshi, value: this.D.unit.btc.satoshi}
           ]
           this.$nextTick(() => {
             form.render('radio', 'form3')

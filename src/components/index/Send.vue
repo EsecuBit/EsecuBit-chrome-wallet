@@ -305,14 +305,14 @@ export default {
     },
     toTargetCoinUnit (value) {
       if (this.coinType) {
-        let nowType = this.D.isBtc(this.coinType) ? this.D.unit.btc.santoshi : this.D.unit.eth.Wei
+        let nowType = this.D.isBtc(this.coinType) ? this.D.unit.btc.satoshi : this.D.unit.eth.Wei
         let nowUnit = this.currentDisplayUnit(this.coinType)
         return this.esWallet.convertValue(this.coinType, value, nowType, nowUnit)
       }
     },
     toMinCoinUnit (value) {
       if (this.coinType) {
-        let nowType = this.D.isBtc(this.coinType) ? this.D.unit.btc.santoshi : this.D.unit.eth.Wei
+        let nowType = this.D.isBtc(this.coinType) ? this.D.unit.btc.satoshi : this.D.unit.eth.Wei
         let nowUnit = this.currentDisplayUnit(this.coinType)
         return this.esWallet.convertValue(this.coinType, value, nowUnit, nowType)
       }
