@@ -111,7 +111,7 @@ const form = layui.form
 const layer = layui.layer
 export default {
   name: 'Sending',
-  props: ['accountInfo', 'currentUnit', 'currentUnitEth', 'currentExchangeRate', 'resetStatus'],
+  props: ['accountInfo', 'currentUnit', 'currentUnitEth', 'currentExchangeRate', 'resetStatus', 'errorCodeMsg'],
   data () {
     return {
       addressList: [],
@@ -238,6 +238,15 @@ export default {
     Bus.$on('switchLang', () => { this.renderFeeForm(this.currentAccount) })
   },
   methods: {
+    displayErrorCode (value) {
+      layer.closeAll()
+      let errorKey = String(value)
+      if (this.errorCodeMsg[errorKey]) {
+        layer.msg(this.errorCodeMsg[errorKey], {icon: 2, anim: 6})
+      } else {
+        layer.msg(errorKey, {icon: 2, anim: 6})
+      }
+    },
     renderFeeForm (newValue) {
       if (newValue.getSuggestedFee) {
         let oldFeeList = newValue.getSuggestedFee()
@@ -333,10 +342,7 @@ export default {
       })
         .catch(value => {
           console.warn(value)
-          switch (value) {
-            case this.D.error.balanceNotEnough: layer.msg(this.$t('message.send_not_balance'), { icon: 2 })
-              break
-          }
+          this.displayErrorCode(value)
         })
     },
     verifyAddress () {
@@ -346,7 +352,7 @@ export default {
         layer.msg(this.$t('message.send_effective_address_mag'), { icon: 1, anim: 2, time: 1500 })
       } catch (e) {
         console.warn(e)
-        layer.msg(this.$t('message.send_invalid_address_mag'), { icon: 2, anim: 6 })
+        this.displayErrorCode(e)
       }
     },
     verifySubmitAddress () {
@@ -359,7 +365,7 @@ export default {
           return true
         } else {
           console.warn(e)
-          layer.msg(this.$t('message.send_invalid_address_mag'), { icon: 2, anim: 6 })
+          this.displayErrorCode(e)
           document.getElementById('transactionAddress').focus()
           return false
         }
@@ -405,8 +411,7 @@ export default {
           layer.msg(this.$t('message.send_submit_success'), { icon: 1 })
         }).catch(value => {
           console.warn(value)
-          layer.closeAll('msg')
-          layer.msg(String(value), { icon: 2 })
+          this.displayErrorCode(value)
         })
     },
     calculateTotal () {
@@ -427,10 +432,7 @@ export default {
       })
         .catch(value => {
           console.warn(value)
-          switch (value) {
-            case this.D.error.balanceNotEnough: layer.msg(this.$t('message.send_not_balance'), { icon: 2 })
-              break
-          }
+          this.displayErrorCode(value)
         })
     },
     addAddressDom () {

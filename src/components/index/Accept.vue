@@ -53,7 +53,7 @@ const layer = layui.layer
 
 export default {
   name: 'accept',
-  props: ['accountInfo', 'resetStatus'],
+  props: ['accountInfo', 'resetStatus', 'errorCodeMsg'],
   data () {
     return {
       isFirst: true,
@@ -108,6 +108,15 @@ export default {
     })
   },
   methods: {
+    displayErrorCode (value) {
+      layer.closeAll()
+      let errorKey = String(value)
+      if (this.errorCodeMsg[errorKey]) {
+        layer.msg(this.errorCodeMsg[errorKey], {icon: 2})
+      } else {
+        layer.msg(errorKey, {icon: 2, anim: 6})
+      }
+    },
     generateAddress () {
       if (this.isFirst) {
         this.currentAccount.getAddress().then(value => {
@@ -116,7 +125,7 @@ export default {
           this.switchDisplay()
         }).catch(value => {
           console.warn(value)
-          layer.msg(String(value))
+          this.displayErrorCode(value)
         })
         this.isFirst = false
       } else {
@@ -126,7 +135,7 @@ export default {
           this.switchDisplay()
         }).catch(value => {
           console.warn(value)
-          layer.msg(String(value))
+          this.displayErrorCode(value)
         })
       }
     },

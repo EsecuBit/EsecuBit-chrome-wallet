@@ -157,7 +157,7 @@ const layer = layui.layer
 const laypage = layui.laypage
 export default {
   name: 'accouts',
-  props: ['accountInfo', 'currentUnit', 'currentUnitEth', 'currentExchangeRate'],
+  props: ['accountInfo', 'currentUnit', 'currentUnitEth', 'currentExchangeRate', 'errorCodeMsg'],
   data () {
     return {
       grid_pager: 'grid_pager',
@@ -223,7 +223,7 @@ export default {
           })
         }).catch(value => {
           console.warn(value)
-          layer.msg(String(value))
+          this.displayErrorCode(value)
         })
       }
     },
@@ -238,6 +238,15 @@ export default {
     this.listenTXInfo()
   },
   methods: {
+    displayErrorCode (value) {
+      layer.closeAll()
+      let errorKey = String(value)
+      if (this.errorCodeMsg[errorKey]) {
+        layer.msg(this.errorCodeMsg[errorKey], {icon: 2})
+      } else {
+        layer.msg(errorKey, {icon: 2, anim: 6})
+      }
+    },
     listenTXInfo () {
       this.esWallet.listenTxInfo((error, txInfo) => {
         console.log('新交易记录', error, txInfo)
@@ -363,7 +372,7 @@ export default {
         layer.msg(this.$t('message.accounts_sync_success'), { icon: 1 })
       }).catch(value => {
         console.warn(value)
-        layer.msg(this.$t('message.accounts_sync_error'), { icon: 2 })
+        this.displayErrorCode(value)
       })
     },
     setMenuList (targetArray) {
@@ -419,7 +428,7 @@ export default {
         })
           .catch(value => {
             console.warn(value)
-            layer.msg(this.$t('message.accounts_update_error'), { icon: 2 })
+            this.displayErrorCode(value)
           })
       }
     },
@@ -461,7 +470,7 @@ export default {
         })
       }).catch(value => {
         console.warn(value)
-        layer.msg(this.$t('message.accounts_get_data'), { icon: 2 })
+        this.displayErrorCode(value)
       })
     },
     createTab () {

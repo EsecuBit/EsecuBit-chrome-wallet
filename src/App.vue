@@ -35,13 +35,13 @@
           <div class="layui-container page-content ">
             <div class="main-tab-content">
               <div class="main-tab-item layui-show">
-                <Accounts :account-info ="accounts" :current-unit="currentUnit" :current-unit-eth="currentUnitEth" :current-exchange-rate="currentExchangeRate"/>
+                <Accounts :account-info ="accounts" :current-unit="currentUnit" :current-unit-eth="currentUnitEth" :current-exchange-rate="currentExchangeRate" :error-code-msg="errorCodeMsg"/>
               </div>
               <div class="main-tab-item">
-                <Send :account-info ="accounts" :current-unit="currentUnit" :current-unit-eth="currentUnitEth" :current-exchange-rate="currentExchangeRate" :reset-status="resetStatus"/>
+                <Send :account-info ="accounts" :current-unit="currentUnit" :current-unit-eth="currentUnitEth" :current-exchange-rate="currentExchangeRate" :reset-status="resetStatus" :error-code-msg="errorCodeMsg"/>
               </div>
               <div class="main-tab-item">
-                <Accept :account-info ="accounts" :reset-status="resetStatus"/>
+                <Accept :account-info ="accounts" :reset-status="resetStatus" :error-code-msg="errorCodeMsg"/>
               </div>
               <div class="main-tab-item">
                 <Setting @switchSetting = "switchSetting" @settingColor = "settingColor" @setExchangeRate="setExchangeRate"
@@ -123,7 +123,35 @@ export default {
       currentUnit: '',
       currentUnitEth: '',
       currentExchangeRate: '',
-      resetStatus: false
+      resetStatus: false,
+      errorCodeMsg: {
+        101: this.$t('message.error_noDevice'),
+        102: this.$t('message.error_deviceComm'),
+        103: this.$t('message.error_deviceConnectFailed'),
+        104: this.$t('message.error_deviceDeriveLargerThanN'),
+        105: this.$t('message.error_deviceProtocol'),
+        106: this.$t('message.error_handShake'),
+        107: this.$t('message.error_needPressKey'), // sleep after long time idle
+        108: this.$t('message.error_userCancel'),
+        109: this.$t('message.error_pinError'),
+        201: this.$t('message.error_databaseOpenFailed'),
+        202: this.$t('message.error_databaseExecFailed'),
+        301: this.$t('message.error_lastAccountNoTransaction'),
+        302: this.$t('message.error_accountHasTransactions'),
+        401: this.$t('message.error_networkUnavailable'),
+        402: this.$t('message.error_networkNotInitialized'),
+        403: this.$t('message.error_networkProviderError'),
+        404: this.$t('message.error_networkTxNotFound'),
+        405: this.$t('message.error_networkFeeTooSmall'),
+        501: this.$t('message.error_balanceNotEnough'),
+        601: this.$t('message.error_invalidAddress'),
+        602: this.$t('message.error_noAddressCheckSum'), // for eth
+        603: this.$t('message.error_invalidAddressChecksum'),
+        604: this.$t('message.error_valueIsDecimal'),
+        10000: this.$t('message.error_notImplemented'),
+        10001: this.$t('message.error_unknown'),
+        10002: this.$t('message.error_coinNotSupported')
+      }
     }
   },
   watch: {
@@ -189,11 +217,23 @@ export default {
     setEthUnit (...data) {
       this.currentUnitEth = data[0]
     },
-    changelang () {
+    changeLang () {
       // console.log(this.$t('message.hello'))
+    },
+    displayErrorCode (value) {
+      layer.closeAll()
+      let errorKey = String(value)
+      if (this.errorCodeMsg[errorKey]) {
+        layer.msg(this.errorCodeMsg[errorKey], {icon: 2, anim: 6})
+      } else {
+        layer.msg(errorKey, {icon: 2})
+      }
     },
     listenLoginStatus () {
       this.esWallet.listenStatus((errorNum, status) => {
+        if (this.errorCodeMsg[String(errorNum)]) {
+          this.displayErrorCode(errorNum)
+        }
         if (status === this.D.status.plugIn) this.loginStatus = 1
         if (status === this.D.status.initializing) this.loginStatus = 2
         if (status === this.D.status.syncing) this.loginStatus = 3
@@ -203,7 +243,7 @@ export default {
             this.WalletInfo = value
           }).catch(value => {
             console.warn(value)
-            layer.msg(this.$t('message.app_error_get_wallet'), { icon: 2, anim: 6 })
+            this.displayErrorCode(value)
           })
           this.esWallet.getAccounts().then(value => {
             if (value) this.accounts = this.orderArr(value)
@@ -267,7 +307,7 @@ export default {
         })
       }).catch(value => {
         console.warn(value)
-        layer.msg(this.$t('message.app_error_get_type'), { icon: 2, anim: 6 })
+        this.displayErrorCode(value)
       })
     },
     showAddAccount () {
