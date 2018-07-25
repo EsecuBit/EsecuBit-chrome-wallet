@@ -551,6 +551,7 @@ export default {
   .account-info {
     text-align: right;
     width: 300px;
+    overflow-x: hidden;
   }
   .unit{
     color: #999;

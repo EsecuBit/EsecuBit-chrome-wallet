@@ -242,7 +242,7 @@ export default {
           this.isLogin = !this.isLogin
           this.esWallet.getWalletInfo().then(value => {
             this.WalletInfo = value
-            console.log()
+            console.log(value, 'WalletInfo')
           }).catch(value => {
             console.warn(value)
             this.displayErrorCode(value)

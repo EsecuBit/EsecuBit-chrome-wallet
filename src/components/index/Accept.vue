@@ -192,6 +192,7 @@ export default {
   }
   .account-info {
     margin-left: 190px;
+    overflow-x: hidden;
   }
   /*自定义的qrcode*/
   .qrcode{

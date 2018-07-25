@@ -78,10 +78,10 @@
               <th>{{$t('message.setting_information')}}</th>
             </tr>
             </thead>
-            <tbody v-for="item in hardwareList">
-              <tr>
-                <td>{{item.name}}</td>
-                <td>{{item.value}}</td>
+            <tbody >
+              <tr v-for="(value, key) in hardwareList">
+                <td>{{key}}</td>
+                <td>{{value}}</td>
               </tr>
             </tbody>
           </table>
@@ -137,9 +137,7 @@ export default {
   props: ['walletInfo', 'accountInfo'],
   data () {
     return {
-      hardwareList: [
-        {name: '', value: ''}
-      ],
+      hardwareList: {},
       skinColor: [
         {name: 'black', colorClass: 'black-skin'},
         {name: 'gray', colorClass: 'gray-skin'},
@@ -178,7 +176,6 @@ export default {
     walletInfo: {
       handler (newValue, oldValue) {
         this.hardwareList = newValue
-        console.log(newValue)
       },
       deep: true
     },
