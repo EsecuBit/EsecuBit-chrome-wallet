@@ -15,7 +15,6 @@
                 <li class="layui-nav-item"><a href="#" @click="hiddenAddAccount"><i class="icon iconfont icon-msnui-cloud-upload bigger"></i>{{$t('message.app_send')}}</a></li>
                 <li class="layui-nav-item"><a href="#" @click="hiddenAddAccount"><i class="icon iconfont icon-msnui-cloud-download bigger"></i>{{$t('message.app_accept')}}</a></li>
                 <li class="layui-nav-item"><a href="#" @click="hiddenAddAccount"><i class="icon iconfont icon-shezhi2"></i>{{$t('message.app_setting')}}</a></li>
-                <span class="layui-nav-bar" style="left: 0; top: 55px; width: 0; opacity: 0;"></span>
               </ul>
             </div>
           </div>
@@ -134,6 +133,7 @@ export default {
         107: this.$t('message.error_needPressKey'), // sleep after long time idle
         108: this.$t('message.error_userCancel'),
         109: this.$t('message.error_pinError'),
+        110: this.$t('message.error_operationTimeout'),
         201: this.$t('message.error_databaseOpenFailed'),
         202: this.$t('message.error_databaseExecFailed'),
         301: this.$t('message.error_lastAccountNoTransaction'),
@@ -238,9 +238,11 @@ export default {
         if (status === this.D.status.initializing) this.loginStatus = 2
         if (status === this.D.status.syncing) this.loginStatus = 3
         if (status === this.D.status.syncFinish) {
+          console.log('正在同步')
           this.isLogin = !this.isLogin
           this.esWallet.getWalletInfo().then(value => {
             this.WalletInfo = value
+            console.log()
           }).catch(value => {
             console.warn(value)
             this.displayErrorCode(value)

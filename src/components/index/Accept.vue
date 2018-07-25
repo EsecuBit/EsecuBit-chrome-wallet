@@ -118,25 +118,34 @@ export default {
       }
     },
     generateAddress () {
+      let layerIndex = layer.msg(this.$t('message.accept_loading'), { time: 10000 })
       if (this.isFirst) {
-        this.currentAccount.getAddress().then(value => {
-          this.generateQRCode(value.qrAddress)
-          this.qrAddress = value.address
-          this.switchDisplay()
-        }).catch(value => {
-          console.warn(value)
-          this.displayErrorCode(value)
-        })
+        setTimeout(() => {
+          this.currentAccount.getAddress().then(value => {
+            layer.close(layerIndex)
+            this.generateQRCode(value.qrAddress)
+            this.qrAddress = value.address
+            this.switchDisplay()
+          }).catch(value => {
+            layer.close(layerIndex)
+            console.warn(value)
+            this.displayErrorCode(value)
+          })
+        }, 200)
         this.isFirst = false
       } else {
-        this.currentAccount.getAddress().then(value => {
-          this.changeQRCode(value.qrAddress)
-          this.qrAddress = value.address
-          this.switchDisplay()
-        }).catch(value => {
-          console.warn(value)
-          this.displayErrorCode(value)
-        })
+        setTimeout(() => {
+          this.currentAccount.getAddress().then(value => {
+            layer.close(layerIndex)
+            this.changeQRCode(value.qrAddress)
+            this.qrAddress = value.address
+            this.switchDisplay()
+          }).catch(value => {
+            layer.close(layerIndex)
+            console.warn(value)
+            this.displayErrorCode(value)
+          })
+        }, 200)
       }
     },
     initDisplay () {

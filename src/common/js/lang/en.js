@@ -94,6 +94,7 @@ export const message = {
   accept_prompt_msg1: 'Click the button below to generate a QR code, please check the address and confirm on the device',
   accept_prompt_msg2: 'Please double-check that your address from the page matches the address on your device',
   accept_tips: 'Tips :',
+  accept_loading: 'Loading ...',
 
 
   setting_display: 'Display',
@@ -119,11 +120,12 @@ export const message = {
   error_deviceComm: 'Sending a hid packet failed',
   error_deviceConnectFailed: 'Device connection failed',
   error_deviceDeriveLargerThanN: 'Private key value is greater than N (not used)',
-  error_deviceProtocol: 'Send apdu failed, detailed error in the log',
+  error_deviceProtocol: 'Send apdu failed',
   error_handShake: 'Handshake failure',
   error_needPressKey: 'The device idles for a long time and goes to sleep.',
   error_userCancel: 'User canceled',
   error_pinError: 'Pin error',
+  error_operationTimeout: 'Connection timed out',
   error_databaseOpenFailed: 'Database open failed',
   error_databaseExecFailed: 'Database operation failed',
   error_lastAccountNoTransaction: 'The last created account has no transactions, and it is not allowed to create a new account.',

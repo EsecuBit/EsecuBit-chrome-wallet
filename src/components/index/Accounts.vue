@@ -13,30 +13,32 @@
       <div class="tab-item" v-for="(tablecount, index) in gridList" >
         <div class="account-information">
           <div class="account-msg">
-            <span class="layui-badge-dot layui-bg-green"></span>
-            <span>{{$t('message.accounts_account')}}</span>
-           <span class="max-width-200" style="color: #e74c3c" v-if="newAccount.length > 0">{{newAccount[index].label}}</span>
-            <a title="edit" href="#" class="edit-account" @click="editAccount(index)">
+            <div class="max-width-250">
+              <span class="layui-badge-dot layui-bg-green"></span>
+              <span>{{$t('message.accounts_account')}}</span>
+              <span  style="color: #e74c3c" v-if="newAccount.length > 0">{{newAccount[index].label}}</span>
+            </div>
+            <a title="edit" href="#" class="edit-account max-width-250" @click="editAccount(index)">
               <i class="icon iconfont icon-bianji1 "></i>
             </a>
           </div>
           <div class="account-msg">
-            <span class="layui-badge-dot layui-bg-green"></span>
-            <span>{{$t('message.accounts_balance')}}</span>
-            <span class="max-width-200" v-if="coinTypeList[index] && newAccount.length > 0">{{formatBalance(newAccount[index].coinType, newAccount[index].balance)}}</span>
-            <span v-if="coinTypeList[index]">{{currentDisplayUnit(coinTypeList[index])}}</span>
-            <span v-if="newAccount.length > 0 && newAccount[index].balance">
-              <span class="exchange-rate">(</span>
-              <span class="max-width-200 exchange-rate" v-if="currentExchangeRate && coinTypeList[index] && newAccount[index].balance">{{toExchangeText(coinTypeList[index], newAccount[index].balance)}}</span>
-              <span class="exchange-rate">{{currentExchangeRate}}</span>
-              <span class="exchange-rate">)</span>
-            </span>
+            <div class="max-width-400">
+              <span class="layui-badge-dot layui-bg-green"></span>
+              <span>{{$t('message.accounts_balance')}}</span>
+              <span v-if="coinTypeList[index] && newAccount.length > 0">{{formatBalance(newAccount[index].coinType, newAccount[index].balance)}}</span>
+              <span v-if="coinTypeList[index]">{{currentDisplayUnit(coinTypeList[index])}}</span>
+              <span v-if="newAccount.length > 0 && newAccount[index].balance">
+                <span class="exchange-rate">(</span>
+                <span class="exchange-rate" v-if="currentExchangeRate && coinTypeList[index] && newAccount[index].balance">{{toExchangeText(coinTypeList[index], newAccount[index].balance)}}</span>
+                <span class="exchange-rate">{{currentExchangeRate}}</span>
+                <span class="exchange-rate">)</span>
+              </span>
+            </div>
           </div>
-          <div class="account-msg">
-            <a title="refresh" href="#" class="refresh-data" @click="refresh">
-              <i class="layui-icon layui-icon-refresh-2" :class="loadingClass"></i>
-            </a>
-          </div>
+          <a title="refresh" href="#" class="refresh-data max-width-250" @click="refresh">
+            <i class="layui-icon layui-icon-refresh-2" :class="loadingClass"></i>
+          </a>
         </div>
         <div class="site-title">
           <fieldset>
@@ -553,7 +555,7 @@ export default {
     display: block;
     height: 52px;
     margin-bottom: 15px;
-    padding: 15px;
+    padding: 18px 15px 16px 15px;
     background-color: #f6f6f6;
     border-radius: 5px;
     border: 1px solid #f0f0f0;
@@ -565,19 +567,31 @@ export default {
     margin-right: 30px;
 
   }
-  .max-width-200 {
-    max-width: 200px;
+  .max-width-250 {
+    display: inline-block;
+    max-width: 250px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space:nowrap;
+  }
+  .max-width-400 {
+    display: inline-block;
+    max-width: 400px;
     text-overflow: ellipsis;
     overflow: hidden;
     white-space:nowrap;
   }
   .edit-account{
-    margin-left: 5px;
+    margin-left: 10px;
+    height: 16px;
   }
   .edit-account :hover{
     color: #009688;
   }
-  .account-msg a.refresh-data:hover {
+  .refresh-data {
+    height: 16px;
+  }
+  .account-msg .refresh-data:hover {
     color: #009688;
   }
   .layui-badge-dot {

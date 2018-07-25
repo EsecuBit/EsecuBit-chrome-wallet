@@ -383,7 +383,6 @@ export default {
       return this.esWallet.convertValue(this.coinType, value, this.D.unit.eth.GWei, this.D.unit.eth.Wei)
     },
     submitSendData () {
-      layer.msg(this.$t('message.send_is_trading'), { icon: 0, time: 6000000000000 })
       // 验证表单
       if (!this.switchFee) {
         if (!(this.selected && this.amountValue !== '' && this.addressValue)) return false
@@ -391,6 +390,7 @@ export default {
         if (!(this.customFees && this.amountValue !== '' && this.addressValue)) return false
       }
       if (!this.verifySubmitAddress()) return false
+      layer.msg(this.$t('message.send_is_trading'), { icon: 0, time: 60000 })
       let address = this.addressValue
       let moneyValue = this.toMinCoinUnit(this.amountValue)
       let customFees = this.D.isBtc(this.coinType) ? this.customFees : this.gweiToWei(this.customFees)
@@ -401,18 +401,20 @@ export default {
           value: moneyValue
         }]
       }
-      this.currentAccount.prepareTx(formData).then(value => this.currentAccount.buildTx(value))
-        .then(value => {
-          return this.currentAccount.sendTx(value)
-        }).then(value => {
+      setTimeout(() => {
+        this.currentAccount.prepareTx(formData).then(value => this.currentAccount.buildTx(value))
+          .then(value => {
+            return this.currentAccount.sendTx(value)
+          }).then(value => {
           // 格式化表格
-          this.clearFormData()
-          layer.closeAll('msg')
-          layer.msg(this.$t('message.send_submit_success'), { icon: 1 })
-        }).catch(value => {
-          console.warn(value)
-          this.displayErrorCode(value)
-        })
+            this.clearFormData()
+            layer.closeAll('msg')
+            layer.msg(this.$t('message.send_submit_success'), { icon: 1 })
+          }).catch(value => {
+            console.warn(value)
+            this.displayErrorCode(value)
+          })
+      }, 200)
     },
     calculateTotal () {
       let getAmountValue = this.amountValue ? this.amountValue : 0
@@ -528,12 +530,18 @@ export default {
   }
   .usd-amount{
     position: absolute;
+    display: block;
+    height: 15px;
     right: 198px;
     bottom: 3px;
     font-size: 12px;
     margin-left: 5px;
     color: #999;
     padding-left: 3px;
+    width: 250px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: right;
   }
   .max-btn {
     position: absolute;

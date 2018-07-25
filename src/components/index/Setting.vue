@@ -178,6 +178,7 @@ export default {
     walletInfo: {
       handler (newValue, oldValue) {
         this.hardwareList = newValue
+        console.log(newValue)
       },
       deep: true
     },
