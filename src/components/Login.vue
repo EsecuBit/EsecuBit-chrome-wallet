@@ -103,7 +103,7 @@ export default {
     margin: auto;
     width: 100%;
     padding: 0 ;
-    background-color: #f5f5f5;
+    background-color: #F2F2F2;
   }
 
   .layadmin-user-login-main {

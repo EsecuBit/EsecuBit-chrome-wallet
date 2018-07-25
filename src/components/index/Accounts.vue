@@ -556,7 +556,7 @@ export default {
     height: 52px;
     margin-bottom: 15px;
     padding: 18px 15px 16px 15px;
-    background-color: #f6f6f6;
+    background-color: #f2f2f2;
     border-radius: 5px;
     border: 1px solid #f0f0f0;
     box-shadow: 1px 4px 8px 0 rgba(0,0,0,0.15);
