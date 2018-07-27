@@ -117,10 +117,10 @@ export default {
       addressList: [],
       count: 2,
       unit: 'BTC',
-      amountValue: null,
+      amountValue: '',
       addressValue: '',
       selected: null,
-      customFees: 0,
+      customFees: '0',
       accountList: ['account 1', 'account 2'],
       feeList: [
         {label: 'slow（10 usd）', value: 10}
@@ -144,7 +144,7 @@ export default {
     toExchangeText () {
       if (this.currentUnit && this.currentExchangeRate) {
         let nowUnit = this.currentDisplayUnit(this.coinType)
-        let exchange = this.esWallet.convertValue(this.coinType, this.amountValue, nowUnit, this.currentExchangeRate).toFixed(2)
+        let exchange = Number(this.esWallet.convertValue(this.coinType, String(this.amountValue), nowUnit, this.currentExchangeRate)).toFixed(2)
         return this.formatNum(exchange) + ' ' + this.currentExchangeRate
       }
     },
@@ -194,8 +194,8 @@ export default {
     amountValue: {
       handler (newValue, oldValue) {
         this.isDisplayExchange = true
-        if (newValue < 0) {
-          this.amountValue = 0
+        if (Number(newValue) < 0) {
+          this.amountValue = '0'
           layer.msg(this.$t('message.send_positive_number'), { icon: 2, anim: 6 })
           return
         }
@@ -211,7 +211,7 @@ export default {
     },
     customFees: {
       handler (newValue, oldValue) {
-        if (this.switchFee && newValue !== null) this.calculateTotal()
+        if (this.switchFee) this.calculateTotal()
       }
     },
     accountInfo: {
@@ -250,6 +250,7 @@ export default {
     renderFeeForm (newValue) {
       if (newValue.getSuggestedFee) {
         let oldFeeList = newValue.getSuggestedFee()
+        console.log(oldFeeList, 8989989)
         let newFeeList = []
         let fastestMsg = this.$t('message.send_fastest_confirm')
         let fastMsg = this.$t('message.send_fast_confirm')
@@ -282,9 +283,9 @@ export default {
       this.addressValue = ''
     },
     clearFormData () {
-      this.amountValue = null
+      this.amountValue = ''
       this.addressValue = ''
-      this.customFees = null
+      this.customFees = ''
       this.totalDisplayFee = ''
       this.switchFee = false
       this.$nextTick(() => {
@@ -330,10 +331,10 @@ export default {
       let getAddress = this.addressValue
       let formData = {
         sendAll: true,
-        feeRate: Number(this.switchFee ? this.customFees : this.selected),
+        feeRate: String(this.switchFee ? this.customFees : this.selected),
         outputs: [{
           address: getAddress,
-          value: 0
+          value: '0'
         }]
       }
       this.currentAccount.prepareTx(formData).then(result => {
@@ -373,11 +374,11 @@ export default {
     },
     switchSelectButton () {
       this.switchFee = !this.switchFee
-      this.customFees = 0
+      this.customFees = '0'
     },
     switchCustomButton () {
       this.switchFee = !this.switchFee
-      this.customFees = null
+      this.customFees = ''
     },
     gweiToWei (value) {
       return this.esWallet.convertValue(this.coinType, value, this.D.unit.eth.GWei, this.D.unit.eth.Wei)
@@ -392,10 +393,11 @@ export default {
       if (!this.verifySubmitAddress()) return false
       layer.msg(this.$t('message.send_is_trading'), { icon: 0, time: 60000 })
       let address = this.addressValue
-      let moneyValue = this.toMinCoinUnit(this.amountValue)
-      let customFees = this.D.isBtc(this.coinType) ? this.customFees : this.gweiToWei(this.customFees)
+      let moneyValue = this.toMinCoinUnit(String(this.amountValue))
+      let getCustomFees = this.customFees ? String(this.customFees) : '0'
+      let customFees = this.D.isBtc(this.coinType) ? getCustomFees : this.gweiToWei(getCustomFees)
       let formData = {
-        feeRate: Number(this.switchFee ? customFees : this.selected),
+        feeRate: String(this.switchFee ? customFees : this.selected),
         outputs: [{
           address: address,
           value: moneyValue
@@ -415,12 +417,14 @@ export default {
       }, 200)
     },
     calculateTotal () {
-      let getAmountValue = this.amountValue ? this.amountValue : 0
+      let getAmountValue = this.amountValue ? String(this.amountValue) : '0'
+      console.log(getAmountValue)
       let sendAmountValue = this.toMinCoinUnit(getAmountValue)
+      let getCustomFees = this.customFees ? String(this.customFees) : '0'
       let getAddress = this.addressValue
-      let customFees = this.D.isBtc(this.coinType) ? this.customFees : this.gweiToWei(this.customFees)
+      let customFees = this.D.isBtc(this.coinType) ? getCustomFees : this.gweiToWei(getCustomFees)
       let formData = {
-        feeRate: Number(this.switchFee ? customFees : this.selected),
+        feeRate: this.switchFee ? customFees : String(this.selected),
         outputs: [{
           address: getAddress,
           value: sendAmountValue

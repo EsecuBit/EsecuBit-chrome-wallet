@@ -67,24 +67,69 @@
         </div>
         <!--硬件信息-->
         <div class="tab-item">
-          <table class="layui-table" >
-            <colgroup>
-              <col width="100">
-              <col width="200">
-            </colgroup>
-            <thead>
-            <tr>
-              <th>{{$t('message.setting_name')}}</th>
-              <th>{{$t('message.setting_information')}}</th>
-            </tr>
-            </thead>
-            <tbody >
-              <tr v-for="(value, key) in hardwareList">
-                <td>{{key}}</td>
-                <td>{{value}}</td>
+          <div class="table-item">
+            <h3>{{$t('message.setting_hardware')}}</h3>
+            <table class="layui-table" >
+              <colgroup>
+                <col width="100">
+                <col width="200">
+              </colgroup>
+              <thead>
+              <tr>
+                <th>{{$t('message.setting_name')}}</th>
+                <th>{{$t('message.setting_information')}}</th>
               </tr>
-            </tbody>
-          </table>
+              </thead>
+              <tbody >
+              <tr v-for="item in hardwareList" v-if="hardwareList.length > 0">
+                <td>{{item.name}}</td>
+                <td>{{item.value}}</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="table-item">
+            <h3>{{$t('message.setting_btc_net')}}</h3>
+            <table class="layui-table" >
+              <colgroup>
+                <col width="100">
+                <col width="200">
+              </colgroup>
+              <thead>
+              <tr>
+                <th>{{$t('message.setting_name')}}</th>
+                <th>{{$t('message.setting_network')}}</th>
+              </tr>
+              </thead>
+              <tbody >
+              <tr v-for="item in bitNetList" v-if="bitNetList.length > 0">
+                <td>{{item.name}}</td>
+                <td>{{item.value}}</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="table-item">
+            <h3>{{$t('message.setting_etc_net')}}</h3>
+            <table class="layui-table" >
+              <colgroup>
+                <col width="100">
+                <col width="200">
+              </colgroup>
+              <thead>
+              <tr>
+                <th>{{$t('message.setting_name')}}</th>
+                <th>{{$t('message.setting_network')}}</th>
+              </tr>
+              </thead>
+              <tbody >
+              <tr v-for="item in etcNetList" v-if="etcNetList.length > 0">
+                <td>{{item.name}}</td>
+                <td>{{item.value}}</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
         <!--设置种子-->
         <div class="tab-item">
@@ -134,10 +179,9 @@ const $ = layui.jquery
 const layer = layui.layer
 export default {
   name: 'Setting',
-  props: ['walletInfo', 'accountInfo'],
+  props: ['walletInfo', 'accountInfo', 'netInfo'],
   data () {
     return {
-      hardwareList: {},
       unitBitChecked: '',
       unitEthChecked: '',
       selectedExchangeRate: '',
@@ -163,16 +207,11 @@ export default {
       accountOrder: [],
       seedValue: '',
       deviceChecked: '',
-      netChecked: ''
+      netChecked: '',
+      currentNet: ''
     }
   },
   watch: {
-    walletInfo: {
-      handler (newValue, oldValue) {
-        this.hardwareList = newValue
-      },
-      deep: true
-    },
     accountInfo: {
       handler (newValue, oldValue) {
         this.accountOrder = newValue
@@ -221,6 +260,44 @@ export default {
     }
   },
   computed: {
+    hardwareList () {
+      if (this.walletInfo) {
+        let hardwareArr = [
+          {name: this.$t('message.setting_sdk_version'), value: this.walletInfo.sdk_version},
+          {name: this.$t('message.setting_cos_version'), value: this.walletInfo.cos_version}
+        ]
+        return hardwareArr
+      } else return []
+    },
+    bitNetList () {
+      if (this.netInfo) {
+        let netString = this.netInfo[this.D.coin.test.btcTestNet3] ? this.D.coin.test.btcTestNet3 : this.D.coin.main.btc
+        let exchangeNet = this.netInfo[netString].exchange
+        let feeNet = this.netInfo[netString].fee
+        let btcNet = this.netInfo[netString].network
+
+        let netList = [
+          {name: this.$t('message.setting_exchange'), value: exchangeNet},
+          {name: this.$t('message.setting_fee'), value: feeNet},
+          {name: this.$t('message.setting_btc_info'), value: btcNet}
+        ]
+        return netList
+      } else return []
+    },
+    etcNetList () {
+      if (this.netInfo) {
+        let netString = this.netInfo[this.D.coin.test.ethRinkeby] ? this.D.coin.test.ethRinkeby : this.D.coin.main.eth
+        let exchangeNet = this.netInfo[netString].exchange
+        let feeNet = this.netInfo[netString].fee
+        let btcNet = this.netInfo[netString].network
+        let netList = [
+          {name: this.$t('message.setting_exchange'), value: exchangeNet},
+          {name: this.$t('message.setting_fee'), value: feeNet},
+          {name: this.$t('message.setting_btc_info'), value: btcNet}
+        ]
+        return netList
+      } else return []
+    },
     skinColor () {
       return [
         {name: this.$t('message.setting_black'), colorClass: 'black-skin', id: 'black'},
@@ -265,6 +342,7 @@ export default {
         this.seedValue = seedValue['seedValue'] ? seedValue['seedValue'] : ''
         this.deviceChecked = device['device'] ? seedValue['device'] : 'soft'
         this.netChecked = net['net'] ? net['net'] : 'test'
+        this.currentNet = net['net'] ? net['net'] : 'test'
       }
       this.$nextTick(() => {
         form.render('select', 'form3')
@@ -363,5 +441,9 @@ export default {
     background:#4898d5;
     border-color:#4898d5;
     color: #fff;
+  }
+  .layui-table td, .layui-table th {
+    padding: 6px 15px;
+    font-size: 13px;
   }
 </style>

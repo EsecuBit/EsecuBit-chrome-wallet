@@ -44,7 +44,7 @@
               </div>
               <div class="main-tab-item">
                 <Setting @switchSetting = "switchSetting" @settingColor = "settingColor" @setExchangeRate="setExchangeRate"
-                         @setBitUnit="setBitUnit"  @setEthUnit="setEthUnit" :account-info ="accounts" :wallet-info="WalletInfo"/>
+                         @setBitUnit="setBitUnit"  @setEthUnit="setEthUnit" :account-info ="accounts" :wallet-info="walletInfo" :net-info='netInfo'/>
               </div>
             </div>
           </div>
@@ -112,7 +112,8 @@ export default {
     return {
       isLogin: true,
       loginStatus: null,
-      WalletInfo: null,
+      walletInfo: null,
+      netInfo: null,
       accounts: null,
       heardColor: '',
       customizeColor: '',
@@ -250,8 +251,8 @@ export default {
           console.log('正在同步')
           this.isLogin = !this.isLogin
           this.esWallet.getWalletInfo().then(value => {
-            this.WalletInfo = value
-            console.log(value, 'WalletInfo')
+            this.walletInfo = value
+            console.log(value, 'walletInfo')
           }).catch(value => {
             console.warn(value)
             this.displayErrorCode(value)
@@ -263,6 +264,8 @@ export default {
             console.warn(value)
             layer.msg(this.$t('message.app_error_get_account'), { icon: 2, anim: 6 })
           })
+          this.netInfo = this.esWallet.getProviders()
+          console.log(this.esWallet.getProviders(), 'net')
         }
         if (status === this.D.status.plugOut) {
           this.loginStatus = 99

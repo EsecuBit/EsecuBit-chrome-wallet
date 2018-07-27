@@ -37,7 +37,7 @@
         <div class="layui-form-item" v-show="showAddress">
           <label class="layui-form-label account-label" >{{$t('message.accept_qrcode_msg')}}</label>
           <div class="layui-input-block account-info">
-            <div class="description">{{qrAddress}}</div>
+            <div class="address-description">{{qrAddress}}</div>
           </div>
         </div>
       </form>
@@ -223,7 +223,7 @@ export default {
     background-color: rgb(42, 195, 148);
     width: 210px;
   }
-  .description{
+  .address-description{
     display: inline-block;
     padding: 9px 0!important;
     color: #333!important;

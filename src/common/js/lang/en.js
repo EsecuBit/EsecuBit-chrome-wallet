@@ -98,7 +98,7 @@ export const message = {
 
 
   setting_display: 'Display',
-  setting_hardware: 'hardware information',
+  setting_hardware: 'Hardware Information',
   setting_interface_lang: 'Interface Language',
   setting_units: 'Units',
   setting_exchange_rate: 'Exchange Rate',
@@ -119,6 +119,15 @@ export const message = {
   setting_gray: 'gray',
   setting_dark_blue: 'dark blue',
   setting_brown: 'brown',
+  setting_sdk_version: 'SDK Version',
+  setting_cos_version: 'COS Version',
+  setting_network: 'Network',
+  setting_btc_net: 'Bitcoin Network Information',
+  setting_etc_net: 'Ether Network Information',
+  setting_exchange: 'Exchange Website',
+  setting_fee: 'Transaction Cost Website',
+  setting_btc_info: 'Bitcoin Website',
+
 
   error_noDevice: 'No hardware, no instructions can be sent',
   error_deviceComm: 'Sending a hid packet failed',
