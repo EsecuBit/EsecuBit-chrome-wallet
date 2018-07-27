@@ -113,6 +113,10 @@ export const message = {
   setting_software: '软件',
   setting_set_hardware: '硬件',
   setting_net_type: '网络类型',
+  setting_black: '黑色',
+  setting_gray: '灰色',
+  setting_dark_blue: '深蓝',
+  setting_brown: '棕色',
 
   error_noDevice: '没有硬件，无法发送指令',
   error_deviceComm: '发送hid包失败',

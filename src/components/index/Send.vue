@@ -403,9 +403,7 @@ export default {
       }
       setTimeout(() => {
         this.currentAccount.prepareTx(formData).then(value => this.currentAccount.buildTx(value))
-          .then(value => {
-            return this.currentAccount.sendTx(value)
-          }).then(value => {
+          .then(value => this.currentAccount.sendTx(value)).then(value => {
           // 格式化表格
             this.clearFormData()
             layer.closeAll('msg')

@@ -5,7 +5,7 @@
         <Login :status="loginStatus" />
       </div>
       <div v-show="!isLogin">
-        <div class="main-admin" >
+        <div class="main-admin" :class="[customizeColor]">
           <div class="fly-header bg-black" v-bind:class="[heardColor]">
             <div class="layui-container">
               <a class="logo" href="#"> <img src="./common/imgs/logo.png" alt="Wallet Bitcion"></a>
@@ -115,6 +115,7 @@ export default {
       WalletInfo: null,
       accounts: null,
       heardColor: '',
+      customizeColor: '',
       isAddAccounts: true,
       selected: '',
       isHasAccount: true,
@@ -193,13 +194,20 @@ export default {
         this.currentUnit = Store.fetch('bitUnit') ? Store.fetch('bitUnit') : this.D.unit.btc.mBTC
         this.currentUnitEth = Store.fetch('ethUnit') ? Store.fetch('ethUnit') : this.D.unit.eth.GWei
         this.currentExchangeRate = Store.fetch('exchange') ? Store.fetch('exchange') : this.D.unit.legal.USD
+        let currentSkin = Store.fetch('skin') ? Store.fetch('skin') : ''
+        this.heardColor = currentSkin + '-skin'
+        this.customizeColor = currentSkin + '-customize'
       } else {
         const bitUnit = await Store.setPromise('bitUnit')
         const ethUnit = await Store.setPromise('ethUnit')
         const exchange = await Store.setPromise('exchange')
+        const skin = await Store.setPromise('skin')
         this.currentUnit = bitUnit['bitUnit'] ? bitUnit['bitUnit'] : this.D.unit.btc.mBTC
         this.currentUnitEth = ethUnit['ethUnit'] ? ethUnit['ethUnit'] : this.D.unit.eth.GWei
         this.currentExchangeRate = exchange['exchange'] ? exchange['exchange'] : this.D.unit.legal.USD
+        let currentSkin = skin['skin'] ? skin['skin'] : ''
+        this.heardColor = currentSkin + '-skin'
+        this.customizeColor = currentSkin + '-customize'
       }
     },
     setExchangeRate (...data) {
@@ -210,6 +218,7 @@ export default {
     },
     settingColor (...data) {
       this.heardColor = data[0] + '-skin'
+      this.customizeColor = data[0] + '-customize'
     },
     setBitUnit (...data) {
       this.currentUnit = data[0]
@@ -356,7 +365,7 @@ export default {
 @import './common/css/main.css' ;
 </style>
 
-<style scoped>
+<style >
   div{
     font: 14px Helvetica Neue,Helvetica,PingFang SC,\5FAE\8F6F\96C5\9ED1,Tahoma,Arial,sans-serif;
   }
@@ -381,15 +390,15 @@ export default {
     background-color: #f5f5f5;
   }
   .blue-skin {
-    background:#2d668c;
+    background:#1d365d;
     color: #fff;
-    border-bottom: 1px solid #2d668c;
-    border-right: 1px solid #2d668c;
+    border-bottom: 1px solid #1d365d;
+    border-right: 1px solid #1d365d;
   }
-  .red-skin {
-    background:#dd4b39;
-    border-bottom: 1px solid #dd4b39;
-    border-right: 1px solid #dd4b39;
+  .brown-skin {
+    background:#6d3028;
+    border-bottom: 1px solid #6d3028;
+    border-right: 1px solid #6d3028;
     color: #fff;
   }
   .black-skin {
@@ -399,10 +408,23 @@ export default {
     color: #fff;
   }
   .gray-skin {
-    background:#4b505d;
-    border-bottom: 1px solid #4b505d;
-    border-right: 1px solid #4b505d;
+    background:#424650;
+    border-bottom: 1px solid #424650;
+    border-right: 1px solid #424650;
     color: #fff;
+  }
+  /*自定义皮肤样式*/
+  .gray-customize .layui-form-radio>i:hover, .gray-customize .layui-form-radioed>i {
+    color: #263238;
+  }
+  .gray-customize .site-tree .layui-tree li h2 {
+    border-left-color: #009E94;
+  }
+  .blue-customize .layui-form-radio>i:hover, .blue-customize .layui-form-radioed>i {
+    color: #B03A5B;
+  }
+  .blue-customize .site-tree .layui-tree li h2 {
+    border-left-color: #B03A5B;
   }
   .layui-breadcrumb a:hover {
     color: #999!important

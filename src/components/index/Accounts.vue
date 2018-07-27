@@ -727,4 +727,15 @@ export default {
     color: #333;
     font-size: 12px;
   }
+  .layui-tree {
+    max-height: 520px;
+    overflow-y: hidden;
+  }
+  .layui-tree:hover {
+    max-height: 520px;
+    overflow-y: scroll;
+  }
+  ::-webkit-scrollbar {
+    display:none
+  }
 </style>

@@ -59,7 +59,7 @@
               <div class="layui-form-item">
                 <label class="layui-form-label">{{$t('message.setting_skin')}}</label>
                 <div class="layui-input-inline input-width">
-                    <a href="#" class="layui-btn layui-btn-sm" v-bind:class="[item.colorClass]" @click="switchColor(item.name)" v-for="item in skinColor">{{item.name}}</a>
+                    <a href="#" class="layui-btn layui-btn-sm" v-bind:class="[item.colorClass]" @click="switchColor(item.id)" v-for="item in skinColor">{{item.name}}</a>
                 </div>
               </div>
             </form>
@@ -138,12 +138,6 @@ export default {
   data () {
     return {
       hardwareList: {},
-      skinColor: [
-        {name: 'black', colorClass: 'black-skin'},
-        {name: 'gray', colorClass: 'gray-skin'},
-        {name: 'blue', colorClass: 'blue-skin'},
-        {name: 'red', colorClass: 'red-skin'}
-      ],
       unitBitChecked: '',
       unitEthChecked: '',
       selectedExchangeRate: '',
@@ -226,6 +220,16 @@ export default {
       }
     }
   },
+  computed: {
+    skinColor () {
+      return [
+        {name: this.$t('message.setting_black'), colorClass: 'black-skin', id: 'black'},
+        {name: this.$t('message.setting_gray'), colorClass: 'gray-skin', id: 'gray'},
+        {name: this.$t('message.setting_dark_blue'), colorClass: 'blue-skin', id: 'blue'},
+        {name: this.$t('message.setting_brown'), colorClass: 'brown-skin', id: 'brown'}
+      ]
+    }
+  },
   mounted () {
     this.init()
     Bus.$on('switchAccount', (index) => { this.currentAccount = this.accountOrder[index] })
@@ -273,10 +277,10 @@ export default {
         })
       })
     },
-    editExchangeList (arry) {
+    editExchangeList (arr) {
       let exRate = []
-      if (Array.isArray(arry) && arry.length > 0) {
-        for (let item of arry) {
+      if (Array.isArray(arr) && arr.length > 0) {
+        for (let item of arr) {
           exRate.push({label: item, value: item})
         }
       }
@@ -300,6 +304,7 @@ export default {
       })
     },
     switchColor (color) {
+      Store.saveChromeStore('skin', color)
       this.$emit('settingColor', color)
     },
     switchTab () {
@@ -332,13 +337,13 @@ export default {
     width: 70px;
   }
   .blue-skin {
-    background:#2d668c;
-    border-color:#2d668c;
+    background:#1d365d;
+    border-color:#1d365d;
     color: #fff;
   }
-  .red-skin {
-    background:#dd4b39;
-    border-color:#dd4b39;
+  .brown-skin {
+    background:#6d3028;
+    border-color:#6d3028;
     color: #fff;
   }
   .black-skin {
@@ -347,8 +352,8 @@ export default {
     color: #fff;
   }
   .gray-skin {
-    background:#4b505d;
-    border-color:#4b505d;
+    background:#424650;
+    border-color:#424650;
     color: #fff;
   }
   .layui-form-label {

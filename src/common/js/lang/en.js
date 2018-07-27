@@ -115,6 +115,10 @@ export const message = {
   setting_software: 'software',
   setting_set_hardware: 'hardware',
   setting_net_type: 'Net Type',
+  setting_black: 'black',
+  setting_gray: 'gray',
+  setting_dark_blue: 'dark blue',
+  setting_brown: 'brown',
 
   error_noDevice: 'No hardware, no instructions can be sent',
   error_deviceComm: 'Sending a hid packet failed',
