@@ -250,7 +250,6 @@ export default {
     renderFeeForm (newValue) {
       if (newValue.getSuggestedFee) {
         let oldFeeList = newValue.getSuggestedFee()
-        console.log(oldFeeList, 8989989)
         let newFeeList = []
         let fastestMsg = this.$t('message.send_fastest_confirm')
         let fastMsg = this.$t('message.send_fast_confirm')

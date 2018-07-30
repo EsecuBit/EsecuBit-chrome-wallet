@@ -290,6 +290,7 @@ export default {
       }
     },
     formatBalance (coinType, value) {
+      console.log('原始值', value)
       return this.toTargetCoinUnit(coinType, value)
     },
     tableBlockNumber (table) {
