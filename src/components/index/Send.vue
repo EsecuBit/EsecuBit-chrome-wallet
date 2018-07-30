@@ -137,7 +137,8 @@ export default {
       isAddressError: false,
       isAddressTrue: false,
       isInit: true,
-      currentSelectedIndex: null
+      currentSelectedIndex: null,
+      isClearFormData: false
     }
   },
   computed: {
@@ -199,7 +200,7 @@ export default {
           layer.msg(this.$t('message.send_positive_number'), { icon: 2, anim: 6 })
           return
         }
-        if (this.currentAccount.prepareTx && newValue !== null) {
+        if (this.currentAccount.prepareTx && newValue !== null && (!this.isClearFormData)) {
           this.calculateTotal()
         }
       }
@@ -211,7 +212,7 @@ export default {
     },
     customFees: {
       handler (newValue, oldValue) {
-        if (this.switchFee) this.calculateTotal()
+        if (this.switchFee && (!this.isClearFormData)) this.calculateTotal()
       }
     },
     accountInfo: {
@@ -282,14 +283,18 @@ export default {
       this.addressValue = ''
     },
     clearFormData () {
-      this.amountValue = ''
-      this.addressValue = ''
-      this.customFees = ''
-      this.totalDisplayFee = ''
-      this.switchFee = false
+      this.isClearFormData = true
       this.$nextTick(() => {
-        this.isDisplayIcon = false
-        this.isDisplayExchange = false
+        this.amountValue = ''
+        this.addressValue = ''
+        this.customFees = ''
+        this.totalDisplayFee = ''
+        this.switchFee = false
+        this.$nextTick(() => {
+          this.isDisplayIcon = false
+          this.isDisplayExchange = false
+          this.isClearFormData = false
+        })
       })
     },
     verifyForm () {

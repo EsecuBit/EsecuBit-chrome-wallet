@@ -267,6 +267,9 @@ export default {
             this.tableCanvas(nowIndex)
             this.pageList(nowIndex, total)
           })
+        }).catch(value => {
+          console.warn(value)
+          this.displayErrorCode(value)
         })
       })
     },

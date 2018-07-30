@@ -148,6 +148,7 @@ export const message = {
   error_networkProviderError: 'Sending a network request failed, most of the reason is that the transaction message is incorrect.',
   error_networkTxNotFound: 'Network cannot connect',
   error_networkFeeTooSmall: 'Transaction cost is too low, request rejected',
+  error_networkTooManyPendingTx: 'There are too many unconfirmed transactions and it is temporarily impossible to trade',
   error_balanceNotEnough: 'Insufficient balance',
   error_invalidAddress: 'Illegal address',
   error_noAddressCheckSum: 'ETH address has no check format',

@@ -145,6 +145,7 @@ export const message = {
   error_networkProviderError: '发送网络请求失败，大部分原因是交易报文不对',
   error_networkTxNotFound: '网络无法连接',
   error_networkFeeTooSmall: '交易费用太低，请求被拒绝',
+  error_networkTooManyPendingTx: '存在太多未确认的交易，暂时无法进行交易',
   error_balanceNotEnough: '余额不足',
   error_invalidAddress: '非法地址',
   error_noAddressCheckSum: 'ETH地址没有校验格式',

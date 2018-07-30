@@ -145,6 +145,7 @@ export default {
         403: this.$t('message.error_networkProviderError'),
         404: this.$t('message.error_networkTxNotFound'),
         405: this.$t('message.error_networkFeeTooSmall'),
+        406: this.$t('message.error_networkTooManyPendingTx'),
         501: this.$t('message.error_balanceNotEnough'),
         601: this.$t('message.error_invalidAddress'),
         602: this.$t('message.error_noAddressCheckSum'), // for eth
@@ -177,6 +178,11 @@ export default {
     // document.oncontextmenu = function () {
     //   event.returnValue = false
     // }
+    document.onkeydown = function () {
+      if (window.event && window.event.keyCode === 13) {
+        window.event.returnValue = false
+      }
+    }
     form.render('select', 'form1')
     this.listenLoginStatus()
     // 菜单点击事件
