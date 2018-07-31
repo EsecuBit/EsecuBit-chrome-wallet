@@ -216,7 +216,6 @@ export default {
           }
           this.gridList = newGridList
           this.totalNum = total
-          console.log(newGridList)
           this.$nextTick(() => {
             this.tableCanvas()
             for (let index of this.gridList.keys()) {
@@ -251,7 +250,9 @@ export default {
     },
     listenTXInfo () {
       this.esWallet.listenTxInfo((error, txInfo) => {
-        console.log('新交易记录', error, txInfo)
+        if (this.errorCodeMsg[String(error)]) {
+          this.displayErrorCode(error)
+        }
         let nowIndex = 10
         if (this.newAccount.length === 0) return false
         this.newAccount.forEach((item, index) => {
@@ -293,7 +294,6 @@ export default {
       }
     },
     formatBalance (coinType, value) {
-      console.log('原始值', value)
       return this.toTargetCoinUnit(coinType, value)
     },
     tableBlockNumber (table) {

@@ -264,7 +264,6 @@ export default {
           })
           this.esWallet.getAccounts().then(value => {
             if (value) this.accounts = this.orderArr(value)
-            console.log(value)
           }).catch(value => {
             console.warn(value)
             layer.msg(this.$t('message.app_error_get_account'), { icon: 2, anim: 6 })

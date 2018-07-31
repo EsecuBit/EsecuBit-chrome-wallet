@@ -407,7 +407,6 @@ export default {
           value: moneyValue
         }]
       }
-      console.log(formData, 'formData')
       setTimeout(() => {
         this.currentAccount.prepareTx(formData).then(value => this.currentAccount.buildTx(value))
           .then(value => this.currentAccount.sendTx(value)).then(value => {
@@ -423,8 +422,6 @@ export default {
     },
     calculateTotal () {
       let getAmountValue = this.amountValue ? String(this.amountValue) : '0'
-      console.log(getAmountValue, 'test')
-      console.log(getAmountValue)
       let sendAmountValue = this.toMinCoinUnit(getAmountValue)
       let getCustomFees = this.customFees ? String(this.customFees) : '0'
       let getAddress = this.addressValue
