@@ -19,7 +19,7 @@
           <div class="layui-input-block input-width" style="position: relative;height: 55px">
             <div style="width: 300px">
               <div v-if="coinType" class="unit-display" >{{currentDisplayUnit(currentAccount.coinType)}}</div>
-              <input type="number" v-model.number="amountValue" name="money" id="money" lay-verify="isEmpty" v-if="coinType"
+              <input type="number" v-model="amountValue" name="money" id="money" lay-verify="isEmpty" v-if="coinType"
                      :placeholder="$t('message.send_amount')"
                      autocomplete="off" class="layui-input amount-input">
             </div>
@@ -72,7 +72,7 @@
           <div class="layui-input-block input-width" style="position: relative;">
             <div style="width: 300px">
               <div v-if="coinType" class="transFee-unit" >{{currentTransactionUnit(coinType)}}</div>
-              <input type="number"  lay-verify="isEmpty" v-model.number="customFees" :placeholder="$t('message.send_amount')" autocomplete="off" class="layui-input transFee-input">
+              <input type="number"  lay-verify="isEmpty" v-model="customFees" :placeholder="$t('message.send_amount')" autocomplete="off" class="layui-input transFee-input">
             </div>
             <button class="layui-btn layui-btn-sm layui-btn-radius transFee-btn" type="button" @click="switchSelectButton">{{$t('message.send_select_fee')}}</button>
           </div>
@@ -163,9 +163,9 @@ export default {
       }
     },
     addressValue: {
-      handler () {
+      handler (newValue, oldValue) {
         this.isDisplayIcon = true
-        if (!this.currentAccount) return false
+        if (!this.currentAccount || !newValue) return false
         try {
           this.currentAccount.checkAddress(this.addressValue)
           this.isAddressError = false
@@ -287,7 +287,7 @@ export default {
       this.$nextTick(() => {
         this.amountValue = ''
         this.addressValue = ''
-        this.customFees = ''
+        this.customFees = '0'
         this.totalDisplayFee = ''
         this.switchFee = false
         this.$nextTick(() => {
@@ -390,9 +390,9 @@ export default {
     submitSendData () {
       // 验证表单
       if (!this.switchFee) {
-        if (!(this.selected && this.amountValue !== '' && this.addressValue)) return false
+        if (!(this.selected && this.amountValue && this.addressValue)) return false
       } else {
-        if (!(this.customFees && this.amountValue !== '' && this.addressValue)) return false
+        if (!(this.customFees && this.amountValue && this.addressValue)) return false
       }
       if (!this.verifySubmitAddress()) return false
       layer.msg(this.$t('message.send_is_trading'), { icon: 0, time: 60000 })
@@ -407,6 +407,7 @@ export default {
           value: moneyValue
         }]
       }
+      console.log(formData, 'formData')
       setTimeout(() => {
         this.currentAccount.prepareTx(formData).then(value => this.currentAccount.buildTx(value))
           .then(value => this.currentAccount.sendTx(value)).then(value => {
@@ -422,6 +423,7 @@ export default {
     },
     calculateTotal () {
       let getAmountValue = this.amountValue ? String(this.amountValue) : '0'
+      console.log(getAmountValue, 'test')
       console.log(getAmountValue)
       let sendAmountValue = this.toMinCoinUnit(getAmountValue)
       let getCustomFees = this.customFees ? String(this.customFees) : '0'
