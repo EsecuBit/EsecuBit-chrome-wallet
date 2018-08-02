@@ -124,7 +124,7 @@ export default {
       currentUnit: '',
       currentUnitEth: '',
       currentExchangeRate: '',
-      resetStatus: false,
+      resetStatus: 0,
       errorCodeMsg: {
         101: this.$t('message.error_noDevice'),
         102: this.$t('message.error_deviceComm'),
@@ -136,6 +136,7 @@ export default {
         108: this.$t('message.error_userCancel'),
         109: this.$t('message.error_pinError'),
         110: this.$t('message.error_operationTimeout'),
+        111: this.$t('message.error_deviceNotInit'),
         201: this.$t('message.error_databaseOpenFailed'),
         202: this.$t('message.error_databaseExecFailed'),
         301: this.$t('message.error_lastAccountNoTransaction'),
@@ -174,17 +175,12 @@ export default {
     this.init()
   },
   mounted () {
-    // 监听选择事件
-    // document.oncontextmenu = function () {
-    //   event.returnValue = false
-    // }
     document.onkeydown = function () {
       if (window.event && window.event.keyCode === 13) {
         window.event.returnValue = false
       }
     }
     form.render('select', 'form1')
-    this.listenLoginStatus()
     // 菜单点击事件
     $('.menu-switch li a').click(function () {
       if ($(this).parent('li').hasClass('layui-this')) return false
@@ -194,8 +190,26 @@ export default {
       $(this).parent('li').addClass('layui-this')
       $('.main-tab-content .main-tab-item').removeClass('layui-show').eq(tabIndex).addClass('layui-show')
     })
+    this.isLowVersion()
   },
   methods: {
+    isLowVersion () {
+      let currentVersion = this.getChromeVersion()
+      console.log(currentVersion)
+      if (currentVersion < 38) {
+        layer.msg(this.$t('message.app_version_prompt'), {anim: 6, time: 100000})
+        return false
+      }
+      this.listenLoginStatus()
+    },
+    getChromeVersion () {
+      let arr = navigator.userAgent.split(' ')
+      let chromeVersion = ''
+      for (let value of arr) {
+        if (/chrome/i.test(value)) chromeVersion = value
+      }
+      return Number(chromeVersion.split('/')[1].split('.')[0])
+    },
     async init () {
       if (localStorage) {
         this.currentUnit = Store.fetch('bitUnit') ? Store.fetch('bitUnit') : this.D.unit.btc.mBTC
@@ -274,7 +288,7 @@ export default {
         if (status === this.D.status.plugOut) {
           this.loginStatus = 99
           this.isLogin = true
-          this.resetStatus = true
+          this.resetStatus = this.resetStatus + 1
           layer.msg(this.$t('message.app_plug_out'))
         }
       })

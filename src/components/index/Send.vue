@@ -117,10 +117,10 @@ export default {
       addressList: [],
       count: 2,
       unit: 'BTC',
-      amountValue: '',
+      amountValue: null,
       addressValue: '',
       selected: null,
-      customFees: '0',
+      customFees: 0,
       accountList: ['account 1', 'account 2'],
       feeList: [
         {label: 'slow（10 usd）', value: 10}
@@ -145,7 +145,7 @@ export default {
     toExchangeText () {
       if (this.currentUnit && this.currentExchangeRate) {
         let nowUnit = this.currentDisplayUnit(this.coinType)
-        let exchange = Number(this.esWallet.convertValue(this.coinType, String(this.amountValue), nowUnit, this.currentExchangeRate)).toFixed(2)
+        let exchange = Number(this.esWallet.convertValue(this.coinType, String(Number(this.amountValue)), nowUnit, this.currentExchangeRate)).toFixed(2)
         return this.formatNum(exchange) + ' ' + this.currentExchangeRate
       }
     },
@@ -196,22 +196,27 @@ export default {
       handler (newValue, oldValue) {
         this.isDisplayExchange = true
         if (Number(newValue) < 0) {
-          this.amountValue = '0'
+          this.amountValue = null
           layer.msg(this.$t('message.send_positive_number'), { icon: 2, anim: 6 })
-          return
+          return false
         }
-        if (this.currentAccount.prepareTx && newValue !== null && (!this.isClearFormData)) {
+        if (newValue !== null && (!this.isClearFormData)) {
           this.calculateTotal()
         }
       }
     },
     switchFee: {
       handler () {
-        this.calculateTotal()
+        if (!this.isClearFormData) this.calculateTotal()
       }
     },
     customFees: {
       handler (newValue, oldValue) {
+        if (Number(newValue) < 0) {
+          this.customFees = null
+          layer.msg(this.$t('message.send_positive_number'), { icon: 2, anim: 6 })
+          return
+        }
         if (this.switchFee && (!this.isClearFormData)) this.calculateTotal()
       }
     },
@@ -224,11 +229,11 @@ export default {
     },
     currentAccount: {
       handler (newValue, oldValue) {
+        this.clearFormData()
         this.coinType = newValue.coinType
         this.isDisplayDetails = false
         this.isDisplayExchange = false
         this.currentSelectedIndex = null
-        this.clearFormData()
         this.renderFeeForm(newValue)
       }
     }
@@ -284,10 +289,11 @@ export default {
     },
     clearFormData () {
       this.isClearFormData = true
+      this.totalFee = 0
       this.$nextTick(() => {
-        this.amountValue = ''
+        this.amountValue = null
         this.addressValue = ''
-        this.customFees = '0'
+        this.customFees = 0
         this.totalDisplayFee = ''
         this.switchFee = false
         this.$nextTick(() => {
@@ -333,16 +339,16 @@ export default {
     },
     maxAmount () {
       let getAddress = this.addressValue
+      let getCustomFees = this.customFees ? this.customFees : '0'
       let formData = {
         sendAll: true,
-        feeRate: String(this.switchFee ? this.customFees : this.selected),
+        feeRate: String(this.switchFee ? getCustomFees : this.selected),
         outputs: [{
           address: getAddress,
           value: '0'
         }]
       }
       this.currentAccount.prepareTx(formData).then(result => {
-        console.log(result)
         this.amountValue = this.toTargetCoinUnit(result.outputs[0].value)
       })
         .catch(value => {
@@ -378,11 +384,11 @@ export default {
     },
     switchSelectButton () {
       this.switchFee = !this.switchFee
-      this.customFees = '0'
+      this.customFees = 0
     },
     switchCustomButton () {
       this.switchFee = !this.switchFee
-      this.customFees = ''
+      this.customFees = null
     },
     gweiToWei (value) {
       return this.esWallet.convertValue(this.coinType, value, this.D.unit.eth.GWei, this.D.unit.eth.Wei)
@@ -395,7 +401,7 @@ export default {
         if (!(this.customFees && this.amountValue && this.addressValue)) return false
       }
       if (!this.verifySubmitAddress()) return false
-      layer.msg(this.$t('message.send_is_trading'), { icon: 0, time: 60000 })
+      layer.msg(this.$t('message.send_is_click'), {time: 600000000})
       let address = this.addressValue
       let moneyValue = this.toMinCoinUnit(String(this.amountValue))
       let getCustomFees = this.customFees ? String(this.customFees) : '0'
@@ -408,14 +414,21 @@ export default {
         }]
       }
       setTimeout(() => {
-        this.currentAccount.prepareTx(formData).then(value => this.currentAccount.buildTx(value))
-          .then(value => this.currentAccount.sendTx(value)).then(value => {
+        this.currentAccount.prepareTx(formData).then(value => {
+          layer.closeAll('msg')
+          layer.msg(this.$t('message.send_is_trading'), {time: 600000000})
+          return this.currentAccount.buildTx(value)
+        })
+          .then(value => {
+            return this.currentAccount.sendTx(value)
+          }).then(value => {
           // 格式化表格
             this.clearFormData()
             layer.closeAll('msg')
             layer.msg(this.$t('message.send_submit_success'), { icon: 1 })
           }).catch(value => {
             console.warn(value)
+            layer.closeAll('msg')
             this.displayErrorCode(value)
           })
       }, 200)
@@ -435,7 +448,9 @@ export default {
       }
       this.currentAccount.prepareTx(formData).then(value => {
         this.isDisplayDetails = true
-        this.totalFee = this.toTargetCoinUnit(value.total)
+        this.$nextTick(() => {
+          this.totalFee = this.toTargetCoinUnit(value.total)
+        })
       })
         .catch(value => {
           console.warn(value)

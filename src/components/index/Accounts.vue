@@ -4,7 +4,7 @@
     <ul class="layui-tree">
       <template v-for="item in wallet">
         <li class="menu-title" v-if="item.label"><h2>{{item.label}}</h2></li>
-        <li class="site-tree-noicon tab-title-1" v-for="account in item.account"><a href="#"><cite>{{account}}</cite><em>{{account}}</em></a></li>
+        <li class="site-tree-noicon tab-title-1" v-for="account in item.account"><a href="#"><cite>{{account}}</cite></a></li>
       </template>
     </ul>
   </div>
@@ -52,6 +52,7 @@
                 <col width="15%">
                 <col width="30%">
                 <col width="10%">
+                <col v-if="isEtcType(newAccount[index])" width="10%">
                 <col width="10%">
                 <col width="6%">
               </colgroup>
@@ -60,6 +61,7 @@
                 <th>{{$t('message.accounts_table_time')}}</th>
                 <th>{{$t('message.accounts_table_address')}}</th>
                 <th>{{$t('message.accounts_table_blockNumber')}}</th>
+                <th v-if="isEtcType(newAccount[index])" >{{$t('message.accounts_table_fee')}}</th>
                 <th>{{$t('message.accounts_confirmations')}}</th>
                 <th>{{$t('message.accounts_details')}}</th>
               </tr>
@@ -71,7 +73,14 @@
                     <span :class ="[table.direction === 'in'?green:red]" class="text-opacity">{{toOrForm(table.direction)}}</span>
                     <span style="cursor: text;">{{getTableAddress(table)}}</span>
                   </td>
-                  <td :class="[table.value>0?green:red]" >{{tableBlockNumber(table)}}</td>
+                  <td :class="[table.value>0?green:red]" >
+                    <span>{{tableBlockNumber(table)}}</span>
+                    <span v-if="coinTypeList[index]" class="unit-display-2">{{currentDisplayUnit(table.coinType)}}</span>
+                  </td>
+                  <td v-if="isEtcType(newAccount[index])" >
+                    <span>{{weiToGwei(newAccount[index].coinType, table.fee)}}</span>
+                    <span v-if="coinTypeList[index]" class="unit-display-2">{{D.unit.eth.GWei}}</span>
+                  </td>
                   <td style="padding: 0">
                     <canvas class="canvas" :class="'canvas-'+ index" width="100" height="30" :data-counts="table.confirmations"></canvas>
                   </td>
@@ -239,6 +248,10 @@ export default {
     this.listenTXInfo()
   },
   methods: {
+    isEtcType (currentAccount) {
+      let type = currentAccount.coinType
+      return !this.D.isBtc(type)
+    },
     displayErrorCode (value) {
       layer.closeAll()
       let errorKey = String(value)
@@ -298,7 +311,7 @@ export default {
     },
     tableBlockNumber (table) {
       let newValue = this.toTargetCoinUnit(table.coinType, table.value)
-      return this.toTwoPoint(newValue) + ' ' + this.currentDisplayUnit(table.coinType)
+      return this.toTwoPoint(newValue) + ' '
     },
     currentDisplayUnit (coinType) {
       return this.D.isBtc(coinType) ? this.currentUnit : this.currentUnitEth
@@ -514,6 +527,9 @@ export default {
         content: $('.content')
       })
     },
+    weiToGwei (coinType, value) {
+      return this.esWallet.convertValue(coinType, value, this.D.unit.eth.Wei, this.D.unit.eth.GWei) + '  '
+    },
     getFormatTime (time) {
       let date = new Date(time)
       let yyyy = date.getFullYear()
@@ -639,6 +655,7 @@ export default {
   .layui-table td, .layui-table th{
     text-overflow: ellipsis;
     overflow: hidden;
+    text-align: center;
   }
   .table > thead > tr > th {
     width: 40px;
@@ -665,9 +682,6 @@ export default {
     vertical-align: top;
     word-break: break-all;
     white-space: pre-wrap;
-  }
-  .layui-table  td,.layui-table  th {
-    text-align: center;
   }
   .active-count {
     color: #e74c3c;
@@ -742,4 +756,12 @@ export default {
   ::-webkit-scrollbar {
     display:none
   }
+  .unit-display-2 {
+    font-size: .4em;
+    opacity: .8;
+  }
+  .layui-table th {
+    padding: 9px 0;
+  }
+
 </style>

@@ -21,7 +21,7 @@ audio, canvas, video, progress {
   vertical-align: baseline
 }
 
-pre{padding: 10px 15px; margin: 10px 0; font-size: 12px; border-left: 6px solid #009688;  background-color: #f8f8f8; font-family: Courier New; overflow: auto;}
+pre{padding: 10px 15px; margin: 10px 0; font-size: 12px; border-left: 6px solid #009688;  background-color: #f8f8f8; overflow: auto;}
 
 body {
   color: #333;
@@ -164,7 +164,7 @@ input[type="submit"] {
 /* 布局 */
 .site-inline{font-size: 0;}
 .site-tree, .site-content{display: inline-block;  *display:inline; *zoom:1; vertical-align: top; font-size: 14px;}
-.site-tree{width: 220px; min-height:900px; padding: 5px 0 20px;}
+.site-tree{width: 170px; min-height:900px; padding: 5px 0 20px;}
 .site-content{ min-height: 600px; padding: 20px 0 10px 20px;}
 
 /* 目录 */
@@ -184,7 +184,7 @@ body .layui-layer-dir .layui-layer-content{padding: 10px;}
 .site-tree .layui-tree li a cite{padding: 0 8px;}
 .site-tree .layui-tree .site-tree-noicon a cite{padding-left: 15px;}
 .site-tree .layui-tree li a em{font-size: 12px; color: #bbb; padding-right: 5px; font-style: normal;}
-.site-tree .layui-tree li h2{line-height: 36px; border-left: 5px solid #f7be57; margin: 15px 0 5px; padding: 0 10px; background-color: #f2f2f2;}
+.site-tree .layui-tree li h2{ border-left: 4px solid #f7be57; margin: 15px 0 5px; padding: 0 10px; background-color: #f2f2f2;}
 .site-tree .layui-tree li ul{margin-left: 27px; line-height: 28px;}
 .site-tree .layui-tree li ul a,
 .site-tree .layui-tree li ul a i{color: #777;}
@@ -197,7 +197,7 @@ body .layui-layer-dir .layui-layer-content{padding: 10px;}
 .site-tree .layui-tree .layui-this .layui-icon{color: #01AAED;}
 
 .site-fix .site-tree{position: fixed; top: 0; bottom: 0; z-index: 666; min-height: 0; overflow: auto;  background-color: #fff;}
-.site-fix .site-content{margin-left: 220px;}
+.site-fix .site-content{margin-left: 170px;}
 .site-fix-footer .site-tree{/*margin-bottom: 120px;*/}
 
 
@@ -245,12 +245,12 @@ body .layui-layer-dir .layui-layer-content{padding: 10px;}
 }
 @media screen and (min-width: 768px){
   .site-content{
-    width: 520px;
+    width: 570px;
   }
 }
 @media screen and (min-width: 992px){
   .site-content{
-    width: 740px;
+    width: 790px;
   }
   .layui-form-item .input-width{
     width: 500px;
@@ -258,7 +258,7 @@ body .layui-layer-dir .layui-layer-content{padding: 10px;}
 }
 @media screen and (min-width: 1200px){
   .site-content{
-    width: 940px;
+    width: 990px;
   }
 }
 @media screen and (min-width: 1200px){
@@ -268,7 +268,7 @@ body .layui-layer-dir .layui-layer-content{padding: 10px;}
 }
 /*覆盖bootstrap样式*/
 h2{
-  font-size: 21px;
+  font-size: 18px;
 }
 legend{
   border-bottom: none;

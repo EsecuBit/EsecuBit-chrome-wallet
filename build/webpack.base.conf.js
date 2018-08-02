@@ -24,7 +24,7 @@ const createLintingRule = () => ({
 module.exports = {
   context: path.resolve(__dirname, '../'),
   entry: {
-    app: './src/main.js'
+    main: ['babel-polyfill', './src/main.js']
   },
   output: {
     path: config.build.assetsRoot,
@@ -40,6 +40,7 @@ module.exports = {
       '@': resolve('src'),
       'jquery': 'jquery/dist/jquery',
       'vue-i18n': 'vue-i18n/dist/vue-i18n',
+      'chrome-excelsecu-wallet': 'chrome-excelsecu-wallet/dist/eswallet'
     }
   },
   externals: {
@@ -50,6 +51,7 @@ module.exports = {
       $: "jquery",
       jquery: "jquery",
       vueI18n: 'vue-i18n',
+      'chrome-excelsecu-wallet': 'chrome-excelsecu-wallet'
     })
   ],
   module: {

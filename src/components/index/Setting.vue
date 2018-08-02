@@ -340,7 +340,7 @@ export default {
         this.unitEthChecked = ethUnit['ethUnit'] ? ethUnit['ethUnit'] : this.D.unit.eth.GWei
         this.selectedExchangeRate = exchange['exchange'] ? exchange['exchange'] : this.D.unit.legal.USD
         this.seedValue = seedValue['seedValue'] ? seedValue['seedValue'] : ''
-        this.deviceChecked = device['device'] ? seedValue['device'] : 'soft'
+        this.deviceChecked = device['device'] ? device['device'] : 'soft'
         this.netChecked = net['net'] ? net['net'] : 'test'
         this.currentNet = net['net'] ? net['net'] : 'test'
       }
