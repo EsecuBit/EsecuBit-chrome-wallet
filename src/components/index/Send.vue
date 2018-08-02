@@ -426,6 +426,7 @@ export default {
             this.clearFormData()
             layer.closeAll('msg')
             layer.msg(this.$t('message.send_submit_success'), { icon: 1 })
+            this.$emit('switchFirstPage', true)
           }).catch(value => {
             console.warn(value)
             layer.closeAll('msg')

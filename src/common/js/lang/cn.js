@@ -18,7 +18,7 @@ export const message = {
   app_cancel_btn: '取消',
   app_add_accounts_title: '添加用户',
   app_plug_out: '钱包已拔出',
-  app_version_prompt: '您使用的谷歌浏览器版本过低，请升级版本到55以上！',
+  app_version_prompt: '为了您更好的体验，请更新浏览器到最新版本！',
 
   login_title: '比特币钱包',
   login_detail: '一套安全的离线管理工具',

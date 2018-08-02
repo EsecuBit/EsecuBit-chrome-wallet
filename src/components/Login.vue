@@ -18,12 +18,12 @@
             <i class="layui-icon layui-anim layui-anim-rotate layui-anim-loop" v-if="isLoadingIcon" style="font-size: 50px;"> </i>
             <i class="icon iconfont icon-thumbDrive usb-blinking-anim" style="font-size: 50px" v-else></i>
           </div>
-          <h3 v-text="promptMsg"></h3>
+          <h3>{{promptMsg}}</h3>
         </div>
       </div>
     </div>
     <div class="contact-us">
-      <a href="#">{{$t('message.login_contact_us')}}</a>
+      <a href="#">{{promptMsg}}</a>
     </div>
   </div>
 </template>
@@ -34,12 +34,8 @@ export default {
   props: ['status'],
   data () {
     return {
-      promptMsg: this.$t('message.login_prompt_msg'),
-      loadingMsg1: this.$t('message.login_prompt_msg1'),
-      loadingMsg2: this.$t('message.login_prompt_msg2'),
-      loadingMsg3: this.$t('message.login_prompt_msg3'),
-      loadingMsg4: this.$t('message.login_prompt_msg4'),
-      isLoadingIcon: false
+      isLoadingIcon: false,
+      promptMsg: this.$t('message.login_prompt_msg')
     }
   },
   watch: {
@@ -55,18 +51,18 @@ export default {
   },
   methods: {
     loading () {
-      this.promptMsg = this.loadingMsg2
+      this.promptMsg = this.$t('message.login_prompt_msg2')
       this.isLoadingIcon = !this.isLoadingIcon
     },
     init () {
-      this.promptMsg = this.loadingMsg2
+      this.promptMsg = this.$t('message.login_prompt_msg2')
       this.isLoadingIcon = !this.isLoadingIcon
     },
     sync () {
-      this.promptMsg = this.loadingMsg3
+      this.promptMsg = this.$t('message.login_prompt_msg3')
     },
     quitLoading () {
-      this.promptMsg = this.loadingMsg1
+      this.promptMsg = this.$t('message.login_prompt_msg1')
       this.isLoadingIcon = !this.isLoadingIcon
     }
   }

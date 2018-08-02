@@ -11,7 +11,7 @@
               <a class="logo" href="#"> <img src="./common/imgs/logo.png" alt="Wallet Bitcion"></a>
               <!-- 头部区域（可配合layui已有的水平导航） -->
               <ul class="layui-nav fly-nav layui-hide-xs menu-switch">
-                <li class="layui-nav-item layui-this"><a href="#" id="set_jqgrid_width" @click="showAddAccount"><i class="icon iconfont icon-zhanghu1"></i>{{$t('message.app_accounts')}}</a></li>
+                <li class="layui-nav-item layui-this"><a href="#" class="first-page" id="set_jqgrid_width" @click="showAddAccount"><i class="icon iconfont icon-zhanghu1"></i>{{$t('message.app_accounts')}}</a></li>
                 <li class="layui-nav-item"><a href="#" @click="hiddenAddAccount"><i class="icon iconfont icon-msnui-cloud-upload bigger"></i>{{$t('message.app_send')}}</a></li>
                 <li class="layui-nav-item"><a href="#" @click="hiddenAddAccount"><i class="icon iconfont icon-msnui-cloud-download bigger"></i>{{$t('message.app_accept')}}</a></li>
                 <li class="layui-nav-item"><a href="#" @click="hiddenAddAccount"><i class="icon iconfont icon-shezhi2"></i>{{$t('message.app_setting')}}</a></li>
@@ -37,7 +37,7 @@
                 <Accounts :account-info ="accounts" :current-unit="currentUnit" :current-unit-eth="currentUnitEth" :current-exchange-rate="currentExchangeRate" :error-code-msg="errorCodeMsg"/>
               </div>
               <div class="main-tab-item">
-                <Send :account-info ="accounts" :current-unit="currentUnit" :current-unit-eth="currentUnitEth" :current-exchange-rate="currentExchangeRate" :reset-status="resetStatus" :error-code-msg="errorCodeMsg"/>
+                <Send @switchFirstPage="switchFirstPage" :account-info ="accounts" :current-unit="currentUnit" :current-unit-eth="currentUnitEth" :current-exchange-rate="currentExchangeRate" :reset-status="resetStatus" :error-code-msg="errorCodeMsg"/>
               </div>
               <div class="main-tab-item">
                 <Accept :account-info ="accounts" :reset-status="resetStatus" :error-code-msg="errorCodeMsg"/>
@@ -230,6 +230,10 @@ export default {
         this.heardColor = currentSkin + '-skin'
         this.customizeColor = currentSkin + '-customize'
       }
+    },
+    switchFirstPage (...data) {
+      console.log(123)
+      $('.first-page').click()
     },
     setExchangeRate (...data) {
       this.currentExchangeRate = data[0]
