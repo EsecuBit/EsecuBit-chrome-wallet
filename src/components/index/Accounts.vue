@@ -2,15 +2,15 @@
 <div>
   <div class="site-tree">
     <ul class="layui-tree">
-      <template v-for="item in wallet">
+      <template v-for="(item, walletIndex) in wallet">
         <li class="menu-title" v-if="item.label"><h2>{{item.label}}</h2></li>
-        <li class="site-tree-noicon tab-title-1" v-for="account in item.account"><a href="#"><cite>{{account}}</cite></a></li>
+        <li class="site-tree-noicon tab-title-1" v-for="(account, index) in item.account" :class="{'layui-this': (walletIndex > 0 ? (wallet[walletIndex - 1].account.length + index) : index) === currentIndex}"><a href="#" @click="switchTab(index, walletIndex)"><cite>{{account}}</cite></a></li>
       </template>
     </ul>
   </div>
   <div class="site-content">
     <div class="tab-content-1" id="tab-content-1">
-      <div class="tab-item" v-for="(tablecount, index) in gridList" >
+      <div class="tab-item" v-for="(tablecount, index) in gridList"  :class="{'layui-show': index === currentIndex}">
         <div class="account-information">
           <div class="account-msg">
             <div class="max-width-250">
@@ -18,7 +18,7 @@
               <span>{{$t('message.accounts_account')}}</span>
               <span  style="color: #e74c3c" v-if="newAccount.length > 0">{{newAccount[index].label}}</span>
             </div>
-            <a title="edit" href="#" class="edit-account max-width-250" @click="editAccount(index)">
+            <a title="edit" href="#" class="edit-account max-width-250" @click="editAccount()">
               <i class="icon iconfont icon-bianji1 "></i>
             </a>
           </div>
@@ -85,9 +85,6 @@
                     <canvas class="canvas" :class="'canvas-'+ index" width="100" height="30" :data-counts="table.confirmations"></canvas>
                   </td>
                   <td>
-                    <!--<a title="Details" href="#" @click="getDescription(table, index);">-->
-                    <!--<i class="layui-icon">&#xe63c;</i>-->
-                    <!--</a>&nbsp;-->
                     <a title="search" :href="table.link" target="_blank">
                       <i class="layui-icon">&#xe615;</i>
                     </a>
@@ -122,41 +119,6 @@
       </div>
     </form>
   </div>
-  <div class="content" style="display: none">
-    <table class="table table-striped">
-      <colgroup>
-        <col width="20%">
-        <col width="80%">
-      </colgroup>
-      <thead>
-      <tr>
-        <th>{{$t('message.accounts_name')}}</th>
-        <th>{{$t('message.accounts_information')}}</th>
-      </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>{{$t('message.accounts_table_time')}}</td>
-          <td>{{description.time}}</td>
-        </tr>
-        <tr>
-          <td>{{$t('message.accounts_table_address')}}</td>
-          <td>
-            <span :class ="[description.direction === 'in'?green:red]" class="text-opacity">{{description.toOrForm}}</span>
-            <span>{{description.address}}</span>
-          </td>
-        </tr>
-        <tr>
-          <td>{{$t('message.accounts_table_blockNumber')}}</td>
-          <td>{{description.blockNumber}}</td>
-        </tr>
-        <tr>
-          <td>{{$t('message.accounts_confirmations')}}</td>
-          <td>{{description.confirmations}}</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
 </div>
 </template>
 
@@ -168,7 +130,7 @@ const layer = layui.layer
 const laypage = layui.laypage
 export default {
   name: 'accouts',
-  props: ['accountInfo', 'currentUnit', 'currentUnitEth', 'currentExchangeRate', 'errorCodeMsg'],
+  props: ['accountInfo', 'currentUnit', 'currentUnitEth', 'currentExchangeRate', 'errorCodeMsg', 'addAccountTimes', 'resetStatus'],
   data () {
     return {
       grid_pager: 'grid_pager',
@@ -241,10 +203,26 @@ export default {
       handler (newValue, oldValue) {
         this.setMenuList(newValue)
       }
+    },
+    currentIndex: {
+      handler (newValue, oldValue) {
+        Bus.$emit('switchAccount', newValue)
+      }
+    },
+    resetStatus: {
+      handler (newValue, oldValue) {
+        if (newValue) {
+          this.currentIndex = 0
+        }
+      }
+    },
+    addAccountTimes: {
+      handler (newValue, oldValue) {
+        if (newValue > 0 && (this.currentIndex >= this.wallet[0].account.length - 1)) this.currentIndex = this.currentIndex + 1
+      }
     }
   },
   mounted () {
-    this.createTab()
     this.listenTXInfo()
   },
   methods: {
@@ -375,7 +353,7 @@ export default {
         this.loadingClass['layui-anim'] = false
         this.loadingClass['layui-anim-rotate'] = false
         this.loadingClass['layui-anim-loop'] = false
-      }, 3000)
+      }, 2000)
       let index = this.currentIndex
       let total = 0
       this.clearCanvas(index)
@@ -412,13 +390,9 @@ export default {
       }
       // 拼接成理想数据类型
       this.wallet = accountList
-      this.$nextTick(() => {
-        this.switchTab()
-      })
     },
-    editAccount (orderNum) {
+    editAccount () {
       this.renameValue = ''
-      this.currentIndex = orderNum
       const that = this
       layer.open({
         type: 1,
@@ -492,40 +466,8 @@ export default {
         this.displayErrorCode(value)
       })
     },
-    createTab () {
-      // 初始化第一個tab标签
-      $('.tab-title-1:first').addClass('layui-this')
-      $('.tab-item:first').addClass('layui-show')
-    },
-    switchTab () {
-      // 独立各tab操作
-      $('.tab-title-1 a').click(function () {
-        if ($(this).parent('li').hasClass('layui-this')) return false
-        $('li.tab-title-1').removeClass('layui-this')
-        $(this).parent('li').addClass('layui-this')
-        let tabIndex = $(this).parent().index('.tab-title-1')
-        $('.tab-content-1 .layui-show').removeClass('layui-show')
-        $('.tab-content-1 .tab-item').eq(tabIndex).addClass('layui-show')
-        // 切换qrcode
-        Bus.$emit('switchAccount', tabIndex)
-      })
-    },
-    getDescription (table, index) {
-      this.description.blockNumber = this.tableBlockNumber(this.coinTypeList[index], table.blockNumber)
-      this.description.time = this.getFormatTime(table.time)
-      this.description.toOrForm = this.toOrForm(table.direction) + ' '
-      this.description.address = this.getTableAddress(table)
-      this.description.direction = table.direction
-      this.description.confirmations = table.confirmations
-      const that = this
-      layer.open({
-        type: 1,
-        title: that.$t('message.accounts_details_title'),
-        area: ['550px', '340px'],
-        shadeClose: true,
-        btn: ['close'],
-        content: $('.content')
-      })
+    switchTab (index, walletIndex) {
+      this.currentIndex = walletIndex > 0 ? (this.wallet[walletIndex - 1].account.length + index) : index
     },
     weiToGwei (coinType, value) {
       return this.esWallet.convertValue(coinType, value, this.D.unit.eth.Wei, this.D.unit.eth.GWei) + '  '

@@ -34,7 +34,7 @@
           <div class="layui-container page-content ">
             <div class="main-tab-content">
               <div class="main-tab-item layui-show">
-                <Accounts :account-info ="accounts" :current-unit="currentUnit" :current-unit-eth="currentUnitEth" :current-exchange-rate="currentExchangeRate" :error-code-msg="errorCodeMsg"/>
+                <Accounts :account-info ="accounts" :reset-status="resetStatus" :add-account-times="addAccountTimes" :current-unit="currentUnit" :current-unit-eth="currentUnitEth" :current-exchange-rate="currentExchangeRate" :error-code-msg="errorCodeMsg"/>
               </div>
               <div class="main-tab-item">
                 <Send @switchFirstPage="switchFirstPage" :account-info ="accounts" :current-unit="currentUnit" :current-unit-eth="currentUnitEth" :current-exchange-rate="currentExchangeRate" :reset-status="resetStatus" :error-code-msg="errorCodeMsg"/>
@@ -125,6 +125,7 @@ export default {
       currentUnitEth: '',
       currentExchangeRate: '',
       resetStatus: 0,
+      addAccountTimes: 0,
       errorCodeMsg: {
         101: this.$t('message.error_noDevice'),
         102: this.$t('message.error_deviceComm'),
@@ -232,7 +233,6 @@ export default {
       }
     },
     switchFirstPage (...data) {
-      console.log(123)
       $('.first-page').click()
     },
     setExchangeRate (...data) {
@@ -327,6 +327,7 @@ export default {
               content: $('#loading')
             })
             that.esWallet.newAccount(that.selected).then(value => {
+              if (this.D.isBtc(that.selected)) this.addAccountTimes = this.addAccountTimes + 1
               layer.close(loadingIndex)
               layer.close(index)
               layer.msg('successful', { icon: 1 })
