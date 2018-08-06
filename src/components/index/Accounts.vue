@@ -163,6 +163,7 @@ export default {
       green: 'green-font',
       red: 'red-font',
       currentIndex: 0,
+      renameTimes: 0,
       limit: 5,
       pageStartIndex: 0,
       pageEndIndex: 5
@@ -289,7 +290,7 @@ export default {
     },
     tableBlockNumber (table) {
       let newValue = this.toTargetCoinUnit(table.coinType, table.value)
-      return this.toTwoPoint(newValue) + ' '
+      return newValue + ' '
     },
     currentDisplayUnit (coinType) {
       return this.D.isBtc(coinType) ? this.currentUnit : this.currentUnitEth
@@ -415,6 +416,7 @@ export default {
       }
       if (this.newAccount[this.currentIndex].rename) {
         this.newAccount[this.currentIndex].rename(this.renameValue).then(value => {
+          Bus.$emit('rename', this.renameTimes + 1)
           this.setMenuList(this.newAccount)
           layer.closeAll('page')
           layer.msg(this.$t('message.accounts_update_msg'), { icon: 1 })
@@ -705,5 +707,7 @@ export default {
   .layui-table th {
     padding: 9px 0;
   }
-
+  .menu-title {
+    text-transform: uppercase;
+  }
 </style>

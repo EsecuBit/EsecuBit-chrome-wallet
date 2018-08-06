@@ -219,7 +219,7 @@ body .layui-layer-dir .layui-layer-content{padding: 10px;}
 .site-table td{padding: 6px 15px; min-height: 20px; line-height: 20px; border:1px solid #ddd; font-size: 14px; font-weight: 400;}
 .site-table tr:nth-child(even){background: #fbfbfb;}
 
-.site-block{padding: 20px; border: 1px solid #eee;height: 470px;overflow-y: scroll}
+.site-block{padding: 20px; border: 1px solid #eee;height: 480px;overflow-y: scroll}
 .site-block .layui-form{margin-right: 200px;}
 
 /*自定义的tab*/
@@ -301,4 +301,8 @@ blockquote{
   border-width: 0;
   display: inline-block;
   text-align: end;
+}
+.account-name .layui-input{
+  color: #e74c3c;
+  font-weight: 600;
 }

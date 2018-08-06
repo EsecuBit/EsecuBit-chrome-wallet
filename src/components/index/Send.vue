@@ -8,10 +8,18 @@
     </div>
     <div class="site-text site-block">
       <form class="layui-form customize-form" action="" lay-filter="form1" autocomplete="off">
-        <div class="layui-form-item">
+        <div class="layui-form-item" style="position: relative">
           <label class="layui-form-label account-label" >{{$t('message.send_current_account')}}</label>
-          <div class="layui-input-block account-info " >
-            <div class="account-msg">{{currentAccount.label}}</div>
+          <!--<div class="layui-input-block account-info " >-->
+            <!--<div class="account-msg">{{currentAccount.label}}</div>-->
+          <!--</div>-->
+          <div class="layui-input-block input-width account-name" style="margin-left: 220px">
+            <div style="display: inline-block;width: 250px">
+              <select name="account" lay-filter="account"  style="width: 250px" v-model="currentSelectedAccountIndex" >
+                <option v-for="(accountItem, index) in accountInfo"  :value="index">{{accountItem.label}}</option>
+              </select>
+            </div>
+            <div class="account-balance">{{getBalance}}</div>
           </div>
         </div>
         <div class="layui-form-item" style="margin-bottom: 5px">
@@ -126,7 +134,6 @@ export default {
         {label: 'slow（10 usd）', value: 10}
       ],
       switchFee: false,
-      accountOrder: [],
       currentAccount: {label: ''},
       totalFee: 0,
       totalDisplayFee: '',
@@ -138,6 +145,7 @@ export default {
       isAddressTrue: false,
       isInit: true,
       currentSelectedIndex: null,
+      currentSelectedAccountIndex: 0,
       isClearFormData: false
     }
   },
@@ -152,6 +160,10 @@ export default {
     sendCoinTypeMsg () {
       let coinTypeName = this.D.isBtc(this.coinType) ? 'Bitcoin' : 'Ether'
       return this.$t('message.send_send_msg') + ' ' + coinTypeName
+    },
+    getBalance () {
+      let coinType = this.currentDisplayUnit(this.coinType)
+      return '(' + this.$t('message.send_balance') + this.toTargetCoinUnit(this.currentAccount.balance) + ' ' + coinType + ')'
     }
   },
   watch: {
@@ -218,12 +230,15 @@ export default {
           return
         }
         if (this.switchFee && (!this.isClearFormData)) this.calculateTotal()
-      }
+      },
+      deep: true
     },
     accountInfo: {
       handler (newValue, oldValue) {
-        this.accountOrder = newValue
-        if (this.isInit) this.currentAccount = this.accountOrder[0]
+        this.$nextTick(() => {
+          this.renderAccountForm()
+        })
+        if (this.isInit) this.currentAccount = newValue[0]
         this.isInit = false
       }
     },
@@ -240,10 +255,27 @@ export default {
   },
   mounted () {
     this.verifyForm()
-    Bus.$on('switchAccount', (index) => { this.currentAccount = this.accountOrder[index] })
+    Bus.$on('switchAccount', (index) => {
+      this.currentSelectedAccountIndex = index
+      this.currentAccount = this.accountInfo[index]
+      this.$nextTick(() => {
+        this.renderAccountForm()
+      })
+    })
     Bus.$on('switchLang', () => { this.renderFeeForm(this.currentAccount) })
+    Bus.$on('rename', () => { this.renderAccountForm() })
   },
   methods: {
+    renderAccountForm () {
+      form.render('select', 'form1')
+      form.on('select(account)', data => {
+        let index = Number(data.value)
+        this.$nextTick(() => {
+          this.currentSelectedAccountIndex = index
+          this.currentAccount = this.accountInfo[index]
+        })
+      })
+    },
     displayErrorCode (value) {
       layer.closeAll()
       let errorKey = String(value)
@@ -415,11 +447,11 @@ export default {
       }
       setTimeout(() => {
         this.currentAccount.prepareTx(formData).then(value => {
-          layer.closeAll('msg')
-          layer.msg(this.$t('message.send_is_trading'), {time: 600000000})
           return this.currentAccount.buildTx(value)
         })
           .then(value => {
+            layer.closeAll('msg')
+            layer.msg(this.$t('message.send_is_trading'), {time: 600000000})
             return this.currentAccount.sendTx(value)
           }).then(value => {
           // 格式化表格
@@ -607,5 +639,13 @@ export default {
   }
   .site-block {
     border: 1px solid #DCEBF7;
+  }
+  .account-balance{
+    position: absolute;
+    left: 258px;
+    top: 12px;
+    max-width: 200px;
+    overflow: hidden;
+    font-size: 12px;
   }
 </style>

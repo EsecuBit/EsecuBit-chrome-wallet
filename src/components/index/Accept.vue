@@ -15,17 +15,15 @@
           </div>
         </div>
         <div class="layui-form-item">
-          <div class="layui-form-label tips">{{$t('message.accept_tips')}}</div>
-          <div class="layui-input-block address-container" v-show="isInitDisplay">
-            {{$t('message.accept_prompt_msg1')}}
-          </div>
-          <div class="layui-input-block address-container" v-show="!isInitDisplay">
-            {{$t('message.accept_prompt_msg2')}}
-          </div>
           <div class="qrcode" v-show="!showAddress" style="line-height: 210px;text-align: center;border: 1px solid #eee">
             <i class="icon iconfont icon-erweima" style="font-size: 50px"></i>
           </div>
           <div id="code" class="qrcode" v-show="showAddress"></div>
+        </div>
+        <div class="layui-form-item" style="margin-bottom: 5px">
+          <div class="layui-input-block account-info">
+            <input type="checkbox" name="setAddressStatus" lay-filter="setAddressStatus" :title="seAddressMsg" lay-skin="primary" :checked="isSetAddress">
+          </div>
         </div>
         <div class="layui-form-item" v-show="showButton" >
           <div class="layui-input-block account-info">
@@ -34,10 +32,19 @@
             </a>
           </div>
         </div>
-        <div class="layui-form-item" v-show="showAddress">
+        <div class="layui-form-item" v-show="showAddress" style="margin-bottom: 0">
           <label class="layui-form-label account-label" >{{$t('message.accept_qrcode_msg')}}</label>
           <div class="layui-input-block account-info">
             <div class="address-description">{{qrAddress}}</div>
+          </div>
+        </div>
+        <div class="layui-form-item">
+          <div class="layui-form-label tips">{{$t('message.accept_tips')}}</div>
+          <div class="layui-input-block address-container" v-show="isInitDisplay">
+            {{$t('message.accept_prompt_msg1')}}
+          </div>
+          <div class="layui-input-block address-container" v-show="!isInitDisplay">
+            {{$t('message.accept_prompt_msg2')}}
           </div>
         </div>
       </form>
@@ -47,6 +54,7 @@
 
 <script>
 import Bus from '../../common/js/bus'
+import Store from '../../common/js/store'
 
 const form = layui.form
 const layer = layui.layer
@@ -66,13 +74,17 @@ export default {
       showButton: true,
       showAddress: false,
       isInitDisplay: true,
-      isInit: true
+      isInit: true,
+      isSetAddress: false
     }
   },
   computed: {
     receiveCoinTypeMsg  () {
       let coinTypeName = this.D.isBtc(this.coinType) ? 'Bitcoin' : 'Ether'
       return this.$t('message.accept_accept_msg') + ' ' + coinTypeName
+    },
+    seAddressMsg () {
+      return this.$t('message.accept_set_address')
     }
   },
   watch: {
@@ -99,15 +111,37 @@ export default {
         this.currentAccount = this.accountOrder[newValue]
         this.initDisplay()
       }
+    },
+    seAddressMsg: {
+      handler (newValue, oldValue) {
+        setTimeout(() => {
+          form.render('checkbox', 'form2')
+        }, 500)
+      }
     }
   },
   mounted () {
-    form.render('select', 'form2')
+    this.init()
+    this.$nextTick(() => {
+      form.render('checkbox', 'form2')
+    })
     Bus.$on('switchAccount', (index) => {
       this.accountIndex = index
     })
+    form.on('checkbox(setAddressStatus)', (data) => {
+      this.isSetAddress = data.elem.checked
+      Store.saveChromeStore('isSetAddress', data.elem.checked)
+    })
   },
   methods: {
+    async init () {
+      if (localStorage) {
+        this.isSetAddress = typeof Store.fetch('isSetAddress') === 'boolean' ? Store.fetch('isSetAddress') : true
+      } else {
+        const isSetAddress = await Store.setPromise('isSetAddress')
+        this.isSetAddress = typeof isSetAddress['isSetAddress'] === 'boolean' ? isSetAddress['isSetAddress'] : true
+      }
+    },
     displayErrorCode (value) {
       layer.closeAll()
       let errorKey = String(value)
@@ -121,7 +155,7 @@ export default {
       let layerIndex = layer.msg(this.$t('message.accept_loading'), { time: 10000 })
       if (this.isFirst) {
         setTimeout(() => {
-          this.currentAccount.getAddress().then(value => {
+          this.currentAccount.getAddress(this.isSetAddress).then(value => {
             layer.close(layerIndex)
             this.generateQRCode(value.qrAddress)
             this.qrAddress = value.address
@@ -135,7 +169,7 @@ export default {
         this.isFirst = false
       } else {
         setTimeout(() => {
-          this.currentAccount.getAddress().then(value => {
+          this.currentAccount.getAddress(this.isSetAddress).then(value => {
             layer.close(layerIndex)
             this.changeQRCode(value.qrAddress)
             this.qrAddress = value.address

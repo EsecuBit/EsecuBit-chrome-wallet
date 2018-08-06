@@ -321,8 +321,8 @@ export default {
       this.exchangeRate = this.editExchangeList(getExchangeList)
       if (localStorage) {
         this.initLang = Store.fetch('lang') ? Store.fetch('lang') : navigator.language
-        this.unitBitChecked = Store.fetch('bitUnit') ? Store.fetch('bitUnit') : this.D.unit.btc.mBTC
-        this.unitEthChecked = Store.fetch('ethUnit') ? Store.fetch('ethUnit') : this.D.unit.eth.GWei
+        this.unitBitChecked = Store.fetch('bitUnit') ? Store.fetch('bitUnit') : this.D.unit.btc.BTC
+        this.unitEthChecked = Store.fetch('ethUnit') ? Store.fetch('ethUnit') : this.D.unit.eth.ETH
         this.selectedExchangeRate = Store.fetch('exchange') ? Store.fetch('exchange') : this.D.unit.legal.USD
         this.deviceChecked = Store.fetch('device') ? Store.fetch('device') : 'soft'
         this.netChecked = Store.fetch('net') ? Store.fetch('net') : 'test'
@@ -336,8 +336,8 @@ export default {
         const device = await Store.setPromise('device')
         const net = await Store.setPromise('net')
         this.initLang = lang['lang'] ? lang['lang'] : navigator.language
-        this.unitBitChecked = bitUnit['bitUnit'] ? bitUnit['bitUnit'] : this.D.unit.btc.mBTC
-        this.unitEthChecked = ethUnit['ethUnit'] ? ethUnit['ethUnit'] : this.D.unit.eth.GWei
+        this.unitBitChecked = bitUnit['bitUnit'] ? bitUnit['bitUnit'] : this.D.unit.btc.BTC
+        this.unitEthChecked = ethUnit['ethUnit'] ? ethUnit['ethUnit'] : this.D.unit.eth.ETH
         this.selectedExchangeRate = exchange['exchange'] ? exchange['exchange'] : this.D.unit.legal.USD
         this.seedValue = seedValue['seedValue'] ? seedValue['seedValue'] : ''
         this.deviceChecked = device['device'] ? device['device'] : 'soft'

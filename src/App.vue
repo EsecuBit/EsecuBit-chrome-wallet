@@ -213,8 +213,8 @@ export default {
     },
     async init () {
       if (localStorage) {
-        this.currentUnit = Store.fetch('bitUnit') ? Store.fetch('bitUnit') : this.D.unit.btc.mBTC
-        this.currentUnitEth = Store.fetch('ethUnit') ? Store.fetch('ethUnit') : this.D.unit.eth.GWei
+        this.currentUnit = Store.fetch('bitUnit') ? Store.fetch('bitUnit') : this.D.unit.btc.BTC
+        this.currentUnitEth = Store.fetch('ethUnit') ? Store.fetch('ethUnit') : this.D.unit.eth.ETH
         this.currentExchangeRate = Store.fetch('exchange') ? Store.fetch('exchange') : this.D.unit.legal.USD
         let currentSkin = Store.fetch('skin') ? Store.fetch('skin') : ''
         this.heardColor = currentSkin + '-skin'
@@ -224,8 +224,8 @@ export default {
         const ethUnit = await Store.setPromise('ethUnit')
         const exchange = await Store.setPromise('exchange')
         const skin = await Store.setPromise('skin')
-        this.currentUnit = bitUnit['bitUnit'] ? bitUnit['bitUnit'] : this.D.unit.btc.mBTC
-        this.currentUnitEth = ethUnit['ethUnit'] ? ethUnit['ethUnit'] : this.D.unit.eth.GWei
+        this.currentUnit = bitUnit['bitUnit'] ? bitUnit['bitUnit'] : this.D.unit.btc.BTC
+        this.currentUnitEth = ethUnit['ethUnit'] ? ethUnit['ethUnit'] : this.D.unit.eth.ETH
         this.currentExchangeRate = exchange['exchange'] ? exchange['exchange'] : this.D.unit.legal.USD
         let currentSkin = skin['skin'] ? skin['skin'] : ''
         this.heardColor = currentSkin + '-skin'
@@ -281,6 +281,7 @@ export default {
             this.displayErrorCode(value)
           })
           this.esWallet.getAccounts().then(value => {
+            console.log(value, '获取的账户')
             if (value) this.accounts = this.orderArr(value)
           }).catch(value => {
             console.warn(value)
@@ -327,7 +328,7 @@ export default {
               content: $('#loading')
             })
             that.esWallet.newAccount(that.selected).then(value => {
-              if (this.D.isBtc(that.selected)) this.addAccountTimes = this.addAccountTimes + 1
+              if (that.D.isBtc(that.selected)) that.addAccountTimes = that.addAccountTimes + 1
               layer.close(loadingIndex)
               layer.close(index)
               layer.msg('successful', { icon: 1 })
