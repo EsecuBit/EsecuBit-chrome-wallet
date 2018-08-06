@@ -27,15 +27,7 @@ const webpackConfig = merge(baseWebpackConfig, {
     filename: utils.assetsPath('js/[name].[chunkhash].js'),
     chunkFilename: utils.assetsPath('js/[id].[chunkhash].js')
   },
-  resolve: {
-    alias: {
-      'chrome-excelsecu-wallet': 'chrome-excelsecu-wallet/dist/eswallet'
-    }
-  },
   plugins: [
-    new webpack.ProvidePlugin({
-      'chrome-excelsecu-wallet': 'chrome-excelsecu-wallet'
-    }),
     // http://vuejs.github.io/vue-loader/en/workflow/production.html
     new webpack.DefinePlugin({
       'process.env': env

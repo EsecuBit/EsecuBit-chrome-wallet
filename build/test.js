@@ -9,7 +9,7 @@ const path = require('path')
 const chalk = require('chalk')
 const webpack = require('webpack')
 const config = require('../config')
-const webpackConfig = require('./webpack.prod.conf')
+const webpackConfig = require('./webpack.test.conf')
 
 const spinner = ora('building for production...')
 spinner.start()
@@ -34,7 +34,7 @@ rm(path.join(config.build.assetsRoot, config.build.assetsSubDirectory), err => {
 
     console.log(chalk.cyan('  Build complete.\n'))
     console.log(chalk.yellow(
-      '  Tip: this official version.\n'
+      '  Tip: this is test version by zl.\n'
     ))
   })
 })

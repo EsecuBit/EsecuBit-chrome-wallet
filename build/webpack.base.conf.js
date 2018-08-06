@@ -40,18 +40,13 @@ module.exports = {
       '@': resolve('src'),
       'jquery': 'jquery/dist/jquery',
       'vue-i18n': 'vue-i18n/dist/vue-i18n',
-      'chrome-excelsecu-wallet': 'chrome-excelsecu-wallet/dist/eswallet'
     }
-  },
-  externals: {
-    'layui': 'layui'
   },
   plugins: [
     new webpack.ProvidePlugin({
       $: "jquery",
       jquery: "jquery",
       vueI18n: 'vue-i18n',
-      'chrome-excelsecu-wallet': 'chrome-excelsecu-wallet'
     })
   ],
   module: {
