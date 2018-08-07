@@ -192,6 +192,25 @@ export default {
       $('.main-tab-content .main-tab-item').removeClass('layui-show').eq(tabIndex).addClass('layui-show')
     })
     this.isLowVersion()
+
+    // offline mode, currently not used in chrome
+    // this.esWallet.enterOfflineMode().then(() => {
+    //   this.onLoginFinish()
+    // }).catch(e => {
+    //   if (e === this.D.error.offlineModeNotAllowed) {
+    //     console.warn('offlineModeNotAllowed')
+    //     return
+    //   }
+    //   if (e === this.D.error.offlineModeUnnecessary) {
+    //     console.warn('offlineModeUnnecessary')
+    //     return
+    //   }
+    //   if (e === this.D.error.networkProviderError) {
+    //     console.warn('networkProviderError')
+    //     return
+    //   }
+    //   console.warn('other error, stop', e)
+    // })
   },
   methods: {
     isLowVersion () {
@@ -272,23 +291,7 @@ export default {
         if (status === this.D.status.initializing) this.loginStatus = 2
         if (status === this.D.status.syncing) this.loginStatus = 3
         if (status === this.D.status.syncFinish) {
-          console.log('正在同步')
-          this.isLogin = !this.isLogin
-          this.esWallet.getWalletInfo().then(value => {
-            this.walletInfo = value
-          }).catch(value => {
-            console.warn(value)
-            this.displayErrorCode(value)
-          })
-          this.esWallet.getAccounts().then(value => {
-            console.log(value, '获取的账户')
-            if (value) this.accounts = this.orderArr(value)
-          }).catch(value => {
-            console.warn(value)
-            layer.msg(this.$t('message.app_error_get_account'), { icon: 2, anim: 6 })
-          })
-          this.netInfo = this.esWallet.getProviders()
-          console.log(this.esWallet.getProviders(), 'net')
+          this.onLoginFinish()
         }
         if (status === this.D.status.plugOut) {
           this.loginStatus = 99
@@ -297,6 +300,25 @@ export default {
           layer.msg(this.$t('message.app_plug_out'))
         }
       })
+    },
+    onLoginFinish () {
+      console.log('同步完成')
+      this.isLogin = false
+      this.esWallet.getWalletInfo().then(value => {
+        this.walletInfo = value
+      }).catch(value => {
+        console.warn(value)
+        this.displayErrorCode(value)
+      })
+      this.esWallet.getAccounts().then(value => {
+        console.log(value, '获取的账户')
+        if (value) this.accounts = this.orderArr(value)
+      }).catch(value => {
+        console.warn(value)
+        layer.msg(this.$t('message.app_error_get_account'), { icon: 2, anim: 6 })
+      })
+      this.netInfo = this.esWallet.getProviders()
+      console.log(this.esWallet.getProviders(), 'net')
     },
     addAccountContent () {
       let btnDisplay = [this.$t('message.app_submit_btn'), this.$t('message.app_cancel_btn')]
