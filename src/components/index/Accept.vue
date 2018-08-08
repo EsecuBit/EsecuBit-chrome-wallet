@@ -20,7 +20,7 @@
           </div>
           <div id="code" class="qrcode" v-show="showAddress"></div>
         </div>
-        <div class="layui-form-item" style="margin-bottom: 5px">
+        <div class="layui-form-item" style="margin-bottom: 5px" v-show="isShowSetAddress">
           <div class="layui-input-block account-info">
             <input type="checkbox" name="setAddressStatus" lay-filter="setAddressStatus" :title="seAddressMsg" lay-skin="primary" :checked="isSetAddress">
           </div>
@@ -75,7 +75,8 @@ export default {
       showAddress: false,
       isInitDisplay: true,
       isInit: true,
-      isSetAddress: false
+      isSetAddress: false,
+      isShowSetAddress: true
     }
   },
   computed: {
@@ -110,6 +111,11 @@ export default {
         this.coinType = this.accountOrder[newValue].coinType
         this.currentAccount = this.accountOrder[newValue]
         this.initDisplay()
+      }
+    },
+    coinType: {
+      handler (newValue, oldValue) {
+        this.isShowSetAddress = this.D.isBtc(newValue)
       }
     },
     seAddressMsg: {

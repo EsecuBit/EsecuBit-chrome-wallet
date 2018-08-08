@@ -18,7 +18,7 @@ export const message = {
   app_cancel_btn: 'cancel',
   app_add_accounts_title: 'Add Account',
   app_plug_out: 'Device has been disconnected',
-  app_version_prompt: 'The version of Google Chrome you are using is too low. Please upgrade to version 56 or above!',
+  app_version_prompt: 'The version of Google Chrome you are using is too low. Please upgrade to version 45 or above!',
 
   login_title: 'Bitcion Wallet',
   login_detail: 'A secure offline management tool',
@@ -155,6 +155,7 @@ export const message = {
   error_networkTxNotFound: 'Network cannot connect',
   error_networkFeeTooSmall: 'Transaction cost is too low, request rejected',
   error_networkTooManyPendingTx: 'There are too many unconfirmed transactions and it is temporarily impossible to trade',
+  error_networkValueTooSmall: 'Transaction costs are too low to trade',
   error_balanceNotEnough: 'Insufficient balance',
   error_invalidAddress: 'Illegal address',
   error_noAddressCheckSum: 'ETH address has no check format',

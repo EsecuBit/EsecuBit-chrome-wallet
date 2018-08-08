@@ -294,14 +294,14 @@ export default {
         let standardMsg = this.$t('message.send_standard_confirm')
         let slowMsg = this.$t('message.send_slow_confirm')
         if (this.D.isBtc(this.coinType)) {
-          newFeeList.push({label: fastMsg + '(' + oldFeeList.fast + ')', value: oldFeeList.fast})
-          newFeeList.push({label: standardMsg + '(' + oldFeeList.normal + ')', value: oldFeeList.normal})
-          newFeeList.push({label: slowMsg + '(' + oldFeeList.economic + ')', value: oldFeeList.economic})
+          newFeeList.push({label: fastMsg + '(' + oldFeeList.fast + ' ' + this.D.unit.btc.satoshi + ')', value: oldFeeList.fast})
+          newFeeList.push({label: standardMsg + '(' + oldFeeList.normal + ' ' + this.D.unit.btc.satoshi + ')', value: oldFeeList.normal})
+          newFeeList.push({label: slowMsg + '(' + oldFeeList.economic + ' ' + this.D.unit.btc.satoshi + ')', value: oldFeeList.economic})
         } else {
-          newFeeList.push({label: fastestMsg + '(' + oldFeeList.fastest + ')', value: oldFeeList.fastest})
-          newFeeList.push({label: fastMsg + '(' + oldFeeList.fast + ')', value: oldFeeList.fast})
-          newFeeList.push({label: standardMsg + '(' + oldFeeList.normal + ')', value: oldFeeList.normal})
-          newFeeList.push({label: slowMsg + '(' + oldFeeList.economic + ')', value: oldFeeList.economic})
+          newFeeList.push({label: fastestMsg + '(' + this.WeiToGwei(oldFeeList.fastest) + ' ' + this.D.unit.eth.GWei + ')', value: oldFeeList.fastest})
+          newFeeList.push({label: fastMsg + '(' + this.WeiToGwei(oldFeeList.fast) + ' ' + this.D.unit.eth.GWei + ')', value: oldFeeList.fast})
+          newFeeList.push({label: standardMsg + '(' + this.WeiToGwei(oldFeeList.normal) + ' ' + this.D.unit.eth.GWei + ')', value: oldFeeList.normal})
+          newFeeList.push({label: slowMsg + '(' + this.WeiToGwei(oldFeeList.economic) + ' ' + this.D.unit.eth.GWei + ')', value: oldFeeList.economic})
         }
         this.feeList = newFeeList
         this.selected = oldFeeList.normal
@@ -422,6 +422,9 @@ export default {
       this.switchFee = !this.switchFee
       this.customFees = null
     },
+    WeiToGwei (value) {
+      return this.esWallet.convertValue(this.coinType, value, this.D.unit.eth.Wei, this.D.unit.eth.GWei)
+    },
     gweiToWei (value) {
       return this.esWallet.convertValue(this.coinType, value, this.D.unit.eth.GWei, this.D.unit.eth.Wei)
     },
@@ -445,6 +448,7 @@ export default {
           value: moneyValue
         }]
       }
+      this.$emit('preventPageSwitch', true)
       setTimeout(() => {
         this.currentAccount.prepareTx(formData).then(value => {
           return this.currentAccount.buildTx(value)
@@ -455,12 +459,14 @@ export default {
             return this.currentAccount.sendTx(value)
           }).then(value => {
           // 格式化表格
+            this.$emit('allowPageSwitch', true)
             this.clearFormData()
             layer.closeAll('msg')
             layer.msg(this.$t('message.send_submit_success'), { icon: 1 })
             this.$emit('switchFirstPage', true)
           }).catch(value => {
             console.warn(value)
+            this.$emit('allowPageSwitch', true)
             layer.closeAll('msg')
             this.displayErrorCode(value)
           })

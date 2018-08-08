@@ -23,7 +23,7 @@
       </div>
     </div>
     <div class="contact-us">
-      <a href="#">{{promptMsg}}</a>
+      <a href="#">{{$t('message.login_contact_us')}}</a>
     </div>
   </div>
 </template>

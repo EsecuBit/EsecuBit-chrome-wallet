@@ -60,7 +60,12 @@
               <tr>
                 <th>{{$t('message.accounts_table_time')}}</th>
                 <th>{{$t('message.accounts_table_address')}}</th>
-                <th>{{$t('message.accounts_table_blockNumber')}}</th>
+                <th>
+                  <span>{{$t('message.accounts_table_blockNumber')}}</span>
+                  <span class="table-unit">
+                    {{' ' + currentDisplayUnit(coinTypeList[index])}}
+                  </span>
+                </th>
                 <th v-if="isEtcType(newAccount[index])" >{{$t('message.accounts_table_fee')}}</th>
                 <th>{{$t('message.accounts_confirmations')}}</th>
                 <th>{{$t('message.accounts_details')}}</th>
@@ -75,7 +80,7 @@
                   </td>
                   <td :class="[table.value>0?green:red]" >
                     <span>{{tableBlockNumber(table)}}</span>
-                    <span v-if="coinTypeList[index]" class="unit-display-2">{{currentDisplayUnit(table.coinType)}}</span>
+                    <!--<span v-if="coinTypeList[index]" class="unit-display-2">{{currentDisplayUnit(table.coinType)}}</span>-->
                   </td>
                   <td v-if="isEtcType(newAccount[index])" >
                     <span>{{weiToGwei(newAccount[index].coinType, table.fee)}}</span>
@@ -709,5 +714,10 @@ export default {
   }
   .menu-title {
     text-transform: uppercase;
+  }
+  .table-unit {
+    font-size: 10px;
+    font-weight: 400;
+    opacity: .8;
   }
 </style>

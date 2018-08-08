@@ -1,20 +1,19 @@
 <template>
   <div id="app" style="height: 100%">
     <div v-cloak style="height: 100%">
-      <div v-show="isLogin" style="height: 100%">
+      <div v-show="isShowLogin" style="height: 100%">
         <Login :status="loginStatus" />
       </div>
-      <div v-show="!isLogin">
+      <div v-show="!isShowLogin">
         <div class="main-admin" :class="[customizeColor]">
           <div class="fly-header bg-black" v-bind:class="[heardColor]">
             <div class="layui-container">
               <a class="logo" href="#"> <img src="./common/imgs/logo.png" alt="Wallet Bitcion"></a>
               <!-- 头部区域（可配合layui已有的水平导航） -->
               <ul class="layui-nav fly-nav layui-hide-xs menu-switch">
-                <li class="layui-nav-item layui-this"><a href="#" class="first-page" id="set_jqgrid_width" @click="showAddAccount"><i class="icon iconfont icon-zhanghu1"></i>{{$t('message.app_accounts')}}</a></li>
-                <li class="layui-nav-item"><a href="#" @click="hiddenAddAccount"><i class="icon iconfont icon-msnui-cloud-upload bigger"></i>{{$t('message.app_send')}}</a></li>
-                <li class="layui-nav-item"><a href="#" @click="hiddenAddAccount"><i class="icon iconfont icon-msnui-cloud-download bigger"></i>{{$t('message.app_accept')}}</a></li>
-                <li class="layui-nav-item"><a href="#" @click="hiddenAddAccount"><i class="icon iconfont icon-shezhi2"></i>{{$t('message.app_setting')}}</a></li>
+                <li class="layui-nav-item " :class="{'layui-this': index === pageIndex}" v-for="(item, index) in pageList" @click="switchPage(index)">
+                  <a href="#"><i class="icon iconfont" :class="item.icon"></i>{{item.label}}</a>
+                </li>
               </ul>
             </div>
           </div>
@@ -33,16 +32,16 @@
           </div>
           <div class="layui-container page-content ">
             <div class="main-tab-content">
-              <div class="main-tab-item layui-show">
+              <div class="main-tab-item" :class="{'layui-show': 0 === pageIndex}">
                 <Accounts :account-info ="accounts" :reset-status="resetStatus" :add-account-times="addAccountTimes" :current-unit="currentUnit" :current-unit-eth="currentUnitEth" :current-exchange-rate="currentExchangeRate" :error-code-msg="errorCodeMsg"/>
               </div>
-              <div class="main-tab-item">
-                <Send @switchFirstPage="switchFirstPage" :account-info ="accounts" :current-unit="currentUnit" :current-unit-eth="currentUnitEth" :current-exchange-rate="currentExchangeRate" :reset-status="resetStatus" :error-code-msg="errorCodeMsg"/>
+              <div class="main-tab-item" :class="{'layui-show': 1 === pageIndex}">
+                <Send @switchFirstPage="switchFirstPage" @preventPageSwitch="preventPageSwitch" @allowPageSwitch="allowPageSwitch" :account-info ="accounts"  :current-unit="currentUnit" :current-unit-eth="currentUnitEth" :current-exchange-rate="currentExchangeRate" :reset-status="resetStatus" :error-code-msg="errorCodeMsg"/>
               </div>
-              <div class="main-tab-item">
+              <div class="main-tab-item" :class="{'layui-show': 2 === pageIndex}">
                 <Accept :account-info ="accounts" :reset-status="resetStatus" :error-code-msg="errorCodeMsg"/>
               </div>
-              <div class="main-tab-item">
+              <div class="main-tab-item" :class="{'layui-show': 3 === pageIndex}">
                 <Setting @switchSetting = "switchSetting" @settingColor = "settingColor" @setExchangeRate="setExchangeRate"
                          @setBitUnit="setBitUnit"  @setEthUnit="setEthUnit" :account-info ="accounts" :wallet-info="walletInfo" :net-info='netInfo'/>
               </div>
@@ -110,7 +109,7 @@ export default {
   name: 'App',
   data () {
     return {
-      isLogin: true,
+      isShowLogin: true,
       loginStatus: null,
       walletInfo: null,
       netInfo: null,
@@ -126,6 +125,8 @@ export default {
       currentExchangeRate: '',
       resetStatus: 0,
       addAccountTimes: 0,
+      pageIndex: 0,
+      isPreventSwitch: false,
       errorCodeMsg: {
         101: this.$t('message.error_noDevice'),
         102: this.$t('message.error_deviceComm'),
@@ -148,6 +149,7 @@ export default {
         404: this.$t('message.error_networkTxNotFound'),
         405: this.$t('message.error_networkFeeTooSmall'),
         406: this.$t('message.error_networkTooManyPendingTx'),
+        407: this.$t('message.error_networkValueTooSmall'),
         501: this.$t('message.error_balanceNotEnough'),
         601: this.$t('message.error_invalidAddress'),
         602: this.$t('message.error_noAddressCheckSum'), // for eth
@@ -172,6 +174,16 @@ export default {
       }
     }
   },
+  computed: {
+    pageList () {
+      return [
+        {label: this.$t('message.app_accounts'), icon: 'icon-zhanghu1'},
+        {label: this.$t('message.app_send'), icon: 'icon-msnui-cloud-upload'},
+        {label: this.$t('message.app_accept'), icon: 'icon-msnui-cloud-download'},
+        {label: this.$t('message.app_setting'), icon: 'icon-shezhi2'}
+      ]
+    }
+  },
   beforeMount () {
     this.init()
   },
@@ -182,15 +194,6 @@ export default {
       }
     }
     form.render('select', 'form1')
-    // 菜单点击事件
-    $('.menu-switch li a').click(function () {
-      if ($(this).parent('li').hasClass('layui-this')) return false
-      let tabIndex = $(this).parent().index()
-      $('#message').text($(this).text())
-      $('.menu-switch li.layui-this').removeClass('layui-this')
-      $(this).parent('li').addClass('layui-this')
-      $('.main-tab-content .main-tab-item').removeClass('layui-show').eq(tabIndex).addClass('layui-show')
-    })
     this.isLowVersion()
 
     // offline mode, currently not used in chrome
@@ -213,10 +216,22 @@ export default {
     // })
   },
   methods: {
+    switchPage (index) {
+      if (!this.isPreventSwitch) {
+        this.pageIndex = index
+        this.isAddAccounts = index === 0
+      }
+    },
+    preventPageSwitch () {
+      this.isPreventSwitch = true
+    },
+    allowPageSwitch () {
+      this.isPreventSwitch = false
+    },
     isLowVersion () {
       let currentVersion = this.getChromeVersion()
       console.log(currentVersion)
-      if (currentVersion < 38) {
+      if (currentVersion < 45) {
         layer.msg(this.$t('message.app_version_prompt'), {anim: 6, time: 100000})
         return false
       }
@@ -252,7 +267,7 @@ export default {
       }
     },
     switchFirstPage (...data) {
-      $('.first-page').click()
+      this.pageIndex = 0
     },
     setExchangeRate (...data) {
       this.currentExchangeRate = data[0]
@@ -295,15 +310,17 @@ export default {
         }
         if (status === this.D.status.plugOut) {
           this.loginStatus = 99
-          this.isLogin = true
+          this.isShowLogin = true
           this.resetStatus = this.resetStatus + 1
+          this.pageIndex = 0
+          this.isPreventSwitch = false
           layer.msg(this.$t('message.app_plug_out'))
         }
       })
     },
     onLoginFinish () {
       console.log('同步完成')
-      this.isLogin = false
+      this.isShowLogin = false
       this.esWallet.getWalletInfo().then(value => {
         this.walletInfo = value
       }).catch(value => {
@@ -369,12 +386,6 @@ export default {
         console.warn(value)
         this.displayErrorCode(value)
       })
-    },
-    showAddAccount () {
-      this.isAddAccounts = true
-    },
-    hiddenAddAccount () {
-      this.isAddAccounts = false
     },
     orderArr (targetArr) {
       const arr = []
