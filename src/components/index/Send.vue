@@ -75,7 +75,7 @@
             <!--</select>-->
           <!--</div>-->
         <!--</div>-->
-        <div class="layui-form-item" v-if="switchFee">
+        <div class="layui-form-item" v-if="switchFee && isBtc">
           <label class="layui-form-label" >{{$t('message.send_transaction_fees')}}</label>
           <div class="layui-input-block input-width" style="position: relative;">
             <div style="width: 300px">
@@ -86,7 +86,7 @@
           </div>
         </div>
         <div class="layui-form-item" v-show="!switchFee">
-          <label class="layui-form-label">{{$t('message.send_transaction_fees')}}</label>
+          <label class="layui-form-label">{{isBtc?$t('message.send_transaction_fees'): 'Gas price'}}</label>
           <div class="layui-input-block input-width" style="margin-left: 220px">
             <div style="display: inline-block;width: 250px">
               <select name="fee" lay-filter="fee"  style="width: 250px">
@@ -97,11 +97,44 @@
                     style="margin-left: 5px" type="button" @click="switchCustomButton">{{$t('message.send_custom_fee')}}</button>
           </div>
         </div>
+
+        <div class="layui-form-item" v-show="switchFee && !isBtc">
+          <div style="display: inline-block">
+            <label class="layui-form-label" >Gas Limit</label>
+            <div class="layui-input-block input-width" style="position: relative;">
+              <div style="width: 300px">
+                <input type="number"  lay-verify="isEmpty" v-model="gasLimit" :placeholder="$t('message.send_amount')" autocomplete="off" class="layui-input transFee-input">
+              </div>
+              <button class="layui-btn layui-btn-sm layui-btn-radius transFee-btn" type="button" @click="switchSelectButton">{{$t('message.send_select_fee')}}</button>
+            </div>
+          </div>
+          <div style="display: inline-block">
+            <label class="layui-form-label" >Gas Price</label>
+            <div class="layui-input-block input-width" style="position: relative;">
+              <div style="width: 300px">
+                <div v-if="coinType" class="transFee-unit" >GWei</div>
+                <input type="number"  lay-verify="isEmpty" v-model="gasPrice" :placeholder="$t('message.send_amount')" autocomplete="off" class="layui-input transFee-input">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="layui-form-item" v-show="isShowData && !isBtc">
+          <label class="layui-form-label">Data</label>
+          <div class="layui-input-block input-width" style="margin-left: 100px">
+            <input type="text" value="" name="data"  v-model="etcData" :placeholder="$t('message.send_data')" class="layui-input" style="width: 360px;text-align: right;">
+          </div>
+        </div>
         <div class="layui-form-item">
           <label class="layui-form-label">{{$t('message.send_total_fee')}}</label>
           <div class="layui-input-inline input-width">
             <textarea disabled  class="layui-textarea" v-bind:value= "totalDisplayFee" name="desc"></textarea>
           </div>
+        </div>
+
+        <div class="add-data-wrapper" v-show="!isShowData && !isBtc">
+          <a class="add-data" @click="switchData">
+            <i class="layui-icon">&#xe654;</i> {{$t('message.send_advance')}}
+          </a>
         </div>
         <div class="layui-form-item" style="border:none">
           <button class="layui-btn" lay-submit type="button" @click="submitSendData">{{$t('message.send_submit_btn')}}</button>
@@ -146,10 +179,17 @@ export default {
       isInit: true,
       currentSelectedIndex: null,
       currentSelectedAccountIndex: 0,
-      isClearFormData: false
+      isClearFormData: false,
+      gasLimit: 21000,
+      gasPrice: 0,
+      isShowData: false,
+      etcData: ''
     }
   },
   computed: {
+    isBtc () {
+      return this.D.isBtc(this.coinType)
+    },
     toExchangeText () {
       if (this.currentUnit && this.currentExchangeRate) {
         let nowUnit = this.currentDisplayUnit(this.coinType)
@@ -230,8 +270,28 @@ export default {
           return
         }
         if (this.switchFee && (!this.isClearFormData)) this.calculateTotal()
-      },
-      deep: true
+      }
+    },
+    gasLimit: {
+      handler (newValue, oldValue) {
+        if (!newValue) return
+        if (Number(newValue) < 0) {
+          this.gasLimit = null
+          layer.msg(this.$t('message.send_positive_number'), { icon: 2, anim: 6 })
+          return
+        }
+        if (this.switchFee && (!this.isClearFormData)) this.calculateTotal()
+      }
+    },
+    gasPrice: {
+      handler (newValue, oldValue) {
+        if (Number(newValue) < 0) {
+          this.gasPrice = null
+          layer.msg(this.$t('message.send_positive_number'), { icon: 2, anim: 6 })
+          return
+        }
+        if (this.switchFee && (!this.isClearFormData)) this.calculateTotal()
+      }
     },
     accountInfo: {
       handler (newValue, oldValue) {
@@ -266,6 +326,9 @@ export default {
     Bus.$on('rename', () => { this.renderAccountForm() })
   },
   methods: {
+    switchData () {
+      this.isShowData = true
+    },
     renderAccountForm () {
       form.render('select', 'form1')
       form.on('select(account)', data => {
@@ -326,7 +389,10 @@ export default {
         this.amountValue = null
         this.addressValue = ''
         this.customFees = 0
+        this.gasLimit = 21000
+        this.gasPrice = 0
         this.totalDisplayFee = ''
+        this.etcData = ''
         this.switchFee = false
         this.$nextTick(() => {
           this.isDisplayIcon = false
@@ -417,10 +483,12 @@ export default {
     switchSelectButton () {
       this.switchFee = !this.switchFee
       this.customFees = 0
+      this.gasPrice = 0
     },
     switchCustomButton () {
       this.switchFee = !this.switchFee
       this.customFees = null
+      this.gasPrice = null
     },
     WeiToGwei (value) {
       return this.esWallet.convertValue(this.coinType, value, this.D.unit.eth.Wei, this.D.unit.eth.GWei)
@@ -433,7 +501,8 @@ export default {
       if (!this.switchFee) {
         if (!(this.selected && this.amountValue && this.addressValue)) return false
       } else {
-        if (!(this.customFees && this.amountValue && this.addressValue)) return false
+        if (!(this.customFees && this.amountValue && this.addressValue) && this.D.isBtc(this.coinType)) return false
+        if (!(this.gasPrice && this.amountValue && this.addressValue && this.gasLimit) && !this.D.isBtc(this.coinType)) return false
       }
       if (!this.verifySubmitAddress()) return false
       layer.msg(this.$t('message.send_is_click'), {time: 600000000})
@@ -441,13 +510,29 @@ export default {
       let moneyValue = this.toMinCoinUnit(String(this.amountValue))
       let getCustomFees = this.customFees ? String(this.customFees) : '0'
       let customFees = this.D.isBtc(this.coinType) ? getCustomFees : this.gweiToWei(getCustomFees)
-      let formData = {
-        feeRate: String(this.switchFee ? customFees : this.selected),
-        outputs: [{
-          address: address,
-          value: moneyValue
-        }]
+      let formData = {}
+      if (this.D.isBtc(this.coinType)) {
+        formData = {
+          feeRate: String(this.switchFee ? customFees : this.selected),
+          outputs: [{
+            address: address,
+            value: moneyValue
+          }]
+        }
+      } else {
+        let gasPrice = String(this.gasPrice ? this.gasPrice : 0)
+        let getGasPrice = this.gweiToWei(gasPrice)
+        formData = {
+          output: {
+            address: address,
+            value: moneyValue
+          },
+          gasPrice: String(this.switchFee ? getGasPrice : this.selected),
+          gasLimit: String(this.gasLimit),
+          data: this.etcData
+        }
       }
+      console.log(formData, '0xc0C67EfdCf6eA024F0Bad34d3c6D60773b8b078A')
       this.$emit('preventPageSwitch', true)
       setTimeout(() => {
         this.currentAccount.prepareTx(formData).then(value => {
@@ -484,6 +569,28 @@ export default {
           address: getAddress,
           value: sendAmountValue
         }]
+      }
+      if (this.D.isBtc(this.coinType)) {
+        formData = {
+          feeRate: this.switchFee ? customFees : String(this.selected),
+          outputs: [{
+            address: getAddress,
+            value: sendAmountValue
+          }]
+        }
+      } else {
+        let gasPrice = String(this.gasPrice ? this.gasPrice : 0)
+        let getGasPrice = this.gweiToWei(gasPrice)
+        formData = {
+          output: {
+            address: getAddress,
+            value: sendAmountValue
+          },
+          gasPrice: String(this.switchFee ? getGasPrice : this.selected),
+          gasLimit: String(this.gasLimit),
+          data: ''
+        }
+        console.log(formData)
       }
       this.currentAccount.prepareTx(formData).then(value => {
         this.isDisplayDetails = true
@@ -619,7 +726,7 @@ export default {
     color: #999;
   }
   .layui-textarea{
-    min-height: 80px;
+    min-height: 60px;
   }
   /*自定义 表格与样式*/
   .layui-form-item {
@@ -631,7 +738,7 @@ export default {
     width:auto;
   }
   .layui-textarea {
-    width: 395px;
+    width: 400px;
     padding: 9px 10px;
     resize: none;
   }
@@ -653,5 +760,17 @@ export default {
     max-width: 200px;
     overflow: hidden;
     font-size: 12px;
+  }
+  .add-data-wrapper {
+    margin-bottom: 10px;
+  }
+  .add-data-wrapper .layui-icon {
+    font-size: 14px;
+  }
+  .add-data {
+    color: #009a61;
+  }
+  .add-data:hover{
+    opacity: .8;
   }
 </style>
