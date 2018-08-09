@@ -75,7 +75,7 @@ export default {
       showAddress: false,
       isInitDisplay: true,
       isInit: true,
-      isSetAddress: false,
+      isSetAddress: null,
       isShowSetAddress: true
     }
   },
@@ -128,9 +128,6 @@ export default {
   },
   mounted () {
     this.init()
-    this.$nextTick(() => {
-      form.render('checkbox', 'form2')
-    })
     Bus.$on('switchAccount', (index) => {
       this.accountIndex = index
     })
@@ -147,6 +144,9 @@ export default {
         const isSetAddress = await Store.setPromise('isSetAddress')
         this.isSetAddress = typeof isSetAddress['isSetAddress'] === 'boolean' ? isSetAddress['isSetAddress'] : true
       }
+      this.$nextTick(() => {
+        form.render('checkbox', 'form2')
+      })
     },
     displayErrorCode (value) {
       layer.closeAll()
@@ -158,7 +158,8 @@ export default {
       }
     },
     generateAddress () {
-      let layerIndex = layer.msg(this.$t('message.accept_loading'), { time: 10000 })
+      let layerIndex = (this.isSetAddress && this.D.isBtc(this.coinType)) ? layer.msg(this.$t('message.accept_confirm'), { time: 1000000 }) : layer.msg(this.$t('message.accept_loading'), { time: 1000000 })
+      console.log(this.isSetAddress, 'this.isSetAddress')
       if (this.isFirst) {
         setTimeout(() => {
           this.currentAccount.getAddress(this.isSetAddress).then(value => {
@@ -166,13 +167,13 @@ export default {
             this.generateQRCode(value.qrAddress)
             this.qrAddress = value.address
             this.switchDisplay()
+            this.isFirst = false
           }).catch(value => {
             layer.close(layerIndex)
             console.warn(value)
             this.displayErrorCode(value)
           })
         }, 200)
-        this.isFirst = false
       } else {
         setTimeout(() => {
           this.currentAccount.getAddress(this.isSetAddress).then(value => {

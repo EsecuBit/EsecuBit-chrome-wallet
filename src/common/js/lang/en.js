@@ -90,6 +90,7 @@ export const message = {
   send_not_balance: 'Insufficient account balance',
   send_is_click: 'Please enter your PIN and confirm the transaction detail on your device.Press OK button to confirm.',
   send_is_trading: 'Trading is in progress, please wait...',
+  send_is_hex: 'The data you entered is not in the correct format. Please enter a number in hexadecimal and a multiple of 2.',
   send_positive_number: 'The amount cannot be less than 0',
 
   accept_prompt_msg: 'Please use the mobile phone to scan the QR code in the picture',
@@ -102,6 +103,8 @@ export const message = {
   accept_prompt_msg2: 'Please double-check the address on your device. Press the OK button to confirm',
   accept_tips: 'Tips :',
   accept_loading: 'Loading ...',
+  accept_confirm: 'Please confirm on the wallet ...',
+
 
 
   setting_display: 'Display',
@@ -162,6 +165,7 @@ export const message = {
   error_invalidAddress: 'Illegal address',
   error_noAddressCheckSum: 'ETH address has no check format',
   error_invalidAddressChecksum: 'Address verification error (not used)',
+  error_invalidDataNotHex: 'The data you entered does not meet the requirements.',
   error_valueIsDecimal: 'The smallest unit of the transaction cannot be a decimal',
   error_notImplemented: 'Function not implemented',
   error_unknown: 'Unknown mistake',

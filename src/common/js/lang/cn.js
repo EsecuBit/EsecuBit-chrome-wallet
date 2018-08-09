@@ -70,7 +70,7 @@ export const message = {
   send_custom_fee: '自定义费用',
   send_select_fee: '选择费用',
   send_transaction_fees: '交易费用',
-  send_data: '数据',
+  send_data: 'Data',
   send_total_fee: '总费用',
   send_advance:'高级选项：添加数据',
   send_submit_btn: '提交',
@@ -88,6 +88,7 @@ export const message = {
   send_invalid_address_mag: '地址不合法，请重新输入',
   send_not_balance: '账户余额不足',
   send_is_click: '请在设备上输入PIN码并核对交易金额和地址，按OK键确认',
+  send_is_hex: '您输入的数据格式不正确，请输入16进制且为2的倍数的数字',
   send_is_trading: '正在进行交易， 请稍后。。。',
   send_positive_number: '金额不能小于0',
 
@@ -101,6 +102,7 @@ export const message = {
   accept_prompt_msg2: '请核对上面的地址与设备上的地址是否匹配',
   accept_tips: '温馨提示：',
   accept_loading: '加载中 ...',
+  accept_confirm: '请在钱包上确认 ...',
 
   setting_display: '显示',
   setting_hardware: '硬件信息',
@@ -159,6 +161,7 @@ export const message = {
   error_invalidAddress: '非法地址',
   error_noAddressCheckSum: 'ETH地址没有校验格式',
   error_invalidAddressChecksum: '地址校验错误（没有用到）',
+  error_invalidDataNotHex: '您输入的Data不符合要求',
   error_valueIsDecimal: '交易的最小单位不能是小数',
   error_notImplemented: '功能未实现',
   error_unknown: '未知错误',

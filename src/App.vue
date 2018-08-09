@@ -154,6 +154,7 @@ export default {
         601: this.$t('message.error_invalidAddress'),
         602: this.$t('message.error_noAddressCheckSum'), // for eth
         603: this.$t('message.error_invalidAddressChecksum'),
+        605: this.$t('message.error_invalidDataNotHex'),
         604: this.$t('message.error_valueIsDecimal'),
         10000: this.$t('message.error_notImplemented'),
         10001: this.$t('message.error_unknown'),

@@ -438,21 +438,45 @@ export default {
     maxAmount () {
       let getAddress = this.addressValue
       let getCustomFees = this.customFees ? this.customFees : '0'
-      let formData = {
-        sendAll: true,
-        feeRate: String(this.switchFee ? getCustomFees : this.selected),
-        outputs: [{
-          address: getAddress,
-          value: '0'
-        }]
-      }
-      this.currentAccount.prepareTx(formData).then(result => {
-        this.amountValue = this.toTargetCoinUnit(result.outputs[0].value)
-      })
-        .catch(value => {
-          console.warn(value)
-          this.displayErrorCode(value)
+      let formData = {}
+      if (this.D.isBtc(this.coinType)) {
+        formData = {
+          sendAll: true,
+          feeRate: String(this.switchFee ? getCustomFees : this.selected),
+          outputs: [{
+            address: getAddress,
+            value: '0'
+          }]
+        }
+        this.currentAccount.prepareTx(formData).then(result => {
+          console.log(result)
+          this.amountValue = this.toTargetCoinUnit(result.outputs[0].value)
         })
+          .catch(value => {
+            console.warn(value)
+            this.displayErrorCode(value)
+          })
+      } else {
+        let gasPrice = String(this.gasPrice ? this.gasPrice : 0)
+        let getGasPrice = this.gweiToWei(gasPrice)
+        formData = {
+          sendAll: true,
+          output: {
+            address: getAddress,
+            value: '0'
+          },
+          gasPrice: String(this.switchFee ? getGasPrice : this.selected),
+          gasLimit: String(this.gasLimit)
+        }
+        this.currentAccount.prepareTx(formData).then(result => {
+          console.log(result)
+          this.amountValue = this.toTargetCoinUnit(result.output.value)
+        })
+          .catch(value => {
+            console.warn(value)
+            this.displayErrorCode(value)
+          })
+      }
     },
     verifyAddress () {
       if (!this.currentAccount) return false
@@ -503,6 +527,11 @@ export default {
       } else {
         if (!(this.customFees && this.amountValue && this.addressValue) && this.D.isBtc(this.coinType)) return false
         if (!(this.gasPrice && this.amountValue && this.addressValue && this.gasLimit) && !this.D.isBtc(this.coinType)) return false
+      }
+      let lastString = this.etcData.substr(this.etcData.length - 1, 1)
+      if (this.etcData && !/^0[xX][0-9a-fA-F]+$/.test(this.etcData) && !/^[02468aAcCfF]$/.test(lastString)) {
+        layer.msg(this.$t('message.send_is_hex'), {icon: 2, anim: 6})
+        return false
       }
       if (!this.verifySubmitAddress()) return false
       layer.msg(this.$t('message.send_is_click'), {time: 600000000})
