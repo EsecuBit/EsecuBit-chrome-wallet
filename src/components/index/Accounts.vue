@@ -261,6 +261,7 @@ export default {
         this.newAccount[nowIndex].getTxInfos(this.pageStartIndex, this.pageEndIndex).then(value => {
           this.$set(this.gridList, nowIndex, value.txInfos)
           total = value.total
+          this.$set(this.totalNum, nowIndex, value.total)
           this.$nextTick(() => {
             this.tableCanvas(nowIndex)
             this.pageList(nowIndex, total)
@@ -367,6 +368,8 @@ export default {
         this.newAccount[index].getTxInfos(this.pageStartIndex, this.pageEndIndex).then(value => {
           this.$set(this.gridList, index, value.txInfos)
           total = value.total
+          this.$set(this.totalNum, index, value.total)
+          console.log(this.totalNum, value.total)
           this.$nextTick(() => {
             this.tableCanvas(index)
             this.pageList(index, total)
@@ -403,7 +406,7 @@ export default {
       layer.open({
         type: 1,
         area: ['530px', '315px'],
-        shadeClose: true,
+        shadeClose: false,
         title: that.$t('message.accounts_layer_title'),
         btn: [that.$t('message.accounts_submit_btn'), that.$t('message.accounts_cancel_btn')],
         content: $('#edit-account'),

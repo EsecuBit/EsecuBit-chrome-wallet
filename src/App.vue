@@ -173,6 +173,11 @@ export default {
           })
         })
       }
+    },
+    pageIndex: {
+      handler (newValue, oldValue) {
+        this.isAddAccounts = newValue === 0
+      }
     }
   },
   computed: {
@@ -353,7 +358,7 @@ export default {
         layer.open({
           type: 1,
           area: ['530px', '315px'],
-          shadeClose: true,
+          shadeClose: false,
           title: that.$t('message.app_add_accounts_title'),
           btn: btnDisplay,
           content: $('#account-content'),
@@ -371,7 +376,7 @@ export default {
               if (that.D.isBtc(that.selected)) that.addAccountTimes = that.addAccountTimes + 1
               layer.close(loadingIndex)
               layer.close(index)
-              layer.msg('successful', { icon: 1 })
+              layer.msg(that.$t('message.app_successful'), { icon: 1 })
               if (Array.isArray(that.accounts) && that.accounts.length > 0) {
                 that.accounts.push(value)
                 that.accounts = that.orderArr(that.accounts)

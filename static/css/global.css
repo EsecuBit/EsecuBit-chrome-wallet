@@ -306,3 +306,9 @@ blockquote{
   color: #e74c3c;
   font-weight: 600;
 }
+.layui-form-select dl dd.layui-select-tips {
+  display: none;
+}
+.layui-select-group dl dt {
+  text-transform: uppercase!important;
+}

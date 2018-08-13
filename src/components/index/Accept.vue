@@ -76,7 +76,8 @@ export default {
       isInitDisplay: true,
       isInit: true,
       isSetAddress: null,
-      isShowSetAddress: true
+      isShowSetAddress: true,
+      isPreventClick: false
     }
   },
   computed: {
@@ -158,17 +159,22 @@ export default {
       }
     },
     generateAddress () {
+      if (this.isPreventClick) return false
+      this.isPreventClick = true
       let layerIndex = (this.isSetAddress && this.D.isBtc(this.coinType)) ? layer.msg(this.$t('message.accept_confirm'), { time: 1000000 }) : layer.msg(this.$t('message.accept_loading'), { time: 1000000 })
       console.log(this.isSetAddress, 'this.isSetAddress')
+      let param = this.D.isBtc(this.coinType) ? this.isSetAddress : false
       if (this.isFirst) {
         setTimeout(() => {
-          this.currentAccount.getAddress(this.isSetAddress).then(value => {
+          this.currentAccount.getAddress(param).then(value => {
             layer.close(layerIndex)
             this.generateQRCode(value.qrAddress)
             this.qrAddress = value.address
             this.switchDisplay()
             this.isFirst = false
+            this.isPreventClick = false
           }).catch(value => {
+            this.isPreventClick = false
             layer.close(layerIndex)
             console.warn(value)
             this.displayErrorCode(value)
@@ -176,12 +182,14 @@ export default {
         }, 200)
       } else {
         setTimeout(() => {
-          this.currentAccount.getAddress(this.isSetAddress).then(value => {
+          this.currentAccount.getAddress(param).then(value => {
             layer.close(layerIndex)
             this.changeQRCode(value.qrAddress)
             this.qrAddress = value.address
             this.switchDisplay()
+            this.isPreventClick = false
           }).catch(value => {
+            this.isPreventClick = false
             layer.close(layerIndex)
             console.warn(value)
             this.displayErrorCode(value)

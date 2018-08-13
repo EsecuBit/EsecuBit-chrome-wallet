@@ -16,7 +16,10 @@
           <div class="layui-input-block input-width account-name" style="margin-left: 220px">
             <div style="display: inline-block;width: 250px">
               <select name="account" lay-filter="account"  style="width: 250px" v-model="currentSelectedAccountIndex" >
-                <option v-for="(accountItem, index) in accountInfo"  :value="index">{{accountItem.label}}</option>
+                <option > </option>
+                <optgroup :label="item.label" v-for="item in groupingAccounts" v-if="groupingAccounts">
+                  <option v-for="accountItem in item.account" :value="accountItem.index">{{accountItem.label}}</option>
+                </optgroup>
               </select>
             </div>
             <div class="account-balance">{{getBalance}}</div>
@@ -183,7 +186,9 @@ export default {
       gasLimit: 21000,
       gasPrice: 0,
       isShowData: false,
-      etcData: ''
+      etcData: '',
+      isPreventClick: false,
+      groupingAccounts: null
     }
   },
   computed: {
@@ -295,9 +300,8 @@ export default {
     },
     accountInfo: {
       handler (newValue, oldValue) {
-        this.$nextTick(() => {
-          this.renderAccountForm()
-        })
+        this.setMenuList(newValue)
+        console.log(this.groupingAccounts, 'newValue')
         if (this.isInit) this.currentAccount = newValue[0]
         this.isInit = false
       }
@@ -323,9 +327,31 @@ export default {
       })
     })
     Bus.$on('switchLang', () => { this.renderFeeForm(this.currentAccount) })
-    Bus.$on('rename', () => { this.renderAccountForm() })
+    Bus.$on('rename', () => { this.setMenuList(this.accountInfo) })
   },
   methods: {
+    setMenuList (targetArray) {
+      const arr = []
+      const accountList = []
+      for (let [index, elem] of targetArray.entries()) {
+        if (!arr.includes(elem.coinType)) {
+          arr.push(elem.coinType)
+          accountList.push({label: elem.coinType, account: [{label: elem.label, index: index}]})
+        } else {
+          for (let val of accountList) {
+            if (val.label === elem.coinType) {
+              val.account.push({label: elem.label, index: index})
+              break
+            }
+          }
+        }
+      }
+      // 拼接成理想数据类型
+      this.groupingAccounts = accountList
+      this.$nextTick(() => {
+        this.renderAccountForm()
+      })
+    },
     switchData () {
       this.isShowData = true
     },
@@ -529,7 +555,7 @@ export default {
         if (!(this.gasPrice && this.amountValue && this.addressValue && this.gasLimit) && !this.D.isBtc(this.coinType)) return false
       }
       let lastString = this.etcData.substr(this.etcData.length - 1, 1)
-      if (this.etcData && !/^0[xX][0-9a-fA-F]+$/.test(this.etcData) && !/^[02468aAcCfF]$/.test(lastString)) {
+      if (this.etcData && !/^[0-9a-fA-F]+$/.test(this.etcData) && !/^[02468aAcCfF]$/.test(lastString)) {
         layer.msg(this.$t('message.send_is_hex'), {icon: 2, anim: 6})
         return false
       }
@@ -561,24 +587,28 @@ export default {
           data: this.etcData
         }
       }
-      console.log(formData, '0xc0C67EfdCf6eA024F0Bad34d3c6D60773b8b078A')
+      if (this.isPreventClick) return
+      this.isPreventClick = true
       this.$emit('preventPageSwitch', true)
       setTimeout(() => {
         this.currentAccount.prepareTx(formData).then(value => {
           return this.currentAccount.buildTx(value)
         })
           .then(value => {
+            this.isPreventClick = false
             layer.closeAll('msg')
             layer.msg(this.$t('message.send_is_trading'), {time: 600000000})
             return this.currentAccount.sendTx(value)
           }).then(value => {
           // 格式化表格
+            this.isPreventClick = false
             this.$emit('allowPageSwitch', true)
             this.clearFormData()
             layer.closeAll('msg')
             layer.msg(this.$t('message.send_submit_success'), { icon: 1 })
             this.$emit('switchFirstPage', true)
           }).catch(value => {
+            this.isPreventClick = false
             console.warn(value)
             this.$emit('allowPageSwitch', true)
             layer.closeAll('msg')
