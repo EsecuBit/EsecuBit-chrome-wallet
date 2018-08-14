@@ -35,7 +35,10 @@
         <div class="layui-form-item" v-show="showAddress" style="margin-bottom: 0">
           <label class="layui-form-label account-label" >{{$t('message.accept_qrcode_msg')}}</label>
           <div class="layui-input-block account-info">
-            <div class="address-description">{{qrAddress}}</div>
+            <div class="address-description" id="address-description">{{qrAddress}}</div>
+            <a :title="$t('message.icon_title_copy')" href="#" class="copy-address" data-clipboard-target="#address-description" >
+              <i class="icon iconfont icon-copy "></i>
+            </a>
           </div>
         </div>
         <div class="layui-form-item">
@@ -55,6 +58,7 @@
 <script>
 import Bus from '../../common/js/bus'
 import Store from '../../common/js/store'
+import Clipboard from 'clipboard'
 
 const form = layui.form
 const layer = layui.layer
@@ -135,6 +139,10 @@ export default {
     form.on('checkbox(setAddressStatus)', (data) => {
       this.isSetAddress = data.elem.checked
       Store.saveChromeStore('isSetAddress', data.elem.checked)
+    })
+    let clipboard = new Clipboard('.copy-address')
+    clipboard.on('success', () => {
+      layer.msg(this.$t('message.accept_copy_success'), { icon: 1 })
     })
   },
   methods: {
@@ -278,5 +286,11 @@ export default {
     color: #333!important;
     font-weight: bold;
     cursor: text;
+    margin-right: 6px;
+  }
+  .copy-address .iconfont{
+    color: #333;
+    font-size: 18px;
+    vertical-align: middle;
   }
 </style>

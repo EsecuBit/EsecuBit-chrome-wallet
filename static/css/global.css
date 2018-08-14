@@ -309,6 +309,6 @@ blockquote{
 .layui-form-select dl dd.layui-select-tips {
   display: none;
 }
-.layui-select-group dl dt {
+.layui-form-select dl dt {
   text-transform: uppercase!important;
 }

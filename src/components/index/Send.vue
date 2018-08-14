@@ -554,8 +554,8 @@ export default {
         if (!(this.customFees && this.amountValue && this.addressValue) && this.D.isBtc(this.coinType)) return false
         if (!(this.gasPrice && this.amountValue && this.addressValue && this.gasLimit) && !this.D.isBtc(this.coinType)) return false
       }
-      let lastString = this.etcData.substr(this.etcData.length - 1, 1)
-      if (this.etcData && !/^[0-9a-fA-F]+$/.test(this.etcData) && !/^[02468aAcCfF]$/.test(lastString)) {
+      let isInt = Number.isInteger(this.etcData.length / 2)
+      if (this.etcData && (!/^[0-9a-fA-F]+$/.test(this.etcData) || !isInt)) {
         layer.msg(this.$t('message.send_is_hex'), {icon: 2, anim: 6})
         return false
       }
@@ -592,12 +592,14 @@ export default {
       this.$emit('preventPageSwitch', true)
       setTimeout(() => {
         this.currentAccount.prepareTx(formData).then(value => {
+          console.log(value, 'prepareTx')
           return this.currentAccount.buildTx(value)
         })
           .then(value => {
             this.isPreventClick = false
             layer.closeAll('msg')
             layer.msg(this.$t('message.send_is_trading'), {time: 600000000})
+            console.log(value, 'buildTx')
             return this.currentAccount.sendTx(value)
           }).then(value => {
           // 格式化表格
@@ -652,6 +654,7 @@ export default {
         console.log(formData)
       }
       this.currentAccount.prepareTx(formData).then(value => {
+        console.log(value, 'prepareTx2')
         this.isDisplayDetails = true
         this.$nextTick(() => {
           this.totalFee = this.toTargetCoinUnit(value.total)

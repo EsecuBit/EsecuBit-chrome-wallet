@@ -99,6 +99,7 @@ export const message = {
   accept_qrcode_msg: 'QR code Address :',
   accept_accept_msg: 'Receive',
   accept_set_address:'Set this address on device',
+  accept_copy_success:'Successfully copied to the clipboard',
   accept_generate_address: 'Generate Address',
   accept_prompt_msg1: 'Click the button to generate a QR code, please check the address and confirm on the device',
   accept_prompt_msg2: 'Please double-check the address on your device. Press the OK button to confirm',
@@ -172,5 +173,7 @@ export const message = {
   error_unknown: 'Unknown mistake',
   error_coinNotSupported: 'This currency is not supported',
 
-
+  icon_title_edit: 'update',
+  icon_title_refresh: 'refresh',
+  icon_title_copy: 'copy'
 }

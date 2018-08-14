@@ -17,7 +17,7 @@ export const message = {
   app_error_get_type: '无法获取钱包类型',
   app_submit_btn: '确定',
   app_cancel_btn: '取消',
-  app_add_accounts_title: '添加用户',
+  app_add_accounts_title: '添加账户',
   app_plug_out: '设备已断开连接',
   app_version_prompt: '为了您更好的体验，请更新浏览器到最新版本！',
 
@@ -73,7 +73,7 @@ export const message = {
   send_transaction_fees: '交易费用',
   send_data: 'Data',
   send_total_fee: '总费用',
-  send_advance:'高级选项：添加数据',
+  send_advance:'高级选项：添加Data',
   send_submit_btn: '发送',
   send_reset_btn: '重置',
   send_fastest_confirm: '最快确认',
@@ -98,6 +98,7 @@ export const message = {
   accept_qrcode_msg: '二维码地址 ：',
   accept_accept_msg: '接收',
   accept_set_address:'设置此地址到设备上',
+  accept_copy_success:'已成功复制到剪切板',
   accept_generate_address: '生成地址',
   accept_prompt_msg1: '请点击按钮生成账户的地址，同时核对是否与USB设备上的地址匹配',
   accept_prompt_msg2: '请核对上面的地址与设备上的地址是否匹配',
@@ -168,6 +169,7 @@ export const message = {
   error_unknown: '未知错误',
   error_coinNotSupported: '不支持该币种',
 
-
-
+  icon_title_edit: '修改',
+  icon_title_refresh: '刷新',
+  icon_title_copy: '复制'
 }

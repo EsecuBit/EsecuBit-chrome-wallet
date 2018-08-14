@@ -16,6 +16,7 @@
     "bitcoinjs-lib": "^3.3.2",
     "bitpony": "0.0.1",
     "chrome-excelsecu-wallet": "git+http://gogs.sickworm.com/sickworm/chrome-excelsecu-wallet.git",
+    "clipboard": "^2.0.1",
     "create-hmac": "^1.1.7",
     "ecurve": "^1.0.6",
     "fs-promise": "^2.0.3",

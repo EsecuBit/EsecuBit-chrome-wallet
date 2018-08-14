@@ -18,7 +18,7 @@
               <span>{{$t('message.accounts_account')}}</span>
               <span  style="color: #e74c3c" v-if="newAccount.length > 0">{{newAccount[index].label}}</span>
             </div>
-            <a title="edit" href="#" class="edit-account max-width-250" @click="editAccount()">
+            <a :title="$t('message.icon_title_edit')" href="#" class="edit-account max-width-250" @click="editAccount()">
               <i class="icon iconfont icon-bianji1 "></i>
             </a>
           </div>
@@ -36,7 +36,7 @@
               </span>
             </div>
           </div>
-          <a title="refresh" href="#" class="refresh-data max-width-250" @click="refresh">
+          <a :title="$t('message.icon_title_refresh')" href="#" class="refresh-data max-width-250" @click="refresh">
             <i class="layui-icon layui-icon-refresh-2" :class="loadingClass"></i>
           </a>
         </div>
