@@ -93,6 +93,7 @@ export const message = {
   send_is_trading: 'Trading is in progress, please wait...',
   send_is_hex: 'The Data field should be a hex string',
   send_positive_number: 'The amount cannot be less than 0',
+  send_scientific_count: 'Scientific counting is not currently supported, please re-enter',
 
   accept_prompt_msg: 'Please use the mobile phone to scan the QR code in the picture',
   accept_current_account: 'Current Account :',

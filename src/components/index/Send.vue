@@ -251,6 +251,11 @@ export default {
     },
     amountValue: {
       handler (newValue, oldValue) {
+        if (/[eE]/.test(newValue)) {
+          this.amountValue = null
+          layer.msg(this.$t('message.send_scientific_count'), { icon: 2, anim: 6 })
+          return false
+        }
         this.isDisplayExchange = true
         if (Number(newValue) < 0) {
           this.amountValue = null
@@ -269,6 +274,11 @@ export default {
     },
     customFees: {
       handler (newValue, oldValue) {
+        if (/[eE]/.test(newValue)) {
+          this.customFees = null
+          layer.msg(this.$t('message.send_scientific_count'), { icon: 2, anim: 6 })
+          return false
+        }
         if (Number(newValue) < 0) {
           this.customFees = null
           layer.msg(this.$t('message.send_positive_number'), { icon: 2, anim: 6 })
@@ -279,6 +289,11 @@ export default {
     },
     gasLimit: {
       handler (newValue, oldValue) {
+        if (/[eE]/.test(newValue)) {
+          this.gasLimit = null
+          layer.msg(this.$t('message.send_scientific_count'), { icon: 2, anim: 6 })
+          return false
+        }
         if (!newValue) return
         if (Number(newValue) < 0) {
           this.gasLimit = null
@@ -290,6 +305,11 @@ export default {
     },
     gasPrice: {
       handler (newValue, oldValue) {
+        if (/[eE]/.test(newValue)) {
+          this.gasPrice = null
+          layer.msg(this.$t('message.send_scientific_count'), { icon: 2, anim: 6 })
+          return false
+        }
         if (Number(newValue) < 0) {
           this.gasPrice = null
           layer.msg(this.$t('message.send_positive_number'), { icon: 2, anim: 6 })
@@ -554,8 +574,8 @@ export default {
         if (!(this.customFees && this.amountValue && this.addressValue) && this.D.isBtc(this.coinType)) return false
         if (!(this.gasPrice && this.amountValue && this.addressValue && this.gasLimit) && !this.D.isBtc(this.coinType)) return false
       }
-      let isInt = Number.isInteger(this.etcData.length / 2)
-      if (this.etcData && (!/^[0-9a-fA-F]+$/.test(this.etcData) || !isInt)) {
+      // let isInt = Number.isInteger(this.etcData.length / 2)
+      if (this.etcData && (!/^[0-9a-fA-F]+$/.test(this.etcData))) {
         layer.msg(this.$t('message.send_is_hex'), {icon: 2, anim: 6})
         return false
       }

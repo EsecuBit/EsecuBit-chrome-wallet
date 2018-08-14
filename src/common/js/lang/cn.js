@@ -92,6 +92,7 @@ export const message = {
   send_is_hex: 'Data字段应为hex字符串',
   send_is_trading: '正在进行交易， 请稍后。。。',
   send_positive_number: '金额不能小于0',
+  send_scientific_count: '目前不支持科学计数法，请重新输入',
 
   accept_prompt_msg: '请使用手机扫描下面的二维码',
   accept_current_account: '当前账户 ：',
