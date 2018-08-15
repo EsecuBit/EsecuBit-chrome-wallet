@@ -300,7 +300,7 @@ export default {
           layer.msg(this.$t('message.send_positive_number'), { icon: 2, anim: 6 })
           return
         }
-        if (this.switchFee && (!this.isClearFormData)) this.calculateTotal()
+        if (!this.isClearFormData) this.calculateTotal()
       }
     },
     gasPrice: {
@@ -316,6 +316,12 @@ export default {
           return
         }
         if (this.switchFee && (!this.isClearFormData)) this.calculateTotal()
+      }
+    },
+    etcData: {
+      handler (newValue, oldValue) {
+        let dataLength = Math.ceil(newValue.length / 2)
+        this.gasLimit = 210000 + dataLength * 68
       }
     },
     accountInfo: {
@@ -512,7 +518,8 @@ export default {
             value: '0'
           },
           gasPrice: String(this.switchFee ? getGasPrice : this.selected),
-          gasLimit: String(this.gasLimit)
+          gasLimit: String(this.gasLimit),
+          data: this.etcData
         }
         this.currentAccount.prepareTx(formData).then(result => {
           console.log(result)
@@ -557,14 +564,51 @@ export default {
     },
     switchCustomButton () {
       this.switchFee = !this.switchFee
-      this.customFees = null
-      this.gasPrice = null
+      if (this.D.isBtc(this.coinType)) {
+        this.customFees = null
+        this.gasPrice = 0
+      } else {
+        this.customFees = 0
+        this.gasPrice = null
+      }
     },
     WeiToGwei (value) {
       return this.esWallet.convertValue(this.coinType, value, this.D.unit.eth.Wei, this.D.unit.eth.GWei)
     },
     gweiToWei (value) {
       return this.esWallet.convertValue(this.coinType, value, this.D.unit.eth.GWei, this.D.unit.eth.Wei)
+    },
+    getFormData () {
+      let getAmountValue = this.amountValue ? String(this.amountValue) : '0'
+      let sendAmountValue = this.toMinCoinUnit(getAmountValue)
+      let getCustomFees = this.customFees ? String(this.customFees) : '0'
+      let getAddress = this.addressValue
+      let customFees = this.D.isBtc(this.coinType) ? getCustomFees : this.gweiToWei(getCustomFees)
+      let formData = {
+      }
+      if (this.D.isBtc(this.coinType)) {
+        formData = {
+          feeRate: this.switchFee ? customFees : String(this.selected),
+          outputs: [{
+            address: getAddress,
+            value: sendAmountValue
+          }]
+        }
+      } else {
+        let gasPrice = String(this.gasPrice ? this.gasPrice : 0)
+        let getGasPrice = this.gweiToWei(gasPrice)
+        formData = {
+          output: {
+            address: getAddress,
+            value: sendAmountValue
+          },
+          gasPrice: String(this.switchFee ? getGasPrice : this.selected),
+          gasLimit: String(this.gasLimit),
+          data: this.etcData
+        }
+        console.log(formData)
+      }
+      return formData
     },
     submitSendData () {
       // 验证表单
@@ -575,38 +619,13 @@ export default {
         if (!(this.gasPrice && this.amountValue && this.addressValue && this.gasLimit) && !this.D.isBtc(this.coinType)) return false
       }
       // let isInt = Number.isInteger(this.etcData.length / 2)
-      if (this.etcData && (!/^[0-9a-fA-F]+$/.test(this.etcData))) {
+      if (this.etcData && (!/^(0[xX])?[0-9a-fA-F]+$/.test(this.etcData))) {
         layer.msg(this.$t('message.send_is_hex'), {icon: 2, anim: 6})
         return false
       }
       if (!this.verifySubmitAddress()) return false
       layer.msg(this.$t('message.send_is_click'), {time: 600000000})
-      let address = this.addressValue
-      let moneyValue = this.toMinCoinUnit(String(this.amountValue))
-      let getCustomFees = this.customFees ? String(this.customFees) : '0'
-      let customFees = this.D.isBtc(this.coinType) ? getCustomFees : this.gweiToWei(getCustomFees)
-      let formData = {}
-      if (this.D.isBtc(this.coinType)) {
-        formData = {
-          feeRate: String(this.switchFee ? customFees : this.selected),
-          outputs: [{
-            address: address,
-            value: moneyValue
-          }]
-        }
-      } else {
-        let gasPrice = String(this.gasPrice ? this.gasPrice : 0)
-        let getGasPrice = this.gweiToWei(gasPrice)
-        formData = {
-          output: {
-            address: address,
-            value: moneyValue
-          },
-          gasPrice: String(this.switchFee ? getGasPrice : this.selected),
-          gasLimit: String(this.gasLimit),
-          data: this.etcData
-        }
-      }
+      let formData = this.getFormData()
       if (this.isPreventClick) return
       this.isPreventClick = true
       this.$emit('preventPageSwitch', true)
@@ -639,40 +658,7 @@ export default {
       }, 200)
     },
     calculateTotal () {
-      let getAmountValue = this.amountValue ? String(this.amountValue) : '0'
-      let sendAmountValue = this.toMinCoinUnit(getAmountValue)
-      let getCustomFees = this.customFees ? String(this.customFees) : '0'
-      let getAddress = this.addressValue
-      let customFees = this.D.isBtc(this.coinType) ? getCustomFees : this.gweiToWei(getCustomFees)
-      let formData = {
-        feeRate: this.switchFee ? customFees : String(this.selected),
-        outputs: [{
-          address: getAddress,
-          value: sendAmountValue
-        }]
-      }
-      if (this.D.isBtc(this.coinType)) {
-        formData = {
-          feeRate: this.switchFee ? customFees : String(this.selected),
-          outputs: [{
-            address: getAddress,
-            value: sendAmountValue
-          }]
-        }
-      } else {
-        let gasPrice = String(this.gasPrice ? this.gasPrice : 0)
-        let getGasPrice = this.gweiToWei(gasPrice)
-        formData = {
-          output: {
-            address: getAddress,
-            value: sendAmountValue
-          },
-          gasPrice: String(this.switchFee ? getGasPrice : this.selected),
-          gasLimit: String(this.gasLimit),
-          data: ''
-        }
-        console.log(formData)
-      }
+      let formData = this.getFormData()
       this.currentAccount.prepareTx(formData).then(value => {
         console.log(value, 'prepareTx2')
         this.isDisplayDetails = true
@@ -839,9 +825,11 @@ export default {
     position: absolute;
     left: 258px;
     top: 12px;
-    max-width: 200px;
+    max-width: 300px;
     overflow: hidden;
     font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   .add-data-wrapper {
     margin-bottom: 10px;

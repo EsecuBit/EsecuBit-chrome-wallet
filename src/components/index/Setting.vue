@@ -377,7 +377,6 @@ export default {
         this.$i18n.locale = data.value
         Store.saveChromeStore('lang', data.value)
         // Store.save('lang', data.value)
-        this.$emit('switchSetting', this.$t('message.app_setting'))
         Bus.$emit('switchLang', true)
       })
     },

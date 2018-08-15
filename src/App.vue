@@ -22,7 +22,7 @@
               <p style="height: 40px;line-height: 40px">
                 <span class="layui-breadcrumb" style="visibility: visible;">
                   <a href="#">{{$t('message.app_home')}}</a><span lay-separator="">&gt;</span>
-                  <a href="#" id="message" class="message">{{$t('message.app_accounts')}}</a>
+                  <a href="#" id="message" class="message" v-text="navTitle"></a>
                   <div class="add-btn-wrapper clearfix" v-show="isAddAccounts">
                     <a href="#" class="add-btn" @click="addAccountContent"><i class="layui-icon ">&#xe770;</i>{{$t('message.app_add_accounts')}}</a>
                   </div>
@@ -42,7 +42,7 @@
                 <Accept :account-info ="accounts" :reset-status="resetStatus" :error-code-msg="errorCodeMsg"/>
               </div>
               <div class="main-tab-item" :class="{'layui-show': 3 === pageIndex}">
-                <Setting @switchSetting = "switchSetting" @settingColor = "settingColor" @setExchangeRate="setExchangeRate"
+                <Setting @settingColor = "settingColor" @setExchangeRate="setExchangeRate"
                          @setBitUnit="setBitUnit"  @setEthUnit="setEthUnit" :account-info ="accounts" :wallet-info="walletInfo" :net-info='netInfo'/>
               </div>
             </div>
@@ -126,40 +126,7 @@ export default {
       resetStatus: 0,
       addAccountTimes: 0,
       pageIndex: 0,
-      isPreventSwitch: false,
-      errorCodeMsg: {
-        101: this.$t('message.error_noDevice'),
-        102: this.$t('message.error_deviceComm'),
-        103: this.$t('message.error_deviceConnectFailed'),
-        104: this.$t('message.error_deviceDeriveLargerThanN'),
-        105: this.$t('message.error_deviceProtocol'),
-        106: this.$t('message.error_handShake'),
-        107: this.$t('message.error_needPressKey'), // sleep after long time idle
-        108: this.$t('message.error_userCancel'),
-        109: this.$t('message.error_pinError'),
-        110: this.$t('message.error_operationTimeout'),
-        111: this.$t('message.error_deviceNotInit'),
-        201: this.$t('message.error_databaseOpenFailed'),
-        202: this.$t('message.error_databaseExecFailed'),
-        301: this.$t('message.error_lastAccountNoTransaction'),
-        302: this.$t('message.error_accountHasTransactions'),
-        401: this.$t('message.error_networkUnavailable'),
-        402: this.$t('message.error_networkNotInitialized'),
-        403: this.$t('message.error_networkProviderError'),
-        404: this.$t('message.error_networkTxNotFound'),
-        405: this.$t('message.error_networkFeeTooSmall'),
-        406: this.$t('message.error_networkTooManyPendingTx'),
-        407: this.$t('message.error_networkValueTooSmall'),
-        501: this.$t('message.error_balanceNotEnough'),
-        601: this.$t('message.error_invalidAddress'),
-        602: this.$t('message.error_noAddressCheckSum'), // for eth
-        603: this.$t('message.error_invalidAddressChecksum'),
-        605: this.$t('message.error_invalidDataNotHex'),
-        604: this.$t('message.error_valueIsDecimal'),
-        10000: this.$t('message.error_notImplemented'),
-        10001: this.$t('message.error_unknown'),
-        10002: this.$t('message.error_coinNotSupported')
-      }
+      isPreventSwitch: false
     }
   },
   watch: {
@@ -188,6 +155,48 @@ export default {
         {label: this.$t('message.app_accept'), icon: 'icon-msnui-cloud-download'},
         {label: this.$t('message.app_setting'), icon: 'icon-shezhi2'}
       ]
+    },
+    navTitle () {
+      let pageTitle = [this.$t('message.app_accounts'), this.$t('message.app_send'), this.$t('message.app_accept'), this.$t('message.app_setting')]
+      return pageTitle[this.pageIndex]
+    },
+    errorCodeMsg () {
+      return {
+        101: this.$t('message.error_noDevice'),
+        102: this.$t('message.error_deviceComm'),
+        103: this.$t('message.error_deviceConnectFailed'),
+        104: this.$t('message.error_deviceDeriveLargerThanN'),
+        105: this.$t('message.error_deviceProtocol'),
+        106: this.$t('message.error_handShake'),
+        107: this.$t('message.error_needPressKey'), // sleep after long time idle
+        108: this.$t('message.error_userCancel'),
+        109: this.$t('message.error_pinError'),
+        110: this.$t('message.error_operationTimeout'),
+        111: this.$t('message.error_deviceNotInit'),
+        112: this.$t('message.devicePressKeyTooEarly'),
+        201: this.$t('message.error_databaseOpenFailed'),
+        202: this.$t('message.error_databaseExecFailed'),
+        301: this.$t('message.error_lastAccountNoTransaction'),
+        302: this.$t('message.error_accountHasTransactions'),
+        401: this.$t('message.error_networkUnavailable'),
+        402: this.$t('message.error_networkNotInitialized'),
+        403: this.$t('message.error_networkProviderError'),
+        404: this.$t('message.error_networkTxNotFound'),
+        405: this.$t('message.error_networkFeeTooSmall'),
+        406: this.$t('message.error_networkTooManyPendingTx'),
+        407: this.$t('message.error_networkValueTooSmall'),
+        408: this.$t('message.error_networkGasTooLow'),
+        409: this.$t('message.error_networkGasPriceTooLow'),
+        501: this.$t('message.error_balanceNotEnough'),
+        601: this.$t('message.error_invalidAddress'),
+        602: this.$t('message.error_noAddressCheckSum'), // for eth
+        603: this.$t('message.error_invalidAddressChecksum'),
+        605: this.$t('message.error_invalidDataNotHex'),
+        604: this.$t('message.error_valueIsDecimal'),
+        10000: this.$t('message.error_notImplemented'),
+        10001: this.$t('message.error_unknown'),
+        10002: this.$t('message.error_coinNotSupported')
+      }
     }
   },
   beforeMount () {
@@ -278,9 +287,6 @@ export default {
     setExchangeRate (...data) {
       this.currentExchangeRate = data[0]
     },
-    switchSetting (...data) {
-      $('#message').text(data[0])
-    },
     settingColor (...data) {
       this.heardColor = data[0] + '-skin'
       this.customizeColor = data[0] + '-customize'
@@ -357,7 +363,7 @@ export default {
         const that = this
         layer.open({
           type: 1,
-          area: ['530px', '315px'],
+          area: ['567px', '315px'],
           shadeClose: false,
           title: that.$t('message.app_add_accounts_title'),
           btn: btnDisplay,
@@ -486,8 +492,23 @@ export default {
   .gray-customize .site-tree .layui-tree li h2 {
     border-left-color: #009E94;
   }
+  .gray-customize .layui-form-select dl dd.layui-this{
+    background-color: #46a2cc;
+  }
+  .gray-customize .menu-switch li.layui-this a:after {
+    content: '';
+    border-bottom: 5px #5FB878 solid;
+    width: calc(100% - 9px);
+    position: absolute;
+    bottom: 0;
+    left: 4px;
+    z-index: 1;
+  }
   .blue-customize .layui-form-radio>i:hover, .blue-customize .layui-form-radioed>i {
     color: #B03A5B;
+  }
+  .blue-customize .layui-form-select dl dd.layui-this{
+    background-color: #B03A5B;
   }
   .blue-customize .site-tree .layui-tree li h2 {
     border-left-color: #B03A5B;
@@ -544,7 +565,7 @@ export default {
     padding: 12px;
     font-size: 26px;
     font-weight: 600;
-    word-break: break-all;
+    word-wrap: break-word;
     word-spacing: 0.1em;
   }
   .loading-center {

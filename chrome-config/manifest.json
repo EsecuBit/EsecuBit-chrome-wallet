@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "Excelsecu Client ",
   "description": "Connect your Excelsecu Wallet.",
-  "version": "0.1.9",
+  "version": "0.1.11",
   "app": {
     "background": {
       "scripts": ["background.js"]

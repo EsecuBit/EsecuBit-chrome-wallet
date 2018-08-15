@@ -312,3 +312,9 @@ blockquote{
 .layui-form-select dl dt {
   text-transform: uppercase!important;
 }
+.layui-nav {
+  border-radius: 0;
+}
+.layui-nav .layui-nav-item{
+  line-height: 61px;
+}
