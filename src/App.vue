@@ -499,10 +499,11 @@ export default {
     content: '';
     background-color: #F47023;
     height: 3px;
-    width: calc(100% - 9px);
+    width: calc(100% - 30px);
     position: absolute;
     bottom: 0;
-    left: 4px;
+    left: 5px;
+    right: 0;
     z-index: 1;
   }
   .gray-customize .menu-switch li a:after {
@@ -513,13 +514,13 @@ export default {
     margin: 0 auto;
     position: absolute;
     bottom: 0;
-    left: 4px;
-    right: 4px;
+    left: 5px;
+    right: 0;
     z-index: 1;
     transition: width .2s ease,bottom .2s ease;
   }
   .gray-customize .menu-switch li a:hover:after {
-    width: calc(100% - 9px);
+    width: calc(100% - 30px);
   }
 
   .gray-customize .site-tree .layui-tree li h2 {

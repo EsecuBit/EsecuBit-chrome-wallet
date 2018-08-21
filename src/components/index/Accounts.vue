@@ -219,6 +219,7 @@ export default {
       handler (newValue, oldValue) {
         if (newValue) {
           this.currentIndex = 0
+          this.clearCanvas(false)
         }
       }
     },
@@ -320,9 +321,9 @@ export default {
         let data = parseInt(canvas.getAttribute('data-counts'))
         if (data < 0) {
           context.fillStyle = '#e74c3c'
-          context.font = '16px'
-          let getContent = (data === -1 && 'Pending..') || (data === -2 && 'Invalid..')
-          context.fillText(getContent, centerX - 25, centerY + 4)
+          context.font = '18px'
+          let getContent = (data === -1 && 'Pending') || (data === -2 && 'Invalid')
+          context.fillText(getContent, centerX - 15, centerY + 4)
         } else {
           let n = (data === 0 && 0) || (data === 1 && 1) || (data === 2 && 2) || (data === 3 && 3) || (data === 4 && 4) || (data === 5 && 5) || (data >= 6 && 6)
           let percentDisplay = n * 100 / 6

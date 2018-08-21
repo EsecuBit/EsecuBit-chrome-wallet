@@ -312,11 +312,6 @@ export default {
     },
     gasPrice: {
       handler (newValue, oldValue) {
-        if (/\./.test(newValue)) {
-          this.gasLimit = null
-          layer.msg(this.$t('message.send_not_decimal'), { icon: 2, anim: 6 })
-          return false
-        }
         if (/[eE]/.test(newValue)) {
           this.gasPrice = null
           layer.msg(this.$t('message.send_scientific_count'), { icon: 2, anim: 6 })

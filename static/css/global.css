@@ -317,3 +317,9 @@ blockquote{
 .layui-nav .layui-nav-item{
   line-height: 61px;
 }
+.fly-nav a .icon-msnui-cloud-upload {
+  font-size: 28px;
+}
+.fly-nav a .icon-msnui-cloud-download {
+  font-size: 28px;
+}

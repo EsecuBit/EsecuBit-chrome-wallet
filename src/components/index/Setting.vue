@@ -209,7 +209,7 @@ export default {
       deviceChecked: '',
       netChecked: '',
       currentNet: '',
-      appVersion: '0.1.12'
+      appVersion: '0.1.14'
     }
   },
   watch: {
