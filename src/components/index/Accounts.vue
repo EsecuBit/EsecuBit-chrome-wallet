@@ -318,10 +318,11 @@ export default {
         let centerY = canvas.height / 2 // Canvas中心点y轴坐标
         let rad = Math.PI * 2 / 100 // 将360度分成100份，那么每一份就是rad度
         let data = parseInt(canvas.getAttribute('data-counts'))
-        if (data === -1) {
+        if (data < 0) {
           context.fillStyle = '#e74c3c'
           context.font = '16px'
-          context.fillText('Pending..', centerX - 25, centerY + 4)
+          let getContent = (data === -1 && 'Pending..') || (data === -2 && 'Invalid..')
+          context.fillText(getContent, centerX - 25, centerY + 4)
         } else {
           let n = (data === 0 && 0) || (data === 1 && 1) || (data === 2 && 2) || (data === 3 && 3) || (data === 4 && 4) || (data === 5 && 5) || (data >= 6 && 6)
           let percentDisplay = n * 100 / 6

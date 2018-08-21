@@ -265,7 +265,7 @@ export default {
         this.currentUnit = Store.fetch('bitUnit') ? Store.fetch('bitUnit') : this.D.unit.btc.BTC
         this.currentUnitEth = Store.fetch('ethUnit') ? Store.fetch('ethUnit') : this.D.unit.eth.ETH
         this.currentExchangeRate = Store.fetch('exchange') ? Store.fetch('exchange') : this.D.unit.legal.USD
-        let currentSkin = Store.fetch('skin') ? Store.fetch('skin') : ''
+        let currentSkin = Store.fetch('skin') ? Store.fetch('skin') : 'gray'
         this.heardColor = currentSkin + '-skin'
         this.customizeColor = currentSkin + '-customize'
       } else {
@@ -276,7 +276,7 @@ export default {
         this.currentUnit = bitUnit['bitUnit'] ? bitUnit['bitUnit'] : this.D.unit.btc.BTC
         this.currentUnitEth = ethUnit['ethUnit'] ? ethUnit['ethUnit'] : this.D.unit.eth.ETH
         this.currentExchangeRate = exchange['exchange'] ? exchange['exchange'] : this.D.unit.legal.USD
-        let currentSkin = skin['skin'] ? skin['skin'] : ''
+        let currentSkin = skin['skin'] ? skin['skin'] : 'gray'
         this.heardColor = currentSkin + '-skin'
         this.customizeColor = currentSkin + '-customize'
       }
@@ -487,31 +487,132 @@ export default {
   }
   /*自定义皮肤样式*/
   .gray-customize .layui-form-radio>i:hover, .gray-customize .layui-form-radioed>i {
-    color: #263238;
+    color: #F47023;
   }
   .gray-customize .site-tree .layui-tree li h2 {
     border-left-color: #009E94;
   }
   .gray-customize .layui-form-select dl dd.layui-this{
-    background-color: #46a2cc;
+    background-color: #f99b64;
   }
   .gray-customize .menu-switch li.layui-this a:after {
     content: '';
-    border-bottom: 5px #5FB878 solid;
+    background-color: #F47023;
+    height: 3px;
     width: calc(100% - 9px);
     position: absolute;
     bottom: 0;
     left: 4px;
     z-index: 1;
   }
+  .gray-customize .menu-switch li a:after {
+    content: '';
+    background-color: #F47023;
+    height: 3px;
+    width: 0;
+    margin: 0 auto;
+    position: absolute;
+    bottom: 0;
+    left: 4px;
+    right: 4px;
+    z-index: 1;
+    transition: width .2s ease,bottom .2s ease;
+  }
+  .gray-customize .menu-switch li a:hover:after {
+    width: calc(100% - 9px);
+  }
+
+  .gray-customize .site-tree .layui-tree li h2 {
+    border-left-color: #F47023;
+  }
+  .gray-customize .site-tree .layui-tree .layui-this .layui-icon {
+    color: #F47023;
+  }
+  .gray-customize .site-tree .layui-tree .layui-this a {
+    color: #F47023;
+  }
+  .gray-customize .layui-bg-green {
+    background-color: #F47023!important;
+  }
+  .gray-customize .layui-elem-quote{
+    border-left: 5px solid #F47023;
+  }
+  .gray-customize .layui-btn {
+    background-color: #ef7631;
+  }
+  .gray-customize .layui-btn-primary:hover {
+    border-color: #F47023;
+    color: #333;
+  }
+  .gray-customize .layui-laypage .layui-laypage-curr .layui-laypage-em {
+    background-color: #ef7631;
+  }
+  .gray-customize .layui-laypage a:hover {
+    color: #ef7631;
+  }
+
+  .gray-customize .site-tree .layui-tree a {
+    padding-bottom: 4px;
+    position: relative;
+    height: 30px;
+  }
+  .gray-customize .site-tree .layui-tree a:hover:after {
+    width: calc(100% - 10px);
+    color: #F47023;
+  }
+  .gray-customize .site-tree .layui-tree a:after {
+    content: '';
+    background-color: #F47023;
+    height: 2px;
+    width: 0;
+    margin: 0 auto;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1;
+    transition: width .2s ease,bottom .2s ease;
+  }
+  .gray-customize .site-tree .layui-tree a:hover {
+    color: #F47023;
+  }
+  .gray-customize a:hover li i {
+    color: #F47023!important;
+  }
+
   .blue-customize .layui-form-radio>i:hover, .blue-customize .layui-form-radioed>i {
     color: #B03A5B;
   }
   .blue-customize .layui-form-select dl dd.layui-this{
-    background-color: #B03A5B;
+    background-color: #cb617f;
   }
   .blue-customize .site-tree .layui-tree li h2 {
     border-left-color: #B03A5B;
+  }
+  .blue-customize .site-tree .layui-tree .layui-this .layui-icon {
+    color: #B03A5B;
+  }
+  .blue-customize .site-tree .layui-tree .layui-this a {
+    color: #B03A5B;
+  }
+  .blue-customize .layui-bg-green {
+    background-color: #ba6a81!important;
+  }
+  .blue-customize .layui-elem-quote{
+    border-left: 5px solid #ba6a81;
+  }
+  .blue-customize .layui-btn {
+    background-color: #ba6a81;
+  }
+  .blue-customize .layui-btn-primary:hover {
+    border-color: #ba6a81;
+    color: #333;
+  }
+  .blue-customize .layui-laypage .layui-laypage-curr .layui-laypage-em {
+    background-color: #ba6a81;
+  }
+  .blue-customize .layui-laypage a:hover {
+    color: #ba6a81;
   }
   .layui-breadcrumb a:hover {
     color: #999!important

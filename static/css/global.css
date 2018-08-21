@@ -180,11 +180,10 @@ body .layui-layer-dir .layui-layer-content{padding: 10px;}
 /* 文档 */
 .site-tree{border-right: 1px solid #eee; }
 .site-tree .layui-tree{line-height: 32px;}
-.site-tree .layui-tree li i{position: relative; font-size: 22px; color: #000}
+.site-tree .layui-tree li i{position: relative; font-size: 16px; color: inherit}
 .site-tree .layui-tree li a cite{padding: 0 8px;}
-.site-tree .layui-tree .site-tree-noicon a cite{padding-left: 15px;}
 .site-tree .layui-tree li a em{font-size: 12px; color: #bbb; padding-right: 5px; font-style: normal;}
-.site-tree .layui-tree li h2{ border-left: 4px solid #f7be57; margin: 15px 0 5px; padding: 0 10px; background-color: #f2f2f2;}
+.site-tree .layui-tree li h2{ border-left: 4px solid #009688; margin: 15px 0 5px; padding: 0 10px; background-color: #f2f2f2;}
 .site-tree .layui-tree li ul{margin-left: 27px; line-height: 28px;}
 .site-tree .layui-tree li ul a,
 .site-tree .layui-tree li ul a i{color: #777;}

@@ -128,7 +128,7 @@
           </div>
         </div>
         <div class="layui-form-item">
-          <label class="layui-form-label">{{$t('message.send_total_fee')}}</label>
+          <label class="layui-form-label">{{$t('message.send_fee')}}</label>
           <div class="layui-input-inline input-width">
             <textarea disabled  class="layui-textarea" v-bind:value= "totalDisplayFee" name="desc"></textarea>
           </div>
@@ -141,7 +141,7 @@
         </div>
         <div class="layui-form-item" style="border:none">
           <button class="layui-btn" lay-submit type="button" @click="submitSendData">{{$t('message.send_submit_btn')}}</button>
-          <button type="button" class="layui-btn layui-btn-primary" @click="clearFormData">{{$t('message.send_reset_btn')}}</button>
+          <button type="button" class="layui-btn layui-btn-primary" @click="clearFormData" style="background-color: #fff">{{$t('message.send_reset_btn')}}</button>
         </div>
       </form>
     </div>
@@ -172,7 +172,9 @@ export default {
       switchFee: false,
       currentAccount: {label: ''},
       totalFee: 0,
-      totalDisplayFee: '',
+      transFee: 0,
+      totalFeeDisplay: '',
+      transFeeDisplay: '',
       isDisplayExchange: false,
       isDisplayDetails: false,
       coinType: '',
@@ -209,6 +211,16 @@ export default {
     getBalance () {
       let coinType = this.currentDisplayUnit(this.coinType)
       return '(' + this.$t('message.send_balance') + this.toTargetCoinUnit(this.currentAccount.balance) + ' ' + coinType + ')'
+    },
+    totalDisplayFee () {
+      if (this.coinType && this.currentUnit && this.currentExchangeRate && this.isDisplayDetails) {
+        let nowUnit = this.currentDisplayUnit(this.coinType)
+        let exchange = this.esWallet.convertValue(this.coinType, this.totalFee, nowUnit, this.currentExchangeRate)
+        let feeExchange = this.esWallet.convertValue(this.coinType, this.transFee, nowUnit, this.currentExchangeRate)
+        const totalFeeDisplay = this.$t('message.send_total_fee') + ': ' + this.totalFee + ' ' + nowUnit + ' (' + this.formatNum(exchange) + ' ' + this.currentExchangeRate + ')' + '\n'
+        const transFeeDisplay = this.$t('message.send_transaction_fees') + ': ' + this.transFee + ' ' + nowUnit + ' (' + this.formatNum(feeExchange) + ' ' + this.currentExchangeRate + ')'
+        return totalFeeDisplay + transFeeDisplay
+      }
     }
   },
   watch: {
@@ -236,16 +248,6 @@ export default {
             this.isAddressError = true
             this.isAddressTrue = false
           }
-        }
-      }
-    },
-    totalFee: {
-      handler (newValue, oldValue) {
-        if (this.coinType && this.currentUnit && this.currentExchangeRate && this.isDisplayDetails) {
-          let nowUnit = this.currentDisplayUnit(this.coinType)
-          let exchange = this.esWallet.convertValue(this.coinType, newValue, nowUnit, this.currentExchangeRate)
-          this.totalDisplayFee = newValue + ' ' + nowUnit + ' (' +
-            this.formatNum(exchange) + ' ' + this.currentExchangeRate + ')' + ' '
         }
       }
     },
@@ -289,22 +291,32 @@ export default {
     },
     gasLimit: {
       handler (newValue, oldValue) {
+        if (!newValue) return
         if (/[eE]/.test(newValue)) {
           this.gasLimit = null
           layer.msg(this.$t('message.send_scientific_count'), { icon: 2, anim: 6 })
           return false
         }
-        if (!newValue) return
         if (Number(newValue) < 0) {
           this.gasLimit = null
           layer.msg(this.$t('message.send_positive_number'), { icon: 2, anim: 6 })
           return
+        }
+        if (/\./.test(newValue)) {
+          this.gasLimit = null
+          layer.msg(this.$t('message.send_not_decimal'), { icon: 2, anim: 6 })
+          return false
         }
         if (!this.isClearFormData) this.calculateTotal()
       }
     },
     gasPrice: {
       handler (newValue, oldValue) {
+        if (/\./.test(newValue)) {
+          this.gasLimit = null
+          layer.msg(this.$t('message.send_not_decimal'), { icon: 2, anim: 6 })
+          return false
+        }
         if (/[eE]/.test(newValue)) {
           this.gasPrice = null
           layer.msg(this.$t('message.send_scientific_count'), { icon: 2, anim: 6 })
@@ -352,6 +364,7 @@ export default {
         this.renderAccountForm()
       })
     })
+    Bus.$on('switchUnit', () => { this.clearFormData() })
     Bus.$on('switchLang', () => { this.renderFeeForm(this.currentAccount) })
     Bus.$on('rename', () => { this.setMenuList(this.accountInfo) })
   },
@@ -437,13 +450,14 @@ export default {
     clearFormData () {
       this.isClearFormData = true
       this.totalFee = 0
+      this.transFee = 0
       this.$nextTick(() => {
         this.amountValue = null
         this.addressValue = ''
         this.customFees = 0
         this.gasLimit = 21000
         this.gasPrice = 0
-        this.totalDisplayFee = ''
+        this.isDisplayDetails = false
         this.etcData = ''
         this.switchFee = false
         this.$nextTick(() => {
@@ -663,6 +677,7 @@ export default {
         console.log(value, 'prepareTx2')
         this.isDisplayDetails = true
         this.$nextTick(() => {
+          this.transFee = this.toTargetCoinUnit(value.fee)
           this.totalFee = this.toTargetCoinUnit(value.total)
         })
       })
@@ -795,6 +810,7 @@ export default {
   }
   .layui-textarea{
     min-height: 60px;
+    font-size: 12px;
   }
   /*自定义 表格与样式*/
   .layui-form-item {

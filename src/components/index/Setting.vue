@@ -5,19 +5,19 @@
         <li><h2>{{$t('message.app_setting')}}</h2></li>
         <li class="tab-title-2 layui-this">
           <a href="#">
-            <i class="layui-icon" style="top: 3px;">&#xe632;</i>
+            <i class="layui-icon">&#xe632;</i>
             <cite>{{$t('message.setting_display')}}</cite>
             </a>
         </li>
         <li class="tab-title-2">
           <a href="#">
-            <i class="layui-icon" style="top: 3px;">&#xe628;</i>
+            <i class="layui-icon" >&#xe628;</i>
             <cite>{{$t('message.setting_information')}}</cite>
           </a>
         </li>
         <li class="tab-title-2">
           <a href="#">
-            <i class="layui-icon" style="top: 3px;">&#xe857;</i>
+            <i class="layui-icon">&#xe857;</i>
             <cite>{{$t('message.setting_init')}}</cite>
           </a>
         </li>
@@ -68,7 +68,7 @@
         <!--硬件信息-->
         <div class="tab-item">
           <div class="table-item">
-            <h3>{{$t('message.setting_hardware')}}</h3>
+            <h3>{{$t('message.setting_version')}}</h3>
             <table class="layui-table" >
               <colgroup>
                 <col width="100">
@@ -208,7 +208,8 @@ export default {
       seedValue: '',
       deviceChecked: '',
       netChecked: '',
-      currentNet: ''
+      currentNet: '',
+      appVersion: '0.1.12'
     }
   },
   watch: {
@@ -234,6 +235,7 @@ export default {
             form.on('radio(bitUnit)', data => {
               // Store.save('bitUnit', data.value)
               Store.saveChromeStore('bitUnit', data.value)
+              Bus.$emit('switchUnit', true)
               this.$emit('setBitUnit', data.value)
             })
           })
@@ -251,6 +253,7 @@ export default {
             form.on('radio(ethUnit)', data => {
               // Store.save('ethUnit', data.value)
               Store.saveChromeStore('ethUnit', data.value)
+              Bus.$emit('switchUnit', true)
               this.$emit('setEthUnit', data.value)
             })
           })
@@ -264,7 +267,8 @@ export default {
       if (this.walletInfo) {
         let hardwareArr = [
           {name: this.$t('message.setting_sdk_version'), value: this.walletInfo.sdk_version},
-          {name: this.$t('message.setting_cos_version'), value: this.walletInfo.cos_version}
+          {name: this.$t('message.setting_cos_version'), value: this.walletInfo.cos_version},
+          {name: this.$t('message.setting_app_version'), value: this.appVersion}
         ]
         return hardwareArr
       } else return []
@@ -277,9 +281,9 @@ export default {
         let btcNet = this.netInfo[netString].network
 
         let netList = [
-          {name: this.$t('message.setting_exchange'), value: exchangeNet},
+          {name: this.$t('message.setting_btc_info'), value: btcNet},
           {name: this.$t('message.setting_fee'), value: feeNet},
-          {name: this.$t('message.setting_btc_info'), value: btcNet}
+          {name: this.$t('message.setting_exchange'), value: exchangeNet}
         ]
         return netList
       } else return []
@@ -291,9 +295,9 @@ export default {
         let feeNet = this.netInfo[netString].fee
         let btcNet = this.netInfo[netString].network
         let netList = [
-          {name: this.$t('message.setting_exchange'), value: exchangeNet},
+          {name: this.$t('message.setting_btc_info'), value: btcNet},
           {name: this.$t('message.setting_fee'), value: feeNet},
-          {name: this.$t('message.setting_btc_info'), value: btcNet}
+          {name: this.$t('message.setting_exchange'), value: exchangeNet}
         ]
         return netList
       } else return []
