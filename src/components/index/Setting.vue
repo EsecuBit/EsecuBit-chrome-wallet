@@ -36,14 +36,15 @@
                   </select>
                 </div>
               </div>
-              <div class="layui-form-item" v-show="isBitcoin">
-                <label class="layui-form-label">{{$t('message.setting_units')}}</label>
+              <!--删除了v-show="!isBitcoin"-->
+              <div class="layui-form-item" >
+                <label class="layui-form-label">{{$t('message.setting_btc_units')}}</label>
                 <div class="layui-input-block" >
                   <input type="radio" lay-filter="bitUnit" name="bitUnit" :value="item.value" :title="item.label" :checked="item.value === unitBitChecked" v-for="item in bitUnitValueList">
                 </div>
               </div>
-              <div class="layui-form-item" v-show="!isBitcoin">
-                <label class="layui-form-label">{{$t('message.setting_units')}}</label>
+              <div class="layui-form-item" >
+                <label class="layui-form-label">{{$t('message.setting_etc_units')}}</label>
                 <div class="layui-input-block" >
                   <input type="radio" lay-filter="ethUnit" name="ethUnit" :value="item.value" :title="item.label" :checked="item.value === unitEthChecked" v-for="item in ethUnitValueList">
                 </div>
@@ -202,14 +203,12 @@ export default {
       currentAccount: {},
       coinType: '',
       isBitcoin: true,
-      isBitFirst: true,
-      isEthFirst: true,
       accountOrder: [],
       seedValue: '',
       deviceChecked: '',
       netChecked: '',
       currentNet: '',
-      appVersion: '0.1.14'
+      appVersion: '0.1.15'
     }
   },
   watch: {
@@ -222,43 +221,7 @@ export default {
     currentAccount: {
       handler (newValue, oldValue) {
         this.coinType = newValue.coinType
-        if (this.D.isBtc(this.coinType)) {
-          this.isBitcoin = true
-          if (!this.isBitFirst) return false
-          this.bitUnitValueList = [
-            {label: this.D.unit.btc.BTC, value: this.D.unit.btc.BTC},
-            {label: this.D.unit.btc.mBTC, value: this.D.unit.btc.mBTC},
-            {label: this.D.unit.btc.satoshi, value: this.D.unit.btc.satoshi}
-          ]
-          this.$nextTick(() => {
-            form.render('radio', 'form3')
-            form.on('radio(bitUnit)', data => {
-              // Store.save('bitUnit', data.value)
-              Store.saveChromeStore('bitUnit', data.value)
-              Bus.$emit('switchUnit', true)
-              this.$emit('setBitUnit', data.value)
-            })
-          })
-          this.isBitFirst = false
-        } else if (this.D.isEth(this.coinType)) {
-          this.isBitcoin = false
-          if (!this.isEthFirst) return false
-          this.ethUnitValueList = [
-            {label: this.D.unit.eth.ETH, value: this.D.unit.eth.ETH},
-            {label: this.D.unit.eth.GWei, value: this.D.unit.eth.GWei},
-            {label: this.D.unit.eth.Wei, value: this.D.unit.eth.Wei}
-          ]
-          this.$nextTick(() => {
-            form.render('radio', 'form3')
-            form.on('radio(ethUnit)', data => {
-              // Store.save('ethUnit', data.value)
-              Store.saveChromeStore('ethUnit', data.value)
-              Bus.$emit('switchUnit', true)
-              this.$emit('setEthUnit', data.value)
-            })
-          })
-          this.isEthFirst = false
-        }
+        this.isBitcoin = !!this.D.isBtc(this.coinType)
       }
     }
   },
@@ -317,8 +280,37 @@ export default {
     this.switchLang()
     this.switchExchange()
     this.switchTab()
+    this.initUnitsForm()
   },
   methods: {
+    initUnitsForm () {
+      this.bitUnitValueList = [
+        {label: this.D.unit.btc.BTC, value: this.D.unit.btc.BTC},
+        {label: this.D.unit.btc.mBTC, value: this.D.unit.btc.mBTC},
+        {label: this.D.unit.btc.satoshi, value: this.D.unit.btc.satoshi}
+      ]
+      this.ethUnitValueList = [
+        {label: this.D.unit.eth.ETH, value: this.D.unit.eth.ETH},
+        {label: this.D.unit.eth.GWei, value: this.D.unit.eth.GWei},
+        {label: this.D.unit.eth.Wei, value: this.D.unit.eth.Wei}
+      ]
+      this.$nextTick(() => {
+        form.render('radio', 'form3')
+        form.on('radio(bitUnit)', data => {
+          // Store.save('bitUnit', data.value)
+          Store.saveChromeStore('bitUnit', data.value)
+          this.$emit('setBitUnit', data.value)
+          Bus.$emit('setBitUnit', true)
+        })
+        form.render('radio', 'form3')
+        form.on('radio(ethUnit)', data => {
+          // Store.save('ethUnit', data.value)
+          Store.saveChromeStore('ethUnit', data.value)
+          this.$emit('setEthUnit', data.value)
+          Bus.$emit('setEthUnit', true)
+        })
+      })
+    },
     async init () {
       // 初始化默认值
       const getExchangeList = this.D.suppertedLegals()

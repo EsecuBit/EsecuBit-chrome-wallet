@@ -1,7 +1,7 @@
 <template>
   <div>
     <blockquote class="site-text layui-elem-quote" style="margin-top: 20px">
-      <i class="layui-icon">&#xe645;</i> {{$t('message.send_prompt_msg')}}
+      <i class="layui-icon" style="vertical-align: middle;">&#xe645;</i> {{$t('message.send_prompt_msg')}}
     </blockquote>
     <div class="site-title" style="margin-top: 20px">
       <fieldset><legend><a name="use">{{sendCoinTypeMsg}}</a></legend></fieldset>
@@ -264,7 +264,7 @@ export default {
           layer.msg(this.$t('message.send_positive_number'), { icon: 2, anim: 6 })
           return false
         }
-        if (newValue !== null && (!this.isClearFormData)) {
+        if (!this.isClearFormData) {
           this.calculateTotal()
         }
       }
@@ -359,7 +359,12 @@ export default {
         this.renderAccountForm()
       })
     })
-    Bus.$on('switchUnit', () => { this.clearFormData() })
+    Bus.$on('setBitUnit', () => {
+      this.D.isBtc(this.coinType) && this.clearFormData()
+    })
+    Bus.$on('setEthUnit', () => {
+      !this.D.isBtc(this.coinType) && this.clearFormData()
+    })
     Bus.$on('switchLang', () => { this.renderFeeForm(this.currentAccount) })
     Bus.$on('rename', () => { this.setMenuList(this.accountInfo) })
   },
@@ -520,6 +525,7 @@ export default {
       } else {
         let gasPrice = String(this.gasPrice ? this.gasPrice : 0)
         let getGasPrice = this.gweiToWei(gasPrice)
+        let getGasLimit = String(this.gasLimit ? this.gasLimit : 0)
         formData = {
           sendAll: true,
           output: {
@@ -527,7 +533,7 @@ export default {
             value: '0'
           },
           gasPrice: String(this.switchFee ? getGasPrice : this.selected),
-          gasLimit: String(this.gasLimit),
+          gasLimit: getGasLimit,
           data: this.etcData
         }
         this.currentAccount.prepareTx(formData).then(result => {
@@ -606,13 +612,14 @@ export default {
       } else {
         let gasPrice = String(this.gasPrice ? this.gasPrice : 0)
         let getGasPrice = this.gweiToWei(gasPrice)
+        let getGasLimit = String(this.gasLimit ? this.gasLimit : 0)
         formData = {
           output: {
             address: getAddress,
             value: sendAmountValue
           },
           gasPrice: String(this.switchFee ? getGasPrice : this.selected),
-          gasLimit: String(this.gasLimit),
+          gasLimit: getGasLimit,
           data: this.etcData
         }
         console.log(formData)

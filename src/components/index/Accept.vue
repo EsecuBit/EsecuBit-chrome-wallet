@@ -1,7 +1,7 @@
 <template>
   <div>
     <blockquote class="site-text layui-elem-quote" style="margin-top: 20px">
-      <i class="layui-icon">&#xe645;</i>   {{$t('message.accept_prompt_msg')}}
+      <i class="layui-icon" style="vertical-align: middle;font-size: 20px">&#xe645;</i>   {{$t('message.accept_prompt_msg')}}
     </blockquote>
     <div class="site-title" style="margin-top: 20px">
       <fieldset><legend><a name="use">{{receiveCoinTypeMsg}}</a></legend></fieldset>
