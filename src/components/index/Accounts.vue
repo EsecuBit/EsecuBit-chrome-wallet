@@ -45,6 +45,16 @@
             <legend><a name="default">{{$t('message.accounts_recent_operations')}}</a></legend>
           </fieldset>
         </div>
+        <div v-if="isShowAgainSendMsg">
+          <div class="again-send-msg" v-show="isShowSendList[index]">
+            <div class="again-send-content">
+              <i class="layui-icon">&#xe702;</i>  您有由于交易费用过低导致无法交易的记录，您可点击该记录选择重发
+            </div>
+            <div class="close-msg">
+              <i class="layui-icon" @click="closeAgainSendMsg">&#x1006;</i>
+            </div>
+          </div>
+        </div>
         <div class="layui-row">
           <div class="layui-col-xs12 ">
             <table class="layui-table" lay-skin="line"  v-if="tablecount.length > 0">
@@ -71,8 +81,8 @@
                 <th>{{$t('message.accounts_details')}}</th>
               </tr>
               </thead>
-              <tbody v-for="table in tablecount">
-                <tr style="height: 39px;overflow-x: hidden">
+              <tbody v-for="(table, trIndex) in tablecount">
+                <tr style="height: 39px;overflow-x: hidden" @mouseenter="reSendPrompt(table.canResend, index,trIndex)" @mouseout="clearLayer" :class="'prompt_' + index + '_' + trIndex">
                   <td>{{getFormatTime(table.time)}}</td>
                   <td>
                     <span :class ="[table.direction === 'in'?green:red]" class="text-opacity">{{toOrForm(table.direction)}}</span>
@@ -87,7 +97,8 @@
                     <span v-if="coinTypeList[index]" class="unit-display-2">{{D.unit.eth.GWei}}</span>
                   </td>
                   <td style="padding: 0">
-                    <canvas class="canvas" :class="'canvas-'+ index" width="100" height="30" :data-counts="table.confirmations"></canvas>
+                    <canvas class="canvas" :class="['canvas-'+ index, table.canResend ? 'hoverClass' : '']" :data-canresend='table.canResend'
+                            width="100" height="30" :data-counts="table.confirmations" @click="sendTransaction(table,  table.canResend)"></canvas>
                   </td>
                   <td>
                     <a title="search" :href="table.link" target="_blank">
@@ -169,6 +180,8 @@ export default {
       red: 'red-font',
       currentIndex: 0,
       renameTimes: 0,
+      isShowAgainSendMsg: true,
+      isShowSendList: [],
       limit: 5,
       pageStartIndex: 0,
       pageEndIndex: 5
@@ -227,12 +240,42 @@ export default {
       handler (newValue, oldValue) {
         if (newValue > 0 && (this.currentIndex >= this.wallet[0].account.length - 1)) this.currentIndex = this.currentIndex + 1
       }
+    },
+    gridList: {
+      handler (newValue, oldValue) {
+        let newArray = []
+        console.log(newValue)
+        for (let table of newValue) {
+          let status = false
+          for (let item of table) {
+            if (item.confirmations === -3) {
+              status = true
+            }
+          }
+          newArray.push(status)
+        }
+        this.isShowSendList = newArray
+      }
     }
   },
   mounted () {
     this.listenTXInfo()
   },
   methods: {
+    reSendPrompt (canResend, index, trIndex) {
+      console.log('canResend', canResend)
+      if (canResend) {
+        let selector = '.prompt_' + index + '_' + trIndex
+        layer.tips('您有由于交易费用过低导致无法交易的记录，您可点击黄色按钮选择重发', selector, {
+          tips: [3, '#f0ad47'],
+          area: ['530px', '38px'],
+          time: 4000
+        })
+      }
+    },
+    clearLayer () {
+      layer.closeAll('tips')
+    },
     isEtcType (currentAccount) {
       let type = currentAccount.coinType
       return !this.D.isBtc(type)
@@ -319,28 +362,35 @@ export default {
         let centerY = canvas.height / 2 // Canvas中心点y轴坐标
         let rad = Math.PI * 2 / 100 // 将360度分成100份，那么每一份就是rad度
         let data = parseInt(canvas.getAttribute('data-counts'))
-        if (data < 0) {
+        let canResend = canvas.getAttribute('data-canresend')
+        if (canResend === 'true') {
           context.fillStyle = '#e74c3c'
           context.font = '18px'
-          let getContent = (data === -1 && 'Pending') || (data === -2 && 'Invalid')
-          context.fillText(getContent, centerX - 15, centerY + 4)
+          context.fillText('!', centerX - 5, centerY + 4)
         } else {
-          let n = (data === 0 && 0) || (data === 1 && 1) || (data === 2 && 2) || (data === 3 && 3) || (data === 4 && 4) || (data === 5 && 5) || (data >= 6 && 6)
-          let percentDisplay = n * 100 / 6
-          // 绘制灰色外圈
-          context.save()
-          context.beginPath()
-          context.lineWidth = 5// 设置线宽
-          context.strokeStyle = '#ddd'
-          context.arc(centerX, centerY, 10, 0, Math.PI * 2, false)
-          context.stroke()
-          // 绘制5像素宽的运动外圈
-          context.save()
-          context.strokeStyle = '#009688' // 设置描边样式
-          context.lineWidth = 5// 设置线宽
-          context.beginPath()// 路径开始
-          context.arc(centerX, centerY, 10, -Math.PI / 2, -Math.PI / 2 + percentDisplay * rad, false) // 用于绘制圆弧context.arc(x坐标，y坐标，半径，起始角度，终止角度，顺时针/逆时针)
-          context.stroke() // 绘制
+          if (data < 0) {
+            context.fillStyle = '#e74c3c'
+            context.font = '18px'
+            let getContent = (data === -1 && 'Pending') || (data === -2 && 'Invalid')
+            context.fillText(getContent, centerX - 15, centerY + 4)
+          } else {
+            let n = (data === 0 && 0) || (data === 1 && 1) || (data === 2 && 2) || (data === 3 && 3) || (data === 4 && 4) || (data === 5 && 5) || (data >= 6 && 6)
+            let percentDisplay = n * 100 / 6
+            // 绘制灰色外圈
+            context.save()
+            context.beginPath()
+            context.lineWidth = 5// 设置线宽
+            context.strokeStyle = '#ddd'
+            context.arc(centerX, centerY, 10, 0, Math.PI * 2, false)
+            context.stroke()
+            // 绘制5像素宽的运动外圈
+            context.save()
+            context.strokeStyle = '#009688' // 设置描边样式
+            context.lineWidth = 5// 设置线宽
+            context.beginPath()// 路径开始
+            context.arc(centerX, centerY, 10, -Math.PI / 2, -Math.PI / 2 + percentDisplay * rad, false) // 用于绘制圆弧context.arc(x坐标，y坐标，半径，起始角度，终止角度，顺时针/逆时针)
+            context.stroke() // 绘制
+          }
         }
       }
     },
@@ -509,6 +559,15 @@ export default {
     },
     formatNum (num) {
       return parseFloat(num).toLocaleString()
+    },
+    closeAgainSendMsg () {
+      this.isShowAgainSendMsg = false
+    },
+    sendTransaction (table, canResend) {
+      if (canResend) {
+        this.$emit('switchTargetPage', 1)
+        Bus.$emit('fillSendData', table)
+      }
     }
   }
 }
@@ -701,14 +760,7 @@ export default {
   }
   .layui-tree {
     max-height: 520px;
-    overflow-y: hidden;
-  }
-  .layui-tree:hover {
-    max-height: 520px;
     overflow-y: scroll;
-  }
-  ::-webkit-scrollbar {
-    display:none
   }
   .unit-display-2 {
     font-size: .4em;
@@ -724,5 +776,34 @@ export default {
     font-size: 10px;
     font-weight: 400;
     opacity: .8;
+  }
+  .again-send-msg{
+    margin-bottom: 10px;
+    position: relative;
+    width: 100%;
+    background-color: #f8e2c1;
+    padding: 10px;
+    border: 1px solid #f6d8ab;
+    border-radius: 4px;
+    color: #8f6c38;
+  }
+  .again-send-content{
+    display: inline-block;
+    font-size: 14px;
+  }
+  .close-msg {
+    position: absolute;
+    top: 0;
+    right: 15px;
+    height: 39px;
+    line-height: 39px;
+  }
+  .close-msg .layui-icon:hover {
+    font-weight: 900;
+  }
+  .hoverClass:hover {
+    cursor: pointer;
+    border: 1px solid #f6ae85;
+    border-radius: 4px;
   }
 </style>

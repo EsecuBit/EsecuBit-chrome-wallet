@@ -171,6 +171,7 @@ export default {
       ],
       switchFee: false,
       currentAccount: {label: ''},
+      homeAccountIndex: 0,
       totalFee: 0,
       transFee: 0,
       totalFeeDisplay: '',
@@ -190,7 +191,8 @@ export default {
       isShowData: false,
       etcData: '',
       isPreventClick: false,
-      groupingAccounts: null
+      groupingAccounts: null,
+      oldTxId: ''
     }
   },
   computed: {
@@ -200,7 +202,8 @@ export default {
     toExchangeText () {
       if (this.currentUnit && this.currentExchangeRate) {
         let nowUnit = this.currentDisplayUnit(this.coinType)
-        let exchange = Number(this.esWallet.convertValue(this.coinType, String(Number(this.amountValue)), nowUnit, this.currentExchangeRate)).toFixed(2)
+        let getMoney = this.amountValue ? this.amountValue : '0'
+        let exchange = Number(this.esWallet.convertValue(this.coinType, String(getMoney), nowUnit, this.currentExchangeRate)).toFixed(2)
         return this.formatNum(exchange) + ' ' + this.currentExchangeRate
       }
     },
@@ -254,13 +257,13 @@ export default {
     amountValue: {
       handler (newValue, oldValue) {
         if (/[eE]/.test(newValue)) {
-          this.amountValue = null
+          this.amountValue = ''
           layer.msg(this.$t('message.send_scientific_count'), { icon: 2, anim: 6 })
           return false
         }
-        this.isDisplayExchange = true
+        if (newValue != null) this.isDisplayExchange = true
         if (Number(newValue) < 0) {
-          this.amountValue = null
+          this.amountValue = ''
           layer.msg(this.$t('message.send_positive_number'), { icon: 2, anim: 6 })
           return false
         }
@@ -336,6 +339,7 @@ export default {
         this.setMenuList(newValue)
         console.log(this.groupingAccounts, 'newValue')
         if (this.isInit) this.currentAccount = newValue[0]
+        this.homeAccountIndex = 0
         this.isInit = false
       }
     },
@@ -353,10 +357,19 @@ export default {
   mounted () {
     this.verifyForm()
     Bus.$on('switchAccount', (index) => {
-      this.currentSelectedAccountIndex = index
-      this.currentAccount = this.accountInfo[index]
+      this.homeAccountIndex = index
+      this.switchCurrentAccount(index)
+    })
+    Bus.$on('fillSendData', (table) => {
+      console.log(table)
+      this.switchCurrentAccount(this.homeAccountIndex)
       this.$nextTick(() => {
-        this.renderAccountForm()
+        let getValue = table.outputs[0].value
+        this.amountValue = this.toTargetCoinUnit(String(getValue))
+        this.addressValue = table.outputs[0].address
+        this.etcData = table.data ? table.data : ''
+        this.isShowData = !!table.data
+        this.oldTxId = table.oldTxId
       })
     })
     Bus.$on('setBitUnit', () => {
@@ -369,6 +382,13 @@ export default {
     Bus.$on('rename', () => { this.setMenuList(this.accountInfo) })
   },
   methods: {
+    switchCurrentAccount (index) {
+      this.currentSelectedAccountIndex = index
+      this.currentAccount = this.accountInfo[index]
+      this.$nextTick(() => {
+        this.renderAccountForm()
+      })
+    },
     setMenuList (targetArray) {
       const arr = []
       const accountList = []
@@ -599,15 +619,15 @@ export default {
       let getCustomFees = this.customFees ? String(this.customFees) : '0'
       let getAddress = this.addressValue
       let customFees = this.D.isBtc(this.coinType) ? getCustomFees : this.gweiToWei(getCustomFees)
-      let formData = {
-      }
+      let formData = {}
       if (this.D.isBtc(this.coinType)) {
         formData = {
           feeRate: this.switchFee ? customFees : String(this.selected),
           outputs: [{
             address: getAddress,
             value: sendAmountValue
-          }]
+          }],
+          oldTxId: this.oldTxId
         }
       } else {
         let gasPrice = String(this.gasPrice ? this.gasPrice : 0)
@@ -620,7 +640,8 @@ export default {
           },
           gasPrice: String(this.switchFee ? getGasPrice : this.selected),
           gasLimit: getGasLimit,
-          data: this.etcData
+          data: this.etcData,
+          oldTxId: this.oldTxId
         }
         console.log(formData)
       }
@@ -657,13 +678,14 @@ export default {
             console.log(value, 'buildTx')
             return this.currentAccount.sendTx(value)
           }).then(value => {
-          // 格式化表格
+            this.oldTxId = ''
+            // 格式化表格
             this.isPreventClick = false
             this.$emit('allowPageSwitch', true)
             this.clearFormData()
             layer.closeAll('msg')
             layer.msg(this.$t('message.send_submit_success'), { icon: 1 })
-            this.$emit('switchFirstPage', true)
+            this.$emit('switchTargetPage', 0)
           }).catch(value => {
             this.isPreventClick = false
             console.warn(value)
