@@ -331,7 +331,7 @@ export default {
     etcData: {
       handler (newValue, oldValue) {
         let dataLength = Math.ceil(newValue.length / 2)
-        this.gasLimit = 210000 + dataLength * 68
+        this.gasLimit = 21000 + dataLength * 68
       }
     },
     accountInfo: {
