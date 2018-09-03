@@ -63,6 +63,7 @@ export const message = {
   accounts_sync_success: 'Successful synchronization',
   accounts_total: 'total',
   accounts_items: 'items',
+  accounts_resend_prompt: 'This record cannot be confirmed due to the low transaction cost, you can choose to resend',
 
 
   send_prompt_msg: 'Before the transaction, please confirm that the address, amount and transaction fee you entered are correct !!',
@@ -96,6 +97,7 @@ export const message = {
   send_positive_number: 'Input value cannot be less than 0',
   send_not_decimal: 'Input value cannot be decimal',
   send_scientific_count: 'Scientific counting is not currently supported, please re-enter',
+
 
   accept_prompt_msg: 'Please use the mobile phone to scan the QR code in the picture',
   accept_current_account: 'Current Account :',

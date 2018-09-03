@@ -369,7 +369,8 @@ export default {
         this.addressValue = table.outputs[0].address
         this.etcData = table.data ? table.data : ''
         this.isShowData = !!table.data
-        this.oldTxId = table.oldTxId
+        this.oldTxId = table.txId
+        console.log(this.oldTxId)
       })
     })
     Bus.$on('setBitUnit', () => {
@@ -656,7 +657,7 @@ export default {
         if (!(this.gasPrice && this.amountValue && this.addressValue && this.gasLimit) && !this.D.isBtc(this.coinType)) return false
       }
       // let isInt = Number.isInteger(this.etcData.length / 2)
-      if (this.etcData && (!/^(0[xX])?[0-9a-fA-F]+$/.test(this.etcData))) {
+      if (this.etcData && (!/^(0[xX])?[0-9a-fA-F]*$/.test(this.etcData))) {
         layer.msg(this.$t('message.send_is_hex'), {icon: 2, anim: 6})
         return false
       }

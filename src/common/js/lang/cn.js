@@ -63,6 +63,7 @@ export const message = {
   accounts_sync_success: '同步成功',
   accounts_total: '共',
   accounts_items: '条',
+  accounts_resend_prompt: '该条记录由于交易费用过低导致无法确认，您可以选择重新发送',
 
   send_prompt_msg: '在交易前请确认您输入的地址、金额、交易费用正确 ！！',
   send_current_account: '当前账户',

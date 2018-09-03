@@ -97,7 +97,7 @@
                     <span v-if="coinTypeList[index]" class="unit-display-2">{{D.unit.eth.GWei}}</span>
                   </td>
                   <td style="padding: 0">
-                    <canvas class="canvas" :class="['canvas-'+ index, table.canResend ? 'hoverClass' : '']" :data-canresend='table.canResend'
+                    <canvas class="canvas" :class="['canvas-'+ index, table.canResend ? 'hoverClass' : '']" :data-canresend='table.canResend' :data-shouldresend="table.shouldResend"
                             width="100" height="30" :data-counts="table.confirmations" @click="sendTransaction(table,  table.canResend)"></canvas>
                   </td>
                   <td>
@@ -266,7 +266,7 @@ export default {
       console.log('canResend', canResend)
       if (canResend) {
         let selector = '.prompt_' + index + '_' + trIndex
-        layer.tips('您有由于交易费用过低导致无法交易的记录，您可点击黄色按钮选择重发', selector, {
+        layer.tips(this.$t('message.accounts_resend_prompt'), selector, {
           tips: [3, '#f0ad47'],
           area: ['530px', '38px'],
           time: 4000
@@ -362,8 +362,8 @@ export default {
         let centerY = canvas.height / 2 // Canvas中心点y轴坐标
         let rad = Math.PI * 2 / 100 // 将360度分成100份，那么每一份就是rad度
         let data = parseInt(canvas.getAttribute('data-counts'))
-        let canResend = canvas.getAttribute('data-canresend')
-        if (canResend === 'true') {
+        let shouldResend = canvas.getAttribute('data-shouldresend')
+        if (shouldResend === 'true') {
           context.fillStyle = '#e74c3c'
           context.font = '18px'
           context.fillText('!', centerX - 5, centerY + 4)
@@ -564,6 +564,7 @@ export default {
       this.isShowAgainSendMsg = false
     },
     sendTransaction (table, canResend) {
+      console.log(table)
       if (canResend) {
         this.$emit('switchTargetPage', 1)
         Bus.$emit('fillSendData', table)
