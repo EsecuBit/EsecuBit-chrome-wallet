@@ -370,7 +370,6 @@ export default {
         this.etcData = table.data ? table.data : ''
         this.isShowData = !!table.data
         this.oldTxId = table.txId
-        console.log(this.oldTxId)
       })
     })
     Bus.$on('setBitUnit', () => {

@@ -263,7 +263,6 @@ export default {
   },
   methods: {
     reSendPrompt (canResend, index, trIndex) {
-      console.log('canResend', canResend)
       if (canResend) {
         let selector = '.prompt_' + index + '_' + trIndex
         layer.tips(this.$t('message.accounts_resend_prompt'), selector, {
@@ -564,7 +563,6 @@ export default {
       this.isShowAgainSendMsg = false
     },
     sendTransaction (table, canResend) {
-      console.log(table)
       if (canResend) {
         this.$emit('switchTargetPage', 1)
         Bus.$emit('fillSendData', table)
