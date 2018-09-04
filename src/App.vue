@@ -36,7 +36,8 @@
                 <Accounts @switchTargetPage="switchTargetPage" :account-info ="accounts" :reset-status="resetStatus" :add-account-times="addAccountTimes" :current-unit="currentUnit" :current-unit-eth="currentUnitEth" :current-exchange-rate="currentExchangeRate" :error-code-msg="errorCodeMsg"/>
               </div>
               <div class="main-tab-item" :class="{'layui-show': 1 === pageIndex}">
-                <Send @switchTargetPage="switchTargetPage" @preventPageSwitch="preventPageSwitch" @allowPageSwitch="allowPageSwitch" :account-info ="accounts"  :current-unit="currentUnit" :current-unit-eth="currentUnitEth" :current-exchange-rate="currentExchangeRate" :reset-status="resetStatus" :error-code-msg="errorCodeMsg"/>
+                <Send @switchTargetPage="switchTargetPage" @preventPageSwitch="preventPageSwitch" @allowPageSwitch="allowPageSwitch" :account-info ="accounts"  :page-index="pageIndex"
+                      :current-unit="currentUnit" :current-unit-eth="currentUnitEth" :current-exchange-rate="currentExchangeRate" :reset-status="resetStatus" :error-code-msg="errorCodeMsg"/>
               </div>
               <div class="main-tab-item" :class="{'layui-show': 2 === pageIndex}">
                 <Accept :account-info ="accounts" :reset-status="resetStatus" :error-code-msg="errorCodeMsg"/>

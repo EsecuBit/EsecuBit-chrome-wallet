@@ -208,7 +208,7 @@ export default {
       deviceChecked: '',
       netChecked: '',
       currentNet: '',
-      appVersion: '0.1.15'
+      appVersion: '0.1.16'
     }
   },
   watch: {

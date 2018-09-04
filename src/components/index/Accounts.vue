@@ -45,16 +45,16 @@
             <legend><a name="default">{{$t('message.accounts_recent_operations')}}</a></legend>
           </fieldset>
         </div>
-        <div v-if="isShowAgainSendMsg">
-          <div class="again-send-msg" v-show="isShowSendList[index]">
-            <div class="again-send-content">
-              <i class="layui-icon">&#xe702;</i>  您有由于交易费用过低导致无法交易的记录，您可点击该记录选择重发
-            </div>
-            <div class="close-msg">
-              <i class="layui-icon" @click="closeAgainSendMsg">&#x1006;</i>
-            </div>
-          </div>
-        </div>
+        <!--<div v-if="isShowAgainSendMsg">-->
+          <!--<div class="again-send-msg" v-show="isShowSendList[index]">-->
+            <!--<div class="again-send-content">-->
+              <!--<i class="layui-icon">&#xe702;</i>  您有由于交易费用过低导致无法交易的记录，您可点击该记录选择重发-->
+            <!--</div>-->
+            <!--<div class="close-msg">-->
+              <!--<i class="layui-icon" @click="closeAgainSendMsg">&#x1006;</i>-->
+            <!--</div>-->
+          <!--</div>-->
+        <!--</div>-->
         <div class="layui-row">
           <div class="layui-col-xs12 ">
             <table class="layui-table" lay-skin="line"  v-if="tablecount.length > 0">

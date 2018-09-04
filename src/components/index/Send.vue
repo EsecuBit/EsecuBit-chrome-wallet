@@ -6,6 +6,14 @@
     <div class="site-title" style="margin-top: 20px">
       <fieldset><legend><a name="use">{{sendCoinTypeMsg}}</a></legend></fieldset>
     </div>
+    <div class="again-send-msg" v-if="isReSendStatus">
+      <div class="again-send-content">
+        <i class="layui-icon">&#xe702;</i> {{$t('message.send_resend_prompt')}}
+      </div>
+      <div class="close-msg">
+        <i class="layui-icon" @click="clearResendStatusAndData">&#x1006;</i>
+      </div>
+    </div>
     <div class="site-text site-block">
       <form class="layui-form customize-form" action="" lay-filter="form1" autocomplete="off">
         <div class="layui-form-item" style="position: relative">
@@ -155,7 +163,7 @@ const form = layui.form
 const layer = layui.layer
 export default {
   name: 'Sending',
-  props: ['accountInfo', 'currentUnit', 'currentUnitEth', 'currentExchangeRate', 'resetStatus', 'errorCodeMsg'],
+  props: ['accountInfo', 'currentUnit', 'currentUnitEth', 'currentExchangeRate', 'resetStatus', 'errorCodeMsg', 'pageIndex'],
   data () {
     return {
       addressList: [],
@@ -192,7 +200,8 @@ export default {
       etcData: '',
       isPreventClick: false,
       groupingAccounts: null,
-      oldTxId: ''
+      oldTxId: '',
+      isReSendStatus: false
     }
   },
   computed: {
@@ -352,6 +361,13 @@ export default {
         this.currentSelectedIndex = null
         this.renderFeeForm(newValue)
       }
+    },
+    pageIndex: {
+      handler (newValue, oldValue) {
+        if (newValue !== 1 && this.isReSendStatus) {
+          this.clearResendStatus()
+        }
+      }
     }
   },
   mounted () {
@@ -362,6 +378,7 @@ export default {
     })
     Bus.$on('fillSendData', (table) => {
       console.log(table)
+      this.isReSendStatus = true
       this.switchCurrentAccount(this.homeAccountIndex)
       this.$nextTick(() => {
         let getValue = table.outputs[0].value
@@ -417,6 +434,7 @@ export default {
     renderAccountForm () {
       form.render('select', 'form1')
       form.on('select(account)', data => {
+        if (this.isReSendStatus) this.clearResendStatus()
         let index = Number(data.value)
         this.$nextTick(() => {
           this.currentSelectedAccountIndex = index
@@ -678,7 +696,8 @@ export default {
             console.log(value, 'buildTx')
             return this.currentAccount.sendTx(value)
           }).then(value => {
-            this.oldTxId = ''
+            // 清空重发状态
+            if (this.oldTxId) this.clearResendStatus()
             // 格式化表格
             this.isPreventClick = false
             this.$emit('allowPageSwitch', true)
@@ -717,6 +736,14 @@ export default {
     },
     formatNum (num) {
       return parseFloat(num).toLocaleString()
+    },
+    clearResendStatusAndData () {
+      this.clearResendStatus()
+      this.clearFormData()
+    },
+    clearResendStatus () {
+      this.isReSendStatus = false
+      this.oldTxId = null
     }
   }
 }
@@ -882,5 +909,33 @@ export default {
   }
   .add-data:hover{
     opacity: .8;
+  }
+  .again-send-msg{
+    margin-bottom: 10px;
+    position: relative;
+    width: 100%;
+    background-color: #f8e2c1;
+    padding: 10px;
+    border: 1px solid #f6d8ab;
+    border-radius: 4px;
+    color: #8f6c38;
+  }
+  .again-send-content{
+    display: inline-block;
+    font-size: 14px;
+    letter-spacing: .1em;
+  }
+  .again-send-content .layui-icon{
+    font-size: 16px;
+  }
+  .close-msg {
+    position: absolute;
+    top: 0;
+    right: 15px;
+    height: 42px;
+    line-height: 42px;
+  }
+  .close-msg .layui-icon:hover {
+    font-weight: 900;
   }
 </style>

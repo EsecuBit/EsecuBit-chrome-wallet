@@ -96,6 +96,8 @@ export const message = {
   send_positive_number: '输入值不能小于0',
   send_not_decimal: '输入值不能为小数',
   send_scientific_count: '目前不支持科学计数法，请重新输入',
+  send_resend_prompt: '您正在重发交易，您可以点击后面的关闭按钮取消重发',
+
 
   accept_prompt_msg: '请使用手机扫描下面的二维码',
   accept_current_account: '当前账户 ：',

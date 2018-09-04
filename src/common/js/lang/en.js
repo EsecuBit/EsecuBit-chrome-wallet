@@ -97,6 +97,7 @@ export const message = {
   send_positive_number: 'Input value cannot be less than 0',
   send_not_decimal: 'Input value cannot be decimal',
   send_scientific_count: 'Scientific counting is not currently supported, please re-enter',
+  send_resend_prompt: 'You are resending the transaction, you can cancel the reissue by clicking the close button at the back.',
 
 
   accept_prompt_msg: 'Please use the mobile phone to scan the QR code in the picture',
