@@ -82,7 +82,7 @@
               </tr>
               </thead>
               <tbody v-for="(table, trIndex) in tablecount">
-                <tr style="height: 39px;overflow-x: hidden" @mouseenter="reSendPrompt(table.canResend, index, trIndex)" @mouseleave="clearLayer" :class="'prompt_' + index + '_' + trIndex">
+                <tr style="height: 39px;overflow-x: hidden" @mouseenter="reSendPrompt(table.canResend, table.shouldResend, index, trIndex)" @mouseleave="clearLayer" :class="'prompt_' + index + '_' + trIndex">
                   <td>{{getFormatTime(table.time)}}</td>
                   <td>
                     <span :class ="[table.direction === 'in'?green:red]" class="text-opacity">{{toOrForm(table.direction)}}</span>
@@ -262,12 +262,13 @@ export default {
     this.listenTXInfo()
   },
   methods: {
-    reSendPrompt (canResend, index, trIndex) {
+    reSendPrompt (canResend, shouldResend, index, trIndex) {
+      let msg = shouldResend ? this.$t('message.accounts_resend_prompt') : this.$t('message.accounts_resend_prompt_1')
       if (canResend) {
         let selector = '.prompt_' + index + '_' + trIndex
-        layer.tips(this.$t('message.accounts_resend_prompt'), selector, {
+        layer.tips(msg, selector, {
           tips: [3, '#f0ad47'],
-          area: ['530px', '38px'],
+          area: ['730px', '38px'],
           time: 600000
         })
       }

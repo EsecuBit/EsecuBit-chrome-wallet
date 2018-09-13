@@ -22,7 +22,7 @@ export const message = {
   app_version_prompt: 'The version of Google Chrome you are using is too low. Please upgrade to version 45 or above!',
 
   login_title: 'Bitcion Wallet',
-  login_detail: 'A secure offline management tool',
+  login_detail: 'A secure account management tool',
   login_contact_us: 'If you need help, please contact us.',
   login_prompt_msg: 'Please insert your wallet on your computer and unlock your wallet',
   login_prompt_msg1: 'Please insert your wallet on your computer and unlock your wallet',
@@ -63,7 +63,8 @@ export const message = {
   accounts_sync_success: 'Successful synchronization',
   accounts_total: 'total',
   accounts_items: 'items',
-  accounts_resend_prompt: 'This record cannot be confirmed due to the low transaction cost, you can choose to resend',
+  accounts_resend_prompt: 'This record cannot be confirmed due to the low transaction cost. You can choose to increase the transaction fee and resend it.',
+  accounts_resend_prompt_1: 'If the record cannot be confirmed for a long time, you can choose to resend it.',
 
 
   send_prompt_msg: 'Before the transaction, please confirm that the address, amount and transaction fee you entered are correct !!',

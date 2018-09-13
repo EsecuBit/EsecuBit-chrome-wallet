@@ -22,7 +22,7 @@ export const message = {
   app_version_prompt: '为了您更好的体验，请更新浏览器到最新版本！',
 
   login_title: '比特币钱包',
-  login_detail: '一套安全的离线管理工具',
+  login_detail: '一套安全的账户管理工具',
   login_contact_us: '如果您需要帮助，请联系我们...',
   login_prompt_msg: '请在电脑上插入您的钱包并解锁它',
   login_prompt_msg1: '请在电脑上插入您的钱包并解锁它',
@@ -63,7 +63,8 @@ export const message = {
   accounts_sync_success: '同步成功',
   accounts_total: '共',
   accounts_items: '条',
-  accounts_resend_prompt: '该条记录由于交易费用过低导致无法确认，您可以选择重新发送',
+  accounts_resend_prompt: '该条记录由于交易费用过低导致无法确认，您可以选择提高交易费用后重新发送',
+  accounts_resend_prompt_1: '若该条记录长时间无法确认，您可以选择重新发送',
 
   send_prompt_msg: '在交易前请确认您输入的地址、金额、交易费用正确 ！！',
   send_current_account: '当前账户',

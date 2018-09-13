@@ -1,5 +1,32 @@
 import {D} from 'chrome-excelsecu-wallet'
 export default {
+  isOfficial: true,
+  printLog () {
+    const getLogString = function (args) {
+      let logString = ''
+      args.forEach(arg => {
+        logString += JSON.stringify(arg).replace(/"/g, '') + ' '
+      })
+      return logString
+    }
+
+    const log = function (logLevel, args = []) {
+      let color = (logLevel === 0 && '#009688') || (logLevel === 1 && '#333') || (logLevel === 2 && '#f6ae85')
+      document.getElementById('log').innerHTML += `<p style="color: ${color}"> ${getLogString(args)} </p>`;
+    }
+
+    console.debug = function (...args) {
+      log(0, args)
+    }
+
+    console.log = function (...args) {
+      log(1, args)
+    }
+
+    console.warn = function (...args) {
+      log(2, args)
+    }
+  },
   fetch (key) {
     return JSON.parse(window.localStorage.getItem(key))
   },
@@ -36,6 +63,7 @@ export default {
     }
   },
   async init () {
+    // this.printLog()
     let seed = null
     let device = ''
     let net = ''
@@ -55,15 +83,12 @@ export default {
         seedValue : seed
       })
     }
-    if (device === 'soft') {
-      D.test.jsWallet = true
-    } else {
+    if (this.isOfficial) {
       D.test.jsWallet = false
-    }
-    if (net === 'test') {
-      D.test.coin = true
-    } else {
       D.test.coin = false
+    } else {
+      D.test.jsWallet = (device === 'soft')
+      D.test.coin =  (net === 'test')
     }
     D.test.txSeed = seed
     D.test.txWalletId = seed

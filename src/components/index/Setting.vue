@@ -15,7 +15,7 @@
             <cite>{{$t('message.setting_information')}}</cite>
           </a>
         </li>
-        <li class="tab-title-2">
+        <li class="tab-title-2" v-if="!isOfficial">
           <a href="#">
             <i class="layui-icon">&#xe857;</i>
             <cite>{{$t('message.setting_init')}}</cite>
@@ -133,7 +133,7 @@
           </div>
         </div>
         <!--设置种子-->
-        <div class="tab-item">
+        <div class="tab-item" v-if="!isOfficial">
           <div class="site-text site-block">
             <form class="layui-form" lay-filter="form4">
               <div class="layui-form-item" >
@@ -208,7 +208,8 @@ export default {
       deviceChecked: '',
       netChecked: '',
       currentNet: '',
-      appVersion: '0.1.16'
+      appVersion: '0.1.18',
+      isOfficial: Store.isOfficial
     }
   },
   watch: {
@@ -280,7 +281,6 @@ export default {
     this.switchLang()
     this.switchExchange()
     this.switchTab()
-    this.initUnitsForm()
   },
   methods: {
     initUnitsForm () {
@@ -350,6 +350,7 @@ export default {
           Store.saveChromeStore('device', data.value)
         })
       })
+      this.initUnitsForm()
     },
     editExchangeList (arr) {
       let exRate = []

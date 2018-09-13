@@ -246,7 +246,6 @@ export default {
     },
     isLowVersion () {
       let currentVersion = this.getChromeVersion()
-      console.log(currentVersion)
       if (currentVersion < 45) {
         layer.msg(this.$t('message.app_version_prompt'), {anim: 6, time: 100000})
         return false
@@ -680,5 +679,25 @@ export default {
     line-height: 36px;
     text-align: center;
     font-size: 14px;
+  }
+  .display-log{
+    display: block;
+    height: 300px;
+    width: 400px;
+    position: fixed;
+    padding: 20px 5px;
+    border: 1px solid #ddd;
+    bottom: 0;
+    right: 0;
+    background-color: #F8F8F8;
+    overflow-y: scroll;
+    z-index: 10000000;
+    white-space:normal;
+    word-break: break-all;
+    word-wrap:break-word;
+    line-height: 20px;
+  }
+  .display-log p{
+    margin-bottom: 10px;
   }
 </style>
