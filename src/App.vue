@@ -700,4 +700,16 @@ export default {
   .display-log p{
     margin-bottom: 10px;
   }
+  .clear-log{
+    background-color: #1E9FFF;
+    color: #F8F8F8;
+    outline: none;
+    padding: 9px 15px;
+    position: fixed;
+    bottom: 0;
+    right: 0;
+  }
+  .clear-log:hover{
+    opacity: .8;
+  }
 </style>

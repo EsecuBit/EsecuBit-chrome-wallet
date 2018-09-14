@@ -1,7 +1,10 @@
 import {D} from 'chrome-excelsecu-wallet'
 export default {
-  isOfficial: true,
+  isOfficial: false,
   printLog () {
+    document.getElementById('clear').onclick = function () {
+      document.getElementById('log').innerHTML = ''
+    }
     const getLogString = function (args) {
       let logString = ''
       args.forEach(arg => {
