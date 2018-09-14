@@ -733,7 +733,7 @@ export default {
           if (this.intervalId !== null) clearInterval(this.intervalId)
           this.autoCloseAllowAmountMsg()
           this.isShowAllowAmountMsg = true
-          // this.amountValue = this.toTargetCoinUnit(value.outputs[0].value)
+          this.amountValue = this.toTargetCoinUnit(value.outputs[0].value)
         } else {
           this.isDisplayDetails = true
           this.$nextTick(() => {
