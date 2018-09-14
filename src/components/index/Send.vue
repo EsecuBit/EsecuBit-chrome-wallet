@@ -14,6 +14,14 @@
         <i class="layui-icon" @click="clearResendStatusAndData">&#x1006;</i>
       </div>
     </div>
+    <div class="again-send-msg" v-if="isShowAllowAmountMsg">
+      <div class="again-send-content">
+        <i class="layui-icon">&#xe702;</i> {{AllowAmountMsg}}
+      </div>
+      <div class="close-msg">
+        <i class="layui-icon" @click="clearAllowAmountMsg">&#x1006;</i>
+      </div>
+    </div>
     <div class="site-text site-block">
       <form class="layui-form customize-form" action="" lay-filter="form1" autocomplete="off">
         <div class="layui-form-item" style="position: relative">
@@ -201,7 +209,10 @@ export default {
       isPreventClick: false,
       groupingAccounts: null,
       oldTxId: '',
-      isReSendStatus: false
+      isReSendStatus: false,
+      isShowAllowAmountMsg: false,
+      AllowAmountMsg: '',
+      intervalId: null
     }
   },
   computed: {
@@ -718,11 +729,18 @@ export default {
       let formData = this.getFormData()
       this.currentAccount.prepareTx(formData).then(value => {
         console.log(value, 'prepareTx2')
-        this.isDisplayDetails = true
-        this.$nextTick(() => {
-          this.transFee = this.toTargetCoinUnit(value.fee)
-          this.totalFee = this.toTargetCoinUnit(value.total)
-        })
+        if (value.deviceLimit) {
+          if (this.intervalId !== null) clearInterval(this.intervalId)
+          this.autoCloseAllowAmountMsg()
+          this.isShowAllowAmountMsg = true
+          // this.amountValue = this.toTargetCoinUnit(value.outputs[0].value)
+        } else {
+          this.isDisplayDetails = true
+          this.$nextTick(() => {
+            this.transFee = this.toTargetCoinUnit(value.fee)
+            this.totalFee = this.toTargetCoinUnit(value.total)
+          })
+        }
       })
         .catch(value => {
           console.warn(value)
@@ -744,6 +762,23 @@ export default {
     clearResendStatus () {
       this.isReSendStatus = false
       this.oldTxId = null
+    },
+    clearAllowAmountMsg () {
+      clearInterval(this.intervalId)
+      this.isShowAllowAmountMsg = !this.isShowAllowAmountMsg
+    },
+    autoCloseAllowAmountMsg () {
+      let i = 20
+      this.AllowAmountMsg = `您填写的金额超过了交易允许的金额数，系统已为您自动填写最高的金额数。(${i}s后自动关闭)`
+      this.intervalId = setInterval(() => {
+        if (i !== 0) {
+          this.AllowAmountMsg = `您填写的金额超过了交易允许的金额数，系统已为您自动填写最高的金额数。(${i}s后自动关闭)`
+          i--
+        } else {
+          this.isShowAllowAmountMsg = false
+          clearInterval(this.intervalId)
+        }
+      }, 1000)
     }
   }
 }

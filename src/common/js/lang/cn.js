@@ -167,7 +167,7 @@ export const message = {
   error_networkUnavailable: '无法访问网络',
   error_networkNotInitialized: '网络未初始化（没有用到）',
   error_networkProviderError: '网络请求失败',
-  error_networkTxNotFound: '网络无法连接',
+  error_networkTxNotFound: '无法找到交易记录',
   error_networkFeeTooSmall: '交易费用太低，请求被拒绝',
   error_networkTooManyPendingTx: '存在太多未确认的交易，暂时无法进行交易',
   error_networkValueTooSmall: '交易费用太低，无法交易',

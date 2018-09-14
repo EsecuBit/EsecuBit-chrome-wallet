@@ -14,8 +14,9 @@
       <div class="layadmin-user-login-box layadmin-user-login-header" >
         <div style="position: relative;">
           <div class="loader-anim">
-            <i class="layui-icon layui-anim layui-anim-rotate layui-anim-loop" v-if="isLoadingIcon" style="font-size: 50px;"> </i>
-            <i class="icon iconfont icon-thumbDrive usb-blinking-anim" style="font-size: 50px" v-else></i>
+            <i class="icon iconfont swing-anim icon-bug"  style="font-size: 50px;" v-if="isShowError"> </i>
+            <i class="layui-icon layui-anim layui-anim-rotate layui-anim-loop" v-if="isLoadingIcon && !isShowError" style="font-size: 50px;"> </i>
+            <i class="icon iconfont icon-thumbDrive usb-blinking-anim" style="font-size: 50px" v-if="!isLoadingIcon && !isShowError"></i>
           </div>
           <h3>{{promptMsg}}</h3>
         </div>
@@ -30,25 +31,35 @@
 <script>
 export default {
   name: 'Login',
-  props: ['status'],
+  props: ['status', 'loginErrorMsg'],
   data () {
     return {
       isLoadingIcon: false,
-      promptMsg: this.$t('message.login_prompt_msg')
+      promptMsg: this.$t('message.login_prompt_msg'),
+      isShowError: false
     }
   },
   watch: {
     status: {
       handler (newValue, oldValue) {
-        if (newValue === 2) this.init()
-        if (newValue === 3) this.sync()
-        if (newValue === 99) this.quitLoading()
+        if (newValue === 404) {
+          this.isShowError = true
+          this.showErrorMsg()
+        } else {
+          this.isShowError = false
+          if (newValue === 2) this.init()
+          if (newValue === 3) this.sync()
+          if (newValue === 99) this.quitLoading()
+        }
       }
     }
   },
   mounted () {
   },
   methods: {
+    showErrorMsg () {
+      this.promptMsg = this.loginErrorMsg
+    },
     loading () {
       this.promptMsg = this.$t('message.login_prompt_msg2')
       this.isLoadingIcon = !this.isLoadingIcon
@@ -176,6 +187,34 @@ export default {
     animation-timing-function: ease;
     -webkit-animation-iteration-count: infinite;
     animation-iteration-count: infinite;
+  }
+  .swing-anim{
+    display: inline-block;
+    -webkit-animation-name: swing-anim;
+    animation-name: swing-anim;
+    -webkit-animation-duration: 4s;
+    animation-duration: 4s;
+    -webkit-animation-timing-function: linear;
+    animation-timing-function: linear;
+    -webkit-animation-iteration-count: infinite;
+    animation-iteration-count: infinite;
+  }
+  @keyframes swing-anim{
+    from{
+      opacity: 1;
+    }
+    30% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.6;
+    }
+    70% {
+      opacity: 1;
+    }
+    to{
+      opacity: 1;
+    }
   }
   @keyframes usb-anim {
     from{

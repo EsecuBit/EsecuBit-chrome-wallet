@@ -208,7 +208,7 @@ export default {
       deviceChecked: '',
       netChecked: '',
       currentNet: '',
-      appVersion: '0.1.18',
+      appVersion: '0.1.19',
       isOfficial: Store.isOfficial
     }
   },

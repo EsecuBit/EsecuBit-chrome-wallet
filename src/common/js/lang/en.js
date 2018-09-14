@@ -171,7 +171,7 @@ export const message = {
   error_networkUnavailable: 'Unable to access the network',
   error_networkNotInitialized: 'Network not initialized (not used)',
   error_networkProviderError: 'Network request failed',
-  error_networkTxNotFound: 'Network cannot connect',
+  error_networkTxNotFound: 'Unable to find transaction history',
   error_networkFeeTooSmall: 'Transaction cost is too low, request rejected',
   error_networkTooManyPendingTx: 'There are too many unconfirmed transactions and it is temporarily impossible to trade',
   error_networkValueTooSmall: 'Transaction costs are too low to trade',

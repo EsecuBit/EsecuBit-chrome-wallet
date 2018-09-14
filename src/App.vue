@@ -2,7 +2,7 @@
   <div id="app" style="height: 100%">
     <div v-cloak style="height: 100%">
       <div v-show="isShowLogin" style="height: 100%">
-        <Login :status="loginStatus" />
+        <Login :status="loginStatus" :login-error-msg="loginErrorMsg"/>
       </div>
       <div v-show="!isShowLogin">
         <div class="main-admin" :class="[customizeColor]">
@@ -127,7 +127,8 @@ export default {
       resetStatus: 0,
       addAccountTimes: 0,
       pageIndex: 0,
-      isPreventSwitch: false
+      isPreventSwitch: false,
+      loginErrorMsg: ''
     }
   },
   watch: {
@@ -311,8 +312,10 @@ export default {
     },
     listenLoginStatus () {
       this.esWallet.listenStatus((errorNum, status) => {
-        if (this.errorCodeMsg[String(errorNum)]) {
-          this.displayErrorCode(errorNum)
+        if (errorNum !== 0) {
+          this.loginErrorMsg = this.errorCodeMsg[String(errorNum)]
+          this.loginStatus = 404
+          return false
         }
         if (status === this.D.status.plugIn) this.loginStatus = 1
         if (status === this.D.status.initializing) this.loginStatus = 2
