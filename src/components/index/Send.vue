@@ -565,6 +565,11 @@ export default {
         }
         this.currentAccount.prepareTx(formData).then(result => {
           console.log(result)
+          if (result.deviceLimit) {
+            if (this.intervalId !== null) clearInterval(this.intervalId)
+            this.autoCloseAllowAmountMsg()
+            this.isShowAllowAmountMsg = true
+          }
           this.amountValue = this.toTargetCoinUnit(result.outputs[0].value)
         })
           .catch(value => {
@@ -769,10 +774,10 @@ export default {
     },
     autoCloseAllowAmountMsg () {
       let i = 20
-      this.AllowAmountMsg = `您填写的金额超过了交易允许的金额数，系统已为您自动填写最高的金额数。(${i}s后自动关闭)`
+      this.AllowAmountMsg = this.$t('message.send_allow_amount_msg_1') + i + 's' + this.$t('message.send_allow_amount_msg_2')
       this.intervalId = setInterval(() => {
         if (i !== 0) {
-          this.AllowAmountMsg = `您填写的金额超过了交易允许的金额数，系统已为您自动填写最高的金额数。(${i}s后自动关闭)`
+          this.AllowAmountMsg = this.$t('message.send_allow_amount_msg_1') + i + 's' + this.$t('message.send_allow_amount_msg_2')
           i--
         } else {
           this.isShowAllowAmountMsg = false

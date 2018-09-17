@@ -269,9 +269,9 @@ export default {
     skinColor () {
       return [
         {name: this.$t('message.setting_black'), colorClass: 'black-skin', id: 'black'},
-        {name: this.$t('message.setting_gray'), colorClass: 'gray-skin', id: 'gray'},
         {name: this.$t('message.setting_dark_blue'), colorClass: 'blue-skin', id: 'blue'},
-        {name: this.$t('message.setting_brown'), colorClass: 'brown-skin', id: 'brown'}
+        {name: this.$t('message.setting_green'), colorClass: 'green-skin', id: 'green'},
+        {name: this.$t('message.setting_gray'), colorClass: 'gray-skin', id: 'gray'}
       ]
     }
   },
@@ -411,13 +411,13 @@ export default {
     width: 70px;
   }
   .blue-skin {
-    background:#1d365d;
-    border-color:#1d365d;
+    background:#2d3451;
+    border-color:#2d3451;
     color: #fff;
   }
-  .brown-skin {
-    background:#6d3028;
-    border-color:#6d3028;
+  .green-skin {
+    background:#2e5c62;
+    border-color:#2e5c62;
     color: #fff;
   }
   .black-skin {

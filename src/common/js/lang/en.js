@@ -99,6 +99,8 @@ export const message = {
   send_not_decimal: 'Input value cannot be decimal',
   send_scientific_count: 'Scientific counting is not currently supported, please re-enter',
   send_resend_prompt: 'You are resending the transaction, you can cancel the reissue by clicking the close button at the back.',
+  send_allow_amount_msg_1: 'The amount you filled in is too large and the system has automatically filled in the highest amount for you.',
+  send_allow_amount_msg_2: ' automatically turns off',
 
 
   accept_prompt_msg: 'Please use the mobile phone to scan the QR code in the picture',
@@ -139,7 +141,7 @@ export const message = {
   setting_black: 'black',
   setting_gray: 'gray',
   setting_dark_blue: 'dark blue',
-  setting_brown: 'brown',
+  setting_green: 'dark green',
   setting_sdk_version: 'SDK Version',
   setting_cos_version: 'COS Version',
   setting_app_version: 'App Version',

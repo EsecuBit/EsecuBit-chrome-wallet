@@ -98,7 +98,8 @@ export const message = {
   send_not_decimal: '输入值不能为小数',
   send_scientific_count: '目前不支持科学计数法，请重新输入',
   send_resend_prompt: '您正在重发交易，您可以点击后面的关闭按钮取消重发',
-
+  send_allow_amount_msg_1: '您填写的金额超过了交易允许的金额数，系统已为您自动填写最高的金额数。',
+  send_allow_amount_msg_2: ' 后自动关闭',
 
   accept_prompt_msg: '请使用手机扫描下面的二维码',
   accept_current_account: '当前账户 ：',
@@ -136,7 +137,7 @@ export const message = {
   setting_black: '黑色',
   setting_gray: '灰色',
   setting_dark_blue: '深蓝',
-  setting_brown: '棕色',
+  setting_green: '墨绿',
   setting_sdk_version: 'SDK 版本',
   setting_cos_version: 'COS 版本',
   setting_app_version: 'App 版本',

@@ -277,7 +277,6 @@ export default {
   }
   .address-btn {
     color: #fff;
-    background-color: rgb(42, 195, 148);
     width: 210px;
   }
   .address-description{

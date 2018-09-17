@@ -440,12 +440,37 @@ export default {
 @import './common/css/main.css' ;
 </style>
 
-<style >
+<style lang="less">
+  @blue: #2d3451;
+  @darkRed1: #6d3028;
+  @darkRed2: #B03A5B;
+  @darkRed3: #ba6a81;
+  @black: #263238;
+  @gray: #424650;
+  @orange1: #F47023;
+  @orange2: #ef7631;
+  @orange3: #f99b64;
+  @darkGreen: #2e5c62;
+  .underline(@color){
+    content: '';
+    background-color: @color;
+    position: absolute;
+    z-index: 1;
+  }
+  .header-skin(@color){
+    background:@color;
+    color: #fff;
+    border-bottom: 1px solid @color;
+    border-right: 1px solid @color;
+  }
   div{
     font: 14px Helvetica Neue,Helvetica,PingFang SC,\5FAE\8F6F\96C5\9ED1,Tahoma,Arial,sans-serif;
   }
   .bg-black{
-    background-color:#263238;
+    background-color:@black;
+  }
+  .fly-column{
+    background-color: #f5f5f5;
   }
   .logo {
     position: absolute;
@@ -453,170 +478,146 @@ export default {
     top: 6px;
     width: 126px;
     height: 46px;
-  }
-  .logo img {
-    width: 100%;
-    height: 100%;
-  }
-  img {
-    max-width: 100%;
-  }
-  .fly-column{
-    background-color: #f5f5f5;
+    img {
+      width: 100%;
+      height: 100%;
+    }
   }
   .blue-skin {
-    background:#1d365d;
-    color: #fff;
-    border-bottom: 1px solid #1d365d;
-    border-right: 1px solid #1d365d;
+    .header-skin(@blue);
   }
-  .brown-skin {
-    background:#6d3028;
-    border-bottom: 1px solid #6d3028;
-    border-right: 1px solid #6d3028;
-    color: #fff;
+  .green-skin {
+    .header-skin(@darkGreen);
   }
   .black-skin {
-    background:#263238;
-    border-bottom: 1px solid #263238;
-    border-right: 1px solid #263238;
-    color: #fff;
+    .header-skin(@black);
   }
   .gray-skin {
-    background:#424650;
-    border-bottom: 1px solid #424650;
-    border-right: 1px solid #424650;
-    color: #fff;
+    .header-skin(@gray);
   }
   /*自定义皮肤样式*/
-  .gray-customize .layui-form-radio>i:hover, .gray-customize .layui-form-radioed>i {
-    color: #F47023;
+  .gray-customize {
+    .layui-form-radioed>i{
+      color: @orange1;
+      &:hover{
+        color: @orange1;
+      }
+    }
+    .layui-form-select dl dd.layui-this{
+      background-color: @orange3;
+    }
+    .menu-switch li.layui-this a:after{
+      .underline(@orange1);
+      height: 3px;
+      width: calc(100% - 30px);
+      bottom: 0;
+      left: 5px;
+      right: 0;
+    }
+    .menu-switch li a{
+      &:after{
+        .underline(@orange1);
+        height: 3px;
+        width: 0;
+        margin: 0 auto;
+        bottom: 0;
+        left: 5px;
+        right: 0;
+        transition: width .2s ease,bottom .2s ease;
+      }
+      &:hover:after{
+        width: calc(100% - 30px);
+      }
+    }
+    .site-tree .layui-tree li h2{
+      border-left-color: @orange1;
+    }
+    .site-tree .layui-tree .layui-this .layui-icon{
+      color: @orange1;
+    }
+    .site-tree .layui-tree .layui-this a {
+      color: @orange1;
+    }
+    .layui-bg-green {
+      background-color: @orange1!important;
+    }
+    .layui-elem-quote{
+      border-left: 5px solid @orange1;
+    }
+    .layui-btn {
+      background-color: @orange2;
+    }
+    .layui-btn-primary:hover {
+      border-color: @orange1;
+      color: #333;
+    }
+    .layui-laypage .layui-laypage-curr .layui-laypage-em {
+      background-color: @orange2;
+    }
+    .layui-laypage a:hover {
+      color: @orange2;
+    }
+    .site-tree .layui-tree a {
+      padding-bottom: 4px;
+      position: relative;
+      height: 30px;
+      &:hover:after{
+        width: calc(100% - 10px);
+        color: @orange1;
+      }
+      &:after{
+        .underline(@orange1);
+        height: 2px;
+        width: 0;
+        margin: 0 auto;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        transition: width .2s ease,bottom .2s ease;
+      }
+      &:hover{
+        color: @orange1;
+      }
+    }
+    a:hover li i {
+      color: @orange1!important;
+    }
   }
-  .gray-customize .site-tree .layui-tree li h2 {
-    border-left-color: #009E94;
-  }
-  .gray-customize .layui-form-select dl dd.layui-this{
-    background-color: #f99b64;
-  }
-  .gray-customize .menu-switch li.layui-this a:after {
-    content: '';
-    background-color: #F47023;
-    height: 3px;
-    width: calc(100% - 30px);
-    position: absolute;
-    bottom: 0;
-    left: 5px;
-    right: 0;
-    z-index: 1;
-  }
-  .gray-customize .menu-switch li a:after {
-    content: '';
-    background-color: #F47023;
-    height: 3px;
-    width: 0;
-    margin: 0 auto;
-    position: absolute;
-    bottom: 0;
-    left: 5px;
-    right: 0;
-    z-index: 1;
-    transition: width .2s ease,bottom .2s ease;
-  }
-  .gray-customize .menu-switch li a:hover:after {
-    width: calc(100% - 30px);
-  }
-
-  .gray-customize .site-tree .layui-tree li h2 {
-    border-left-color: #F47023;
-  }
-  .gray-customize .site-tree .layui-tree .layui-this .layui-icon {
-    color: #F47023;
-  }
-  .gray-customize .site-tree .layui-tree .layui-this a {
-    color: #F47023;
-  }
-  .gray-customize .layui-bg-green {
-    background-color: #F47023!important;
-  }
-  .gray-customize .layui-elem-quote{
-    border-left: 5px solid #F47023;
-  }
-  .gray-customize .layui-btn {
-    background-color: #ef7631;
-  }
-  .gray-customize .layui-btn-primary:hover {
-    border-color: #F47023;
-    color: #333;
-  }
-  .gray-customize .layui-laypage .layui-laypage-curr .layui-laypage-em {
-    background-color: #ef7631;
-  }
-  .gray-customize .layui-laypage a:hover {
-    color: #ef7631;
-  }
-
-  .gray-customize .site-tree .layui-tree a {
-    padding-bottom: 4px;
-    position: relative;
-    height: 30px;
-  }
-  .gray-customize .site-tree .layui-tree a:hover:after {
-    width: calc(100% - 10px);
-    color: #F47023;
-  }
-  .gray-customize .site-tree .layui-tree a:after {
-    content: '';
-    background-color: #F47023;
-    height: 2px;
-    width: 0;
-    margin: 0 auto;
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 1;
-    transition: width .2s ease,bottom .2s ease;
-  }
-  .gray-customize .site-tree .layui-tree a:hover {
-    color: #F47023;
-  }
-  .gray-customize a:hover li i {
-    color: #F47023!important;
-  }
-
-  .blue-customize .layui-form-radio>i:hover, .blue-customize .layui-form-radioed>i {
-    color: #B03A5B;
-  }
-  .blue-customize .layui-form-select dl dd.layui-this{
-    background-color: #cb617f;
-  }
-  .blue-customize .site-tree .layui-tree li h2 {
-    border-left-color: #B03A5B;
-  }
-  .blue-customize .site-tree .layui-tree .layui-this .layui-icon {
-    color: #B03A5B;
-  }
-  .blue-customize .site-tree .layui-tree .layui-this a {
-    color: #B03A5B;
-  }
-  .blue-customize .layui-bg-green {
-    background-color: #ba6a81!important;
-  }
-  .blue-customize .layui-elem-quote{
-    border-left: 5px solid #ba6a81;
-  }
-  .blue-customize .layui-btn {
-    background-color: #ba6a81;
-  }
-  .blue-customize .layui-btn-primary:hover {
-    border-color: #ba6a81;
-    color: #333;
-  }
-  .blue-customize .layui-laypage .layui-laypage-curr .layui-laypage-em {
-    background-color: #ba6a81;
-  }
-  .blue-customize .layui-laypage a:hover {
-    color: #ba6a81;
+  .blue-customize {
+    .layui-form-radio>i:hover, .layui-form-radioed>i {
+      color: @darkRed2;
+    }
+    .layui-form-select dl dd.layui-this{
+      background-color: #cb617f;
+    }
+    .site-tree .layui-tree li h2 {
+      border-left-color: @darkRed2;
+    }
+    .site-tree .layui-tree .layui-this .layui-icon {
+      color: @darkRed2;
+    }
+    .site-tree .layui-tree .layui-this a {
+      color: @darkRed2;
+    }
+    .layui-bg-green {
+      background-color: @darkRed3!important;
+    }
+    .layui-elem-quote{
+      border-left: 5px solid @darkRed3;
+    }
+    .layui-btn {
+      background-color: @darkRed3;
+    }
+    .layui-btn-primary:hover {
+      border-color: @darkRed3;
+      color: #333;
+    }
+    .layui-laypage .layui-laypage-curr .layui-laypage-em {
+      background-color: @darkRed3;
+    }
+    .layui-laypage a:hover {
+      color: @darkRed3;
+    }
   }
   .layui-breadcrumb a:hover {
     color: #999!important
@@ -703,6 +704,7 @@ export default {
   .display-log p{
     margin-bottom: 10px;
   }
+  /*crx日志*/
   .clear-log{
     background-color: #1E9FFF;
     color: #F8F8F8;
