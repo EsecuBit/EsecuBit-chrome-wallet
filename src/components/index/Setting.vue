@@ -208,7 +208,7 @@ export default {
       deviceChecked: '',
       netChecked: '',
       currentNet: '',
-      appVersion: '0.1.19',
+      appVersion: '0.1.20',
       isOfficial: Store.isOfficial
     }
   },
@@ -405,38 +405,33 @@ export default {
 }
 </script>
 
-<style scoped>
+<style scoped lang="less">
+  .color-skin(@color) {
+    background:@color;
+    border-color:@color;
+    color: #fff;
+  }
   a.layui-btn {
     color: #fff;
     width: 70px;
   }
   .blue-skin {
-    background:#2d3451;
-    border-color:#2d3451;
-    color: #fff;
+    .color-skin(#2d3451);
   }
   .green-skin {
-    background:#2e5c62;
-    border-color:#2e5c62;
-    color: #fff;
+    .color-skin(#2e5c62);
   }
   .black-skin {
-    background:#23262E;
-    border-color:#23262E;
-    color: #fff;
+    .color-skin(#23262E);
   }
   .gray-skin {
-    background:#424650;
-    border-color:#424650;
-    color: #fff;
+    .color-skin(#424650);
   }
   .layui-form-label {
     font-size: 13px;
   }
   .layui-btn-normal {
-    background:#4898d5;
-    border-color:#4898d5;
-    color: #fff;
+    .color-skin(#4898d5);
   }
   .layui-table td, .layui-table th {
     padding: 6px 15px;

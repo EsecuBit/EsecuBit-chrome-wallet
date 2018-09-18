@@ -582,6 +582,15 @@ export default {
     a:hover li i {
       color: @orange1!important;
     }
+    .layui-form-checked[lay-skin=primary] i {
+      border-color: @orange2;
+      background-color: @orange2;
+      color: #fff;
+    }
+    .layui-form-checkbox[lay-skin=primary]:hover i {
+      border-color: @orange2;
+      color: #fff;
+    }
   }
   .blue-customize {
     .layui-form-radio>i:hover, .layui-form-radioed>i {
@@ -617,6 +626,15 @@ export default {
     }
     .layui-laypage a:hover {
       color: @darkRed3;
+    }
+    .layui-form-checked[lay-skin=primary] i {
+      border-color:  @darkRed3;
+      background-color:  @darkRed3;
+      color: #fff;
+    }
+    .layui-form-checkbox[lay-skin=primary]:hover i {
+      border-color:  @darkRed3;
+      color: #fff;
     }
   }
   .layui-breadcrumb a:hover {
