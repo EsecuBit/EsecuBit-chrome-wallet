@@ -43,7 +43,7 @@ export const message = {
   accounts_table_operation: 'Operation',
   accounts_table_search: 'Search',
   accounts_details: 'Details',
-  accounts_enter_username: 'Please enter a new username !',
+  accounts_enter_username: 'Please enter a new account name !',
   accounts_form_username: 'Account Name',
   accounts_form_placeholder: 'Enter Yours New Account Name',
   accounts_name: 'Name',

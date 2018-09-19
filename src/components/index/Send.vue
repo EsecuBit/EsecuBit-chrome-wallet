@@ -243,6 +243,8 @@ export default {
         const totalFeeDisplay = this.$t('message.send_total_fee') + ': ' + this.totalFee + ' ' + nowUnit + ' (' + this.formatNum(exchange) + ' ' + this.currentExchangeRate + ')' + '\n'
         const transFeeDisplay = this.$t('message.send_transaction_fees') + ': ' + this.transFee + ' ' + nowUnit + ' (' + this.formatNum(feeExchange) + ' ' + this.currentExchangeRate + ')'
         return totalFeeDisplay + transFeeDisplay
+      } else {
+        return ''
       }
     }
   },
@@ -287,14 +289,20 @@ export default {
           layer.msg(this.$t('message.send_positive_number'), { icon: 2, anim: 6 })
           return false
         }
-        if (!this.isClearFormData) {
-          this.calculateTotal()
+        if (this.D.isBtc(this.coinType)) {
+          if (!this.isClearFormData && this.customFees !== '') {
+            this.calculateTotal()
+          }
+        } else {
+          if (!this.isClearFormData && this.gasLimit !== '' && this.gasPrice !== '') {
+            this.calculateTotal()
+          }
         }
       }
     },
     switchFee: {
-      handler () {
-        if (!this.isClearFormData) this.calculateTotal()
+      handler (newValue, oldValue) {
+        if (!this.isClearFormData && !newValue) this.calculateTotal()
       }
     },
     customFees: {
@@ -309,7 +317,8 @@ export default {
           layer.msg(this.$t('message.send_positive_number'), { icon: 2, anim: 6 })
           return
         }
-        if (this.switchFee && (!this.isClearFormData)) this.calculateTotal()
+        if (this.switchFee && (!this.isClearFormData) && newValue !== null && newValue !== '') this.calculateTotal()
+        if (!newValue) this.isDisplayDetails = false
       }
     },
     gasLimit: {
@@ -331,6 +340,7 @@ export default {
           return false
         }
         if (!this.isClearFormData) this.calculateTotal()
+        if (newValue !== '') this.isDisplayDetails = false
       }
     },
     gasPrice: {
@@ -345,7 +355,8 @@ export default {
           layer.msg(this.$t('message.send_positive_number'), { icon: 2, anim: 6 })
           return
         }
-        if (this.switchFee && (!this.isClearFormData)) this.calculateTotal()
+        if (this.switchFee && (!this.isClearFormData) && newValue !== null && newValue !== '') this.calculateTotal()
+        if (!newValue) this.isDisplayDetails = false
       }
     },
     etcData: {

@@ -43,7 +43,7 @@ export const message = {
   accounts_table_operation: '操作',
   accounts_table_search: '查询',
   accounts_details: '明细',
-  accounts_enter_username: '请输入用户名 ！',
+  accounts_enter_username: '请输入账户名 ！',
   accounts_form_username: '账户名',
   accounts_form_placeholder: '输入一个新账户名',
   accounts_name: '名称',
