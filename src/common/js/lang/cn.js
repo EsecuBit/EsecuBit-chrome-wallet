@@ -26,8 +26,8 @@ export const message = {
   login_contact_us: '如果您需要帮助，请联系我们...',
   login_prompt_msg: '请在电脑上插入您的钱包并解锁它',
   login_prompt_msg1: '请在电脑上插入您的钱包并解锁它',
-  login_prompt_msg2: '正在初始化... 请稍后片刻 !!',
-  login_prompt_msg3: '正在同步... 它可能花费几分钟 !!',
+  login_prompt_msg2: '正在初始化... 请稍后片刻 ！！',
+  login_prompt_msg3: '正在同步... 它可能花费几分钟 ！！',
   login_prompt_msg4: '正在加载... 请稍后片刻',
 
   accounts_account: '账户 :',
