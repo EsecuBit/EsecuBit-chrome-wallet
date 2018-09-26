@@ -1,22 +1,29 @@
 <template>
-  <div id="app" style="height: 100%">
+  <div style="height: 100%">
     <div v-cloak style="height: 100%">
+      <!-- login page -->
       <div v-show="isShowLogin" style="height: 100%">
         <Login :status="loginStatus" :login-error-msg="loginErrorMsg"/>
       </div>
+
+      <!-- app page -->
       <div v-show="!isShowLogin">
+        <!-- header -->
         <div class="main-admin" :class="[customizeColor]">
           <div class="fly-header bg-black" v-bind:class="[heardColor]">
             <div class="layui-container">
               <a class="logo" href="#"> <img src="./common/imgs/logo.png" alt="Wallet Bitcion"></a>
-              <!-- 头部区域（可配合layui已有的水平导航） -->
+              <!-- header nav.menu -->
               <ul class="layui-nav fly-nav layui-hide-xs menu-switch">
                 <li class="layui-nav-item " :class="{'layui-this': index === pageIndex}" v-for="(item, index) in pageList" @click="switchPage(index)">
                   <a href="#"><i class="icon iconfont" :class="item.icon"></i>{{item.label}}</a>
                 </li>
               </ul>
+
             </div>
           </div>
+
+          <!-- breadcrumb and add accounts btn -->
           <div class="fly-panel fly-column">
             <div class="layui-container">
               <p style="height: 40px;line-height: 40px">
@@ -30,6 +37,8 @@
               </p>
             </div>
           </div>
+
+          <!-- main page -->
           <div class="layui-container page-content ">
             <div class="main-tab-content">
               <div class="main-tab-item" :class="{'layui-show': 0 === pageIndex}">
@@ -49,6 +58,8 @@
             </div>
           </div>
         </div>
+
+        <!-- add accounts Pop-up layer -->
         <div class="add-accounts-content" id="account-content">
           <div class="content-wrapper">
             <div class="form-content" v-show="isHasAccount">
@@ -79,6 +90,8 @@
             </div>
           </div>
         </div>
+
+        <!-- add accounts loading-->
         <div class="add-accounts-content" id="loading">
           <div class="loading-center">
             <div class="loading-wrapper">
@@ -87,6 +100,7 @@
             </div>
           </div>
         </div>
+
       </div>
     </div>
   </div>
@@ -100,6 +114,7 @@ import Setting from './components/index/Setting'
 import Accept from './components/index/Accept'
 import Store from './common/js/store'
 
+// Introducing layui plugin variables
 // eslint-disable-next-line
 const element = layui.element
 const $ = layui.jquery
@@ -145,12 +160,14 @@ export default {
     },
     pageIndex: {
       handler (newValue, oldValue) {
+        // Display add accounts button on the home page
         this.isAddAccounts = newValue === 0
       }
     }
   },
   computed: {
     pageList () {
+      // nav.menu label and icon
       return [
         {label: this.$t('message.app_accounts'), icon: 'icon-zhanghu1'},
         {label: this.$t('message.app_send'), icon: 'icon-msnui-cloud-upload'},
@@ -159,10 +176,12 @@ export default {
       ]
     },
     navTitle () {
+      // breadcrumb: get current page
       let pageTitle = [this.$t('message.app_accounts'), this.$t('message.app_send'), this.$t('message.app_accept'), this.$t('message.app_setting')]
       return pageTitle[this.pageIndex]
     },
     errorCodeMsg () {
+      // error code
       return {
         101: this.$t('message.error_noDevice'),
         102: this.$t('message.error_deviceComm'),
@@ -205,6 +224,7 @@ export default {
     this.init()
   },
   mounted () {
+    // Disable enter key
     document.onkeydown = function () {
       if (window.event && window.event.keyCode === 13) {
         window.event.returnValue = false
@@ -246,6 +266,7 @@ export default {
       this.isPreventSwitch = false
     },
     isLowVersion () {
+      // current chrome version < 45
       let currentVersion = this.getChromeVersion()
       if (currentVersion < 45) {
         layer.msg(this.$t('message.app_version_prompt'), {anim: 6, time: 100000})
@@ -298,9 +319,6 @@ export default {
     setEthUnit (...data) {
       this.currentUnitEth = data[0]
     },
-    changeLang () {
-      // console.log(this.$t('message.hello'))
-    },
     displayErrorCode (value) {
       layer.closeAll()
       let errorKey = String(value)
@@ -311,7 +329,9 @@ export default {
       }
     },
     listenLoginStatus () {
+      // Monitor wallet status
       this.esWallet.listenStatus((errorNum, status) => {
+        // some error occur
         if (errorNum !== 0) {
           this.loginErrorMsg = this.errorCodeMsg[String(errorNum)]
           this.loginStatus = 404
@@ -334,7 +354,6 @@ export default {
       })
     },
     onLoginFinish () {
-      console.log('同步完成')
       this.isShowLogin = false
       this.esWallet.getWalletInfo().then(value => {
         this.walletInfo = value
@@ -343,7 +362,6 @@ export default {
         this.displayErrorCode(value)
       })
       this.esWallet.getAccounts().then(value => {
-        console.log(value, '获取的账户')
         if (value) this.accounts = this.orderArr(value)
       }).catch(value => {
         console.warn(value)
@@ -354,7 +372,7 @@ export default {
     },
     addAccountContent () {
       let btnDisplay = [this.$t('message.app_submit_btn'), this.$t('message.app_cancel_btn')]
-      // 获取可用的币类型
+      // Get available currency types
       this.esWallet.availableNewAccountCoinTypes().then(value => {
         if (Array.isArray(value) && value.length > 0) {
           this.accountType = value
@@ -372,6 +390,7 @@ export default {
           btn: btnDisplay,
           content: $('#account-content'),
           yes (index) {
+            // open loading layer
             let loadingIndex = layer.open({
               type: 1,
               anim: 2,
@@ -381,8 +400,10 @@ export default {
               area: ['315px', '100px'],
               content: $('#loading')
             })
+            // add new account operation
             that.esWallet.newAccount(that.selected).then(value => {
               if (that.D.isBtc(that.selected)) that.addAccountTimes = that.addAccountTimes + 1
+              // close loading layer
               layer.close(loadingIndex)
               layer.close(index)
               layer.msg(that.$t('message.app_successful'), { icon: 1 })
@@ -403,6 +424,7 @@ export default {
       })
     },
     orderArr (targetArr) {
+      // Group accounts by coin type
       const arr = []
       const accountList = []
       for (let val of targetArr) {
@@ -441,6 +463,7 @@ export default {
 </style>
 
 <style lang="less">
+  /*Global style*/
   @blue: #2d3451;
   @darkRed1: #6d3028;
   @darkRed2: #B03A5B;
@@ -495,7 +518,7 @@ export default {
   .gray-skin {
     .header-skin(@gray);
   }
-  /*自定义皮肤样式*/
+  /*Custom skin style*/
   .gray-customize {
     .layui-form-radioed>i{
       color: @orange1;
@@ -722,7 +745,7 @@ export default {
   .display-log p{
     margin-bottom: 10px;
   }
-  /*crx日志*/
+  /*crx log */
   .clear-log{
     background-color: #1E9FFF;
     color: #F8F8F8;

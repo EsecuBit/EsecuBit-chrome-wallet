@@ -1,5 +1,6 @@
 <template>
   <div>
+    <!-- menu -->
     <div class="site-tree">
       <ul class="layui-tree ">
         <li><h2>{{$t('message.app_setting')}}</h2></li>
@@ -23,8 +24,11 @@
         </li>
       </ul>
     </div>
+
+    <!-- content -->
     <div class="site-content">
       <div class="tab-content-2">
+
         <div class="tab-item layui-show">
           <div class="site-text site-block">
             <form class="layui-form" lay-filter="form3">
@@ -36,7 +40,6 @@
                   </select>
                 </div>
               </div>
-              <!--删除了v-show="!isBitcoin"-->
               <div class="layui-form-item" >
                 <label class="layui-form-label">{{$t('message.setting_btc_units')}}</label>
                 <div class="layui-input-block" >
@@ -66,7 +69,8 @@
             </form>
           </div>
         </div>
-        <!--硬件信息-->
+
+        <!-- hardware information -->
         <div class="tab-item">
           <div class="table-item">
             <h3>{{$t('message.setting_version')}}</h3>
@@ -132,7 +136,8 @@
             </table>
           </div>
         </div>
-        <!--设置种子-->
+
+        <!-- Set seed -->
         <div class="tab-item" v-if="!isOfficial">
           <div class="site-text site-block">
             <form class="layui-form" lay-filter="form4">
@@ -166,7 +171,8 @@
             </form>
           </div>
         </div>
-        </div>
+
+      </div>
     </div>
   </div>
 </template>
@@ -297,14 +303,12 @@ export default {
       this.$nextTick(() => {
         form.render('radio', 'form3')
         form.on('radio(bitUnit)', data => {
-          // Store.save('bitUnit', data.value)
           Store.saveChromeStore('bitUnit', data.value)
           this.$emit('setBitUnit', data.value)
           Bus.$emit('setBitUnit', true)
         })
         form.render('radio', 'form3')
         form.on('radio(ethUnit)', data => {
-          // Store.save('ethUnit', data.value)
           Store.saveChromeStore('ethUnit', data.value)
           this.$emit('setEthUnit', data.value)
           Bus.$emit('setEthUnit', true)
@@ -312,7 +316,7 @@ export default {
       })
     },
     async init () {
-      // 初始化默认值
+      // Initialize defaults
       const getExchangeList = this.D.suppertedLegals()
       this.exchangeRate = this.editExchangeList(getExchangeList)
       if (localStorage) {
@@ -365,7 +369,6 @@ export default {
       form.on('select(exchange)', (data) => {
         this.selectedExchangeRate = data.value
         Store.saveChromeStore('exchange', data.value)
-        // Store.save('exchange', data.value)
         this.$emit('setExchangeRate', data.value)
       })
     },
@@ -373,7 +376,6 @@ export default {
       form.on('select(lang)', (data) => {
         this.$i18n.locale = data.value
         Store.saveChromeStore('lang', data.value)
-        // Store.save('lang', data.value)
         Bus.$emit('switchLang', true)
       })
     },
@@ -382,7 +384,6 @@ export default {
       this.$emit('settingColor', color)
     },
     switchTab () {
-      // 独立各tab操作
       $('.tab-title-2 a').click(function () {
         $('li.tab-title-2').removeClass('layui-this')
         $(this).parent('li').addClass('layui-this')
@@ -396,7 +397,6 @@ export default {
     },
     setSeed () {
       Store.saveChromeStore('seedValue', this.seedValue)
-      // Store.save('seedValue', this.seedValue)
       this.D.test.txSeed = this.seedValue
       this.D.test.txWalletId = this.seedValue
       layer.msg(this.$t('message.setting_setting_success'), { icon: 1 })

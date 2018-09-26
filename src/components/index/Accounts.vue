@@ -1,5 +1,6 @@
 <template>
 <div>
+  <!-- left sidebar -->
   <div class="site-tree">
     <ul class="layui-tree">
       <template v-for="(item, walletIndex) in wallet">
@@ -8,9 +9,12 @@
       </template>
     </ul>
   </div>
+
+  <!-- main content -->
   <div class="site-content">
     <div class="tab-content-1" id="tab-content-1">
       <div class="tab-item" v-for="(tablecount, index) in gridList"  :class="{'layui-show': index === currentIndex}">
+        <!-- account information -->
         <div class="account-information">
           <div class="account-msg">
             <div class="max-width-250">
@@ -40,23 +44,16 @@
             <i class="layui-icon layui-icon-refresh-2" :class="loadingClass"></i>
           </a>
         </div>
+
         <div class="site-title">
           <fieldset>
             <legend><a name="default">{{$t('message.accounts_recent_operations')}}</a></legend>
           </fieldset>
         </div>
-        <!--<div v-if="isShowAgainSendMsg">-->
-          <!--<div class="again-send-msg" v-show="isShowSendList[index]">-->
-            <!--<div class="again-send-content">-->
-              <!--<i class="layui-icon">&#xe702;</i>  您有由于交易费用过低导致无法交易的记录，您可点击该记录选择重发-->
-            <!--</div>-->
-            <!--<div class="close-msg">-->
-              <!--<i class="layui-icon" @click="closeAgainSendMsg">&#x1006;</i>-->
-            <!--</div>-->
-          <!--</div>-->
-        <!--</div>-->
+
         <div class="layui-row">
           <div class="layui-col-xs12 ">
+            <!-- operation log table -->
             <table class="layui-table" lay-skin="line"  v-if="tablecount.length > 0">
               <colgroup>
                 <col width="15%">
@@ -82,24 +79,30 @@
               </tr>
               </thead>
               <tbody v-for="(table, trIndex) in tablecount">
+              <!-- Determine whether to resend -->
                 <tr style="height: 39px;overflow-x: hidden" @mouseenter="reSendPrompt(table.canResend, table.shouldResend, index, trIndex)" @mouseleave="clearLayer" :class="'prompt_' + index + '_' + trIndex">
                   <td>{{getFormatTime(table.time)}}</td>
+
                   <td>
                     <span :class ="[table.direction === 'in'?green:red]" class="text-opacity">{{toOrForm(table.direction)}}</span>
                     <span style="cursor: text;">{{getTableAddress(table)}}</span>
                   </td>
+
                   <td :class="[table.value>0?green:red]" >
                     <span>{{tableBlockNumber(table)}}</span>
-                    <!--<span v-if="coinTypeList[index]" class="unit-display-2">{{currentDisplayUnit(table.coinType)}}</span>-->
                   </td>
+                  <!-- if current coin is etc, it will display transaction fee-->
                   <td v-if="isEtcType(newAccount[index])" >
                     <span>{{weiToGwei(newAccount[index].coinType, table.fee)}}</span>
                     <span v-if="coinTypeList[index]" class="unit-display-2">{{D.unit.eth.GWei}}</span>
                   </td>
+
+                  <!-- Draw a circular state diagram -->
                   <td style="padding: 0">
                     <canvas class="canvas" :class="['canvas-'+ index, table.canResend ? 'hoverClass' : '']" :data-canresend='table.canResend' :data-shouldresend="table.shouldResend"
                             width="100" height="30" :data-counts="table.confirmations" @click="sendTransaction(table,  table.canResend)"></canvas>
                   </td>
+
                   <td>
                     <a title="search" :href="table.link" target="_blank">
                       <i class="layui-icon">&#xe615;</i>
@@ -108,6 +111,8 @@
                 </tr>
               </tbody>
             </table>
+
+            <!-- Pagination -->
             <div class="page-wrapper">
               <div v-bind:id="grid_pager + index" class="page-content"></div>
               <div class="total-num-wrapper">
@@ -116,11 +121,13 @@
                 </div>
               </div>
             </div>
+
           </div>
         </div>
       </div>
     </div>
   </div>
+  <!-- edit account name layer -->
   <div class="edit-account-wrapper" id="edit-account">
     <p class="description">
       <i class="layui-icon" style="color: #dd4b39;">&#xe702;</i>&nbsp;
@@ -135,6 +142,7 @@
       </div>
     </form>
   </div>
+
 </div>
 </template>
 
@@ -190,12 +198,15 @@ export default {
   watch: {
     accountInfo: {
       handler (newValue, oldValue) {
+        // create coin type array
         let newCoinTypeList = []
         for (let item of newValue) {
           newCoinTypeList.push(item.coinType)
         }
         this.coinTypeList = newCoinTypeList
         this.newAccount = newValue
+
+        // get accounts' Trading Information and Pagination
         let newGridList = []
         let total = []
         let txInfoPromise = this.newAccount.map(item => item.getTxInfos(this.pageStartIndex, this.pageEndIndex))
@@ -206,6 +217,7 @@ export default {
           }
           this.gridList = newGridList
           this.totalNum = total
+
           this.$nextTick(() => {
             this.tableCanvas()
             for (let index of this.gridList.keys()) {
@@ -220,16 +232,19 @@ export default {
     },
     newAccount: {
       handler (newValue, oldValue) {
+        // group accounts
         this.setMenuList(newValue)
       }
     },
     currentIndex: {
       handler (newValue, oldValue) {
+        // Notify other page
         Bus.$emit('switchAccount', newValue)
       }
     },
     resetStatus: {
       handler (newValue, oldValue) {
+        // exit app
         if (newValue) {
           this.currentIndex = 0
           this.clearCanvas(false)
@@ -242,6 +257,7 @@ export default {
       }
     },
     gridList: {
+      // table data list
       handler (newValue, oldValue) {
         let newArray = []
         console.log(newValue)
@@ -259,9 +275,38 @@ export default {
     }
   },
   mounted () {
+    // Monitor for new transactions
     this.listenTXInfo()
   },
   methods: {
+    listenTXInfo () {
+      this.esWallet.listenTxInfo((error, txInfo) => {
+        if (this.errorCodeMsg[String(error)]) {
+          this.displayErrorCode(error)
+        }
+        let nowIndex = 10
+        if (this.newAccount.length === 0) return false
+        this.newAccount.forEach((item, index) => {
+          if (item.accountId === txInfo.accountId) nowIndex = index
+        })
+        // Refresh transaction history
+        let total = 0
+        this.clearCanvas(nowIndex)
+        // table Repagination
+        this.newAccount[nowIndex].getTxInfos(this.pageStartIndex, this.pageEndIndex).then(value => {
+          this.$set(this.gridList, nowIndex, value.txInfos)
+          total = value.total
+          this.$set(this.totalNum, nowIndex, value.total)
+          this.$nextTick(() => {
+            this.tableCanvas(nowIndex)
+            this.pageList(nowIndex, total)
+          })
+        }).catch(value => {
+          console.warn(value)
+          this.displayErrorCode(value)
+        })
+      })
+    },
     reSendPrompt (canResend, shouldResend, index, trIndex) {
       let msg = shouldResend ? this.$t('message.accounts_resend_prompt') : this.$t('message.accounts_resend_prompt_1')
       if (canResend) {
@@ -289,34 +334,8 @@ export default {
         layer.msg(errorKey, {icon: 2, anim: 6})
       }
     },
-    listenTXInfo () {
-      this.esWallet.listenTxInfo((error, txInfo) => {
-        if (this.errorCodeMsg[String(error)]) {
-          this.displayErrorCode(error)
-        }
-        let nowIndex = 10
-        if (this.newAccount.length === 0) return false
-        this.newAccount.forEach((item, index) => {
-          if (item.accountId === txInfo.accountId) nowIndex = index
-        })
-        // 刷新交易记录
-        let total = 0
-        this.clearCanvas(nowIndex)
-        this.newAccount[nowIndex].getTxInfos(this.pageStartIndex, this.pageEndIndex).then(value => {
-          this.$set(this.gridList, nowIndex, value.txInfos)
-          total = value.total
-          this.$set(this.totalNum, nowIndex, value.total)
-          this.$nextTick(() => {
-            this.tableCanvas(nowIndex)
-            this.pageList(nowIndex, total)
-          })
-        }).catch(value => {
-          console.warn(value)
-          this.displayErrorCode(value)
-        })
-      })
-    },
     toTwoPoint (num) {
+      // Keep two decimals
       return Math.round(num * 100) / 100
     },
     toOrForm (value) {
@@ -357,10 +376,10 @@ export default {
       let canvasClass = index ? ('canvas-' + index) : 'canvas'
       let canvasList = document.getElementsByClassName(canvasClass)
       for (let canvas of canvasList) {
-        let context = canvas.getContext('2d') // 获取画图环境，指明为2d
-        let centerX = canvas.width / 2 // Canvas中心点x轴坐标
-        let centerY = canvas.height / 2 // Canvas中心点y轴坐标
-        let rad = Math.PI * 2 / 100 // 将360度分成100份，那么每一份就是rad度
+        let context = canvas.getContext('2d') // Get the drawing environment, indicated as 2d
+        let centerX = canvas.width / 2 // Canvas center point x-axis coordinates
+        let centerY = canvas.height / 2 // Canvas center point y-axis coordinates
+        let rad = Math.PI * 2 / 100 // Divide 360 degrees into 100 copies, then each one is radi
         let data = parseInt(canvas.getAttribute('data-counts'))
         let shouldResend = canvas.getAttribute('data-shouldresend')
         if (shouldResend === 'true') {
@@ -376,20 +395,20 @@ export default {
           } else {
             let n = (data === 0 && 0) || (data === 1 && 1) || (data === 2 && 2) || (data === 3 && 3) || (data === 4 && 4) || (data === 5 && 5) || (data >= 6 && 6)
             let percentDisplay = n * 100 / 6
-            // 绘制灰色外圈
+            // Draw a gray outer ring
             context.save()
             context.beginPath()
-            context.lineWidth = 5// 设置线宽
+            context.lineWidth = 5// Set line width
             context.strokeStyle = '#ddd'
             context.arc(centerX, centerY, 10, 0, Math.PI * 2, false)
             context.stroke()
-            // 绘制5像素宽的运动外圈
+            // Draw a 5-pixel wide moving outer ring
             context.save()
-            context.strokeStyle = '#009688' // 设置描边样式
-            context.lineWidth = 5// 设置线宽
-            context.beginPath()// 路径开始
+            context.strokeStyle = '#009688' // Set the stroke style
+            context.lineWidth = 5// Set line width
+            context.beginPath()// Path begins
             context.arc(centerX, centerY, 10, -Math.PI / 2, -Math.PI / 2 + percentDisplay * rad, false) // 用于绘制圆弧context.arc(x坐标，y坐标，半径，起始角度，终止角度，顺时针/逆时针)
-            context.stroke() // 绘制
+            context.stroke() // draw
           }
         }
       }
@@ -398,13 +417,14 @@ export default {
       let canvasClass = index ? ('canvas-' + index) : 'canvas'
       let canvasList = document.getElementsByClassName(canvasClass)
       for (let canvas of canvasList) {
-        let context = canvas.getContext('2d') // 获取画图环境，指明为2d
+        let context = canvas.getContext('2d')
         let centerX = canvas.width
         let centerY = canvas.height
         context.clearRect(0, 0, centerX, centerY)
       }
     },
     refresh () {
+      // refresh Transaction Record
       this.loadingClass['layui-anim'] = true
       this.loadingClass['layui-anim-rotate'] = true
       this.loadingClass['layui-anim-loop'] = true
@@ -449,7 +469,7 @@ export default {
           }
         }
       }
-      // 拼接成理想数据类型
+      // Stitching into ideal data types
       this.wallet = accountList
     },
     editAccount () {
@@ -463,6 +483,7 @@ export default {
         btn: [that.$t('message.accounts_submit_btn'), that.$t('message.accounts_cancel_btn')],
         content: $('#edit-account'),
         yes (index) {
+          // update account name
           that.submitEven()
         }
       })
@@ -508,16 +529,19 @@ export default {
           if (!first) {
             limit = obj.limit
             page = obj.curr
+            // clear canvas
             that.clearCanvas(i)
+            // update data
             that.changeTableData(i, limit, page)
           }
         }
       })
     },
     changeTableData (id, limit, page) {
-      // 分页参数
+      // Paging parameter
       const startItem = limit * (page - 1)
       const endItem = limit * (page - 1) + limit
+      // Pagination
       this.newAccount[id].getTxInfos(startItem, endItem).then(data => {
         this.$set(this.gridList, id, data.txInfos)
         this.$nextTick(() => {
@@ -564,6 +588,7 @@ export default {
       this.isShowAgainSendMsg = false
     },
     sendTransaction (table, canResend) {
+      // jump to send page
       if (canResend) {
         this.$emit('switchTargetPage', 1)
         Bus.$emit('fillSendData', table)
@@ -705,7 +730,7 @@ export default {
   .red-font {
     color: #e74c3c;
   }
-  /*编辑账户名*/
+  /*Edit account name*/
   .edit-account-wrapper{
     display: none;
     margin: 30px 12px 10px

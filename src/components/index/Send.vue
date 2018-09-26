@@ -1,11 +1,16 @@
 <template>
   <div>
+    <!-- prompt message -->
     <blockquote class="site-text layui-elem-quote" style="margin-top: 20px">
       <i class="layui-icon" style="vertical-align: middle;">&#xe645;</i> {{$t('message.send_prompt_msg')}}
     </blockquote>
+
+    <!-- coin type -->
     <div class="site-title" style="margin-top: 20px">
       <fieldset><legend><a name="use">{{sendCoinTypeMsg}}</a></legend></fieldset>
     </div>
+
+    <!-- warning message -->
     <div class="again-send-msg" v-if="isReSendStatus">
       <div class="again-send-content">
         <i class="layui-icon">&#xe702;</i> {{$t('message.send_resend_prompt')}}
@@ -22,13 +27,13 @@
         <i class="layui-icon" @click="clearAllowAmountMsg">&#x1006;</i>
       </div>
     </div>
+
+    <!-- transaction form -->
     <div class="site-text site-block">
       <form class="layui-form customize-form" action="" lay-filter="form1" autocomplete="off">
+        <!-- select accounts -->
         <div class="layui-form-item" style="position: relative">
           <label class="layui-form-label account-label" >{{$t('message.send_current_account')}}</label>
-          <!--<div class="layui-input-block account-info " >-->
-            <!--<div class="account-msg">{{currentAccount.label}}</div>-->
-          <!--</div>-->
           <div class="layui-input-block input-width account-name" style="margin-left: 220px">
             <div style="display: inline-block;width: 250px">
               <select name="account" lay-filter="account"  style="width: 250px" v-model="currentSelectedAccountIndex" >
@@ -41,29 +46,29 @@
             <div class="account-balance">{{getBalance}}</div>
           </div>
         </div>
+
+        <!-- amount input -->
         <div class="layui-form-item" style="margin-bottom: 5px">
           <label class="layui-form-label" style="padding: 17px 15px">{{$t('message.send_amount')}}</label>
           <div class="layui-input-block input-width" style="position: relative;height: 55px">
             <div style="width: 300px">
               <div v-if="coinType" class="unit-display" >{{currentDisplayUnit(currentAccount.coinType)}}</div>
               <input type="number" v-model="amountValue" name="money" id="money" lay-verify="isEmpty" v-if="coinType"
-                     :placeholder="$t('message.send_amount')"
-                     autocomplete="off" class="layui-input amount-input">
+                     :placeholder="$t('message.send_amount')" autocomplete="off" class="layui-input amount-input">
             </div>
             <button class="layui-btn layui-btn-radius layui-btn-sm max-btn" type="button" @click="maxAmount">MAX</button>
             <div class="usd-amount" v-if="coinType && currentUnit && currentExchangeRate && isDisplayExchange">{{toExchangeText}}</div>
           </div>
         </div>
-        <!--<div class="switch-money">-->
-          <!--<label class="blank-label"></label>-->
-          <!--<div ><span class="usd-amount" v-if="coinType && currentUnit && currentExchangeRate">{{toExchangeText}}</span><em class="unit"></em></div>-->
-        <!--</div>-->
+
+        <!-- address input -->
         <div class="money-address">
           <div class="layui-form-item">
             <label class="layui-form-label">{{$t('message.send_address')}}</label>
             <div class="layui-input-block input-width" style="margin-left: 100px">
               <input type="text" v-model="addressValue" name="address"  lay-verify="isEmpty"  :placeholder="$t('message.send_address')"
                      class="layui-input" style="width: 360px;text-align: right;" id="transactionAddress">
+              <!-- icon -->
               <span v-show="isDisplayIcon" style="margin-left: 10px">
                 <a v-show="isAddressError" style="color: #e74c3c; vertical-align: sub" @click="clearAddress">
                   <i class="layui-icon">&#x1007;</i>
@@ -75,25 +80,12 @@
                   <i class="layui-icon">&#xe702;</i>
                 </a>
               </span>
-            </div>
-            <!--<button class="layui-btn layui-btn-radius layui-btn-primary" type="button" @click="addAddressDom">Add</button>-->
-          </div>
-          <div class="layui-form-item" v-for="item in addressList">
-            <label class="layui-form-label">{{item}}</label>
-            <div class="layui-input-inline input-width">
-              <input type="text" value="" name="address"  placeholder="Address" autocomplete="off" class="layui-input">
+
             </div>
           </div>
         </div>
-        <!--<div class="layui-form-item">-->
-          <!--<label class="layui-form-label">Choose an Account</label>-->
-          <!--<div class="layui-input-inline input-width">-->
-            <!--<select name="account" lay-verify="isEmpty">-->
-              <!--<option disabled value="">请选择</option>-->
-              <!--<option v-for="account in accountList" v-bind:value="account">{{account}}</option>-->
-            <!--</select>-->
-          <!--</div>-->
-        <!--</div>-->
+
+        <!-- btc input -->
         <div class="layui-form-item" v-if="switchFee && isBtc">
           <label class="layui-form-label" >{{$t('message.send_transaction_fees')}}</label>
           <div class="layui-input-block input-width" style="position: relative;">
@@ -104,6 +96,8 @@
             <button class="layui-btn layui-btn-sm layui-btn-radius transFee-btn" type="button" @click="switchSelectButton">{{$t('message.send_select_fee')}}</button>
           </div>
         </div>
+
+        <!-- select fee -->
         <div class="layui-form-item" v-show="!switchFee">
           <label class="layui-form-label">{{isBtc?$t('message.send_transaction_fees'): 'Gas price'}}</label>
           <div class="layui-input-block input-width" style="margin-left: 220px">
@@ -112,11 +106,11 @@
               <option v-for="(fee, index) in feeList"  :value="index" :selected="selectedIndex(index)">{{fee.label}}</option>
               </select>
             </div>
-            <button class="layui-btn layui-btn-sm layui-btn-radius "
-                    style="margin-left: 5px" type="button" @click="switchCustomButton">{{$t('message.send_custom_fee')}}</button>
+            <button class="layui-btn layui-btn-sm layui-btn-radius " style="margin-left: 5px" type="button" @click="switchCustomButton">{{$t('message.send_custom_fee')}}</button>
           </div>
         </div>
 
+        <!-- etc customize input -->
         <div class="layui-form-item" v-show="switchFee && !isBtc">
           <div style="display: inline-block">
             <label class="layui-form-label" >Gas Limit</label>
@@ -137,6 +131,8 @@
             </div>
           </div>
         </div>
+
+        <!-- btc customize input -->
         <div class="layui-form-item" v-show="isShowData && !isBtc">
           <label class="layui-form-label">Data</label>
           <div class="layui-input-block input-width" style="margin-left: 100px">
@@ -150,11 +146,14 @@
           </div>
         </div>
 
+        <!-- etc data -->
         <div class="add-data-wrapper" v-show="!isShowData && !isBtc">
           <a class="add-data" @click="switchData">
             <i class="layui-icon">&#xe654;</i> {{$t('message.send_advance')}}
           </a>
         </div>
+
+        <!-- button -->
         <div class="layui-form-item" style="border:none">
           <button class="layui-btn" lay-submit type="button" @click="submitSendData">{{$t('message.send_submit_btn')}}</button>
           <button type="button" class="layui-btn layui-btn-primary" @click="clearFormData" style="background-color: #fff">{{$t('message.send_reset_btn')}}</button>
@@ -174,16 +173,15 @@ export default {
   props: ['accountInfo', 'currentUnit', 'currentUnitEth', 'currentExchangeRate', 'resetStatus', 'errorCodeMsg', 'pageIndex'],
   data () {
     return {
-      addressList: [],
       count: 2,
       unit: 'BTC',
       amountValue: null,
       addressValue: '',
       selected: null,
       customFees: 0,
-      accountList: ['account 1', 'account 2'],
+      accountList: [],
       feeList: [
-        {label: 'slow（10 usd）', value: 10}
+        {}
       ],
       switchFee: false,
       currentAccount: {label: ''},
@@ -278,25 +276,23 @@ export default {
     },
     amountValue: {
       handler (newValue, oldValue) {
+        // not support scientific notation
         if (/[eE]/.test(newValue)) {
           this.amountValue = ''
           layer.msg(this.$t('message.send_scientific_count'), { icon: 2, anim: 6 })
           return false
         }
         if (newValue != null) this.isDisplayExchange = true
+        // input cannot < 0
         if (Number(newValue) < 0) {
           this.amountValue = ''
           layer.msg(this.$t('message.send_positive_number'), { icon: 2, anim: 6 })
           return false
         }
         if (this.D.isBtc(this.coinType)) {
-          if (!this.isClearFormData && this.customFees !== '') {
-            this.calculateTotal()
-          }
+          if (!this.isClearFormData && this.customFees !== '') this.calculateTotal()
         } else {
-          if (!this.isClearFormData && this.gasLimit !== '' && this.gasPrice !== '') {
-            this.calculateTotal()
-          }
+          if (!this.isClearFormData && this.gasLimit !== '' && this.gasPrice !== '') this.calculateTotal()
         }
       }
     },
@@ -307,6 +303,7 @@ export default {
     },
     customFees: {
       handler (newValue, oldValue) {
+        // not support scientific notation
         if (/[eE]/.test(newValue)) {
           this.customFees = null
           layer.msg(this.$t('message.send_scientific_count'), { icon: 2, anim: 6 })
@@ -315,7 +312,7 @@ export default {
         if (Number(newValue) < 0) {
           this.customFees = null
           layer.msg(this.$t('message.send_positive_number'), { icon: 2, anim: 6 })
-          return
+          return false
         }
         if (this.switchFee && (!this.isClearFormData) && newValue !== null && newValue !== '') this.calculateTotal()
         if (!newValue) this.isDisplayDetails = false
@@ -324,6 +321,7 @@ export default {
     gasLimit: {
       handler (newValue, oldValue) {
         if (!newValue) return
+        // not support scientific notation
         if (/[eE]/.test(newValue)) {
           this.gasLimit = null
           layer.msg(this.$t('message.send_scientific_count'), { icon: 2, anim: 6 })
@@ -332,8 +330,9 @@ export default {
         if (Number(newValue) < 0) {
           this.gasLimit = null
           layer.msg(this.$t('message.send_positive_number'), { icon: 2, anim: 6 })
-          return
+          return false
         }
+        // Does not support decimal points
         if (/\./.test(newValue)) {
           this.gasLimit = null
           layer.msg(this.$t('message.send_not_decimal'), { icon: 2, anim: 6 })
@@ -345,6 +344,7 @@ export default {
     },
     gasPrice: {
       handler (newValue, oldValue) {
+        // not support scientific notation
         if (/[eE]/.test(newValue)) {
           this.gasPrice = null
           layer.msg(this.$t('message.send_scientific_count'), { icon: 2, anim: 6 })
@@ -361,6 +361,7 @@ export default {
     },
     etcData: {
       handler (newValue, oldValue) {
+        // hex string
         let dataLength = Math.ceil(newValue.length / 2)
         this.gasLimit = 21000 + dataLength * 68
       }
@@ -394,10 +395,13 @@ export default {
   },
   mounted () {
     this.verifyForm()
+    // Automatically switch accounts
     Bus.$on('switchAccount', (index) => {
       this.homeAccountIndex = index
       this.switchCurrentAccount(index)
     })
+
+    // Autofill form
     Bus.$on('fillSendData', (table) => {
       console.log(table)
       this.isReSendStatus = true
@@ -411,12 +415,16 @@ export default {
         this.oldTxId = table.txId
       })
     })
+
+    // Empty the form when setting the unit
     Bus.$on('setBitUnit', () => {
       this.D.isBtc(this.coinType) && this.clearFormData()
     })
     Bus.$on('setEthUnit', () => {
       !this.D.isBtc(this.coinType) && this.clearFormData()
     })
+
+    // Re-render the form when setting the language
     Bus.$on('switchLang', () => { this.renderFeeForm(this.currentAccount) })
     Bus.$on('rename', () => { this.setMenuList(this.accountInfo) })
   },
@@ -444,7 +452,6 @@ export default {
           }
         }
       }
-      // 拼接成理想数据类型
       this.groupingAccounts = accountList
       this.$nextTick(() => {
         this.renderAccountForm()
@@ -693,7 +700,7 @@ export default {
       return formData
     },
     submitSendData () {
-      // 验证表单
+      // Verification form
       if (!this.switchFee) {
         if (!(this.selected && this.amountValue && this.addressValue)) return false
       } else {
@@ -723,9 +730,9 @@ export default {
             console.log(value, 'buildTx')
             return this.currentAccount.sendTx(value)
           }).then(value => {
-            // 清空重发状态
+            // Empty retransmission status
             if (this.oldTxId) this.clearResendStatus()
-            // 格式化表格
+            // Formatted form
             this.isPreventClick = false
             this.$emit('allowPageSwitch', true)
             this.clearFormData()
@@ -762,11 +769,6 @@ export default {
           console.warn(value)
           this.displayErrorCode(value)
         })
-    },
-    addAddressDom () {
-      let name = 'Bitcoin Address ' + this.count
-      this.addressList.push(name)
-      this.count++
     },
     formatNum (num) {
       return parseFloat(num).toLocaleString()

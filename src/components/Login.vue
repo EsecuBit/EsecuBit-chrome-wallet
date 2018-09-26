@@ -23,7 +23,7 @@
       </div>
     </div>
     <div class="contact-us">
-      <a href="http://www.esecubit.com/" target="_blank">{{$t('message.login_contact_us')}}</a>
+      <a href="https://www.esecubit.com/" target="_blank">{{$t('message.login_contact_us')}}</a>
     </div>
   </div>
 </template>

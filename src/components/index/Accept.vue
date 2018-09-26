@@ -1,30 +1,42 @@
 <template>
   <div>
+    <!-- prompt msg -->
     <blockquote class="site-text layui-elem-quote" style="margin-top: 20px">
       <i class="layui-icon" style="vertical-align: middle;font-size: 20px">&#xe645;</i>   {{$t('message.accept_prompt_msg')}}
     </blockquote>
+
+    <!-- coin type-->
     <div class="site-title" style="margin-top: 20px">
       <fieldset><legend><a name="use">{{receiveCoinTypeMsg}}</a></legend></fieldset>
     </div>
+
+    <!-- Receive form -->
     <div class="site-text site-block">
       <form class="layui-form"  lay-filter="form2">
+        <!-- current account name -->
         <div class="layui-form-item" style="margin-bottom: 0">
           <label class="layui-form-label account-label" >{{$t('message.accept_current_account')}}</label>
           <div class="layui-input-block account-info">
             <div class="account-msg" v-if="currentAccount.label">{{currentAccount.label}}</div>
           </div>
         </div>
+
+        <!-- qrcode area -->
         <div class="layui-form-item">
           <div class="qrcode" v-show="!showAddress" style="line-height: 210px;text-align: center;border: 1px solid #eee">
             <i class="icon iconfont icon-erweima" style="font-size: 50px"></i>
           </div>
           <div id="code" class="qrcode" v-show="showAddress"></div>
         </div>
+
+        <!-- set address on device-->
         <div class="layui-form-item" style="margin-bottom: 5px" v-show="isShowSetAddress">
           <div class="layui-input-block account-info">
-            <input type="checkbox" name="setAddressStatus" lay-filter="setAddressStatus" :title="seAddressMsg" lay-skin="primary" :checked="isSetAddress">
+            <input type="checkbox" name="setAddressStatus" lay-filter="setAddressStatus" :title="setAddressMsg" lay-skin="primary" :checked="isSetAddress">
           </div>
         </div>
+
+        <!-- generate qrcode btn -->
         <div class="layui-form-item" v-show="showButton" >
           <div class="layui-input-block account-info">
             <a href="#" class="layui-btn layui-btn-radius address-btn" @click="generateAddress">{{$t('message.accept_generate_address')}}
@@ -32,6 +44,8 @@
             </a>
           </div>
         </div>
+
+        <!-- address text -->
         <div class="layui-form-item" v-show="showAddress" style="margin-bottom: 0">
           <label class="layui-form-label account-label" >{{$t('message.accept_qrcode_msg')}}</label>
           <div class="layui-input-block account-info">
@@ -41,6 +55,7 @@
             </a>
           </div>
         </div>
+        <!-- tips -->
         <div class="layui-form-item">
           <div class="layui-form-label tips">{{$t('message.accept_tips')}}</div>
           <div class="layui-input-block address-container" v-show="isInitDisplay">
@@ -89,7 +104,7 @@ export default {
       let coinTypeName = this.D.isBtc(this.coinType) ? 'Bitcoin' : 'Ether'
       return this.$t('message.accept_accept_msg') + ' ' + coinTypeName
     },
-    seAddressMsg () {
+    setAddressMsg () {
       return this.$t('message.accept_set_address')
     }
   },
@@ -123,7 +138,7 @@ export default {
         this.isShowSetAddress = this.D.isBtc(newValue)
       }
     },
-    seAddressMsg: {
+    setAddressMsg: {
       handler (newValue, oldValue) {
         setTimeout(() => {
           form.render('checkbox', 'form2')
@@ -251,7 +266,7 @@ export default {
     margin-left: 190px;
     overflow-x: hidden;
   }
-  /*自定义的qrcode*/
+  /*Custom qrcode*/
   .qrcode{
     display: block;
     width: 210px;
