@@ -394,7 +394,7 @@ export default {
       this.seedValue = this.D.test.generateSeed()
     },
     async setSeed () {
-      await this.esWallet.setTextSeed(this.seedValue)
+      await this.esWallet.setTestSeed(this.seedValue)
       layer.msg(this.$t('message.setting_setting_success'), { icon: 1 })
     }
   }
