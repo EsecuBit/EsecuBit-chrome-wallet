@@ -221,6 +221,7 @@ export default {
   watch: {
     accountInfo: {
       handler (newValue, oldValue) {
+        this.getCurrentSeed()
         this.accountOrder = newValue
         this.currentAccount = this.accountOrder[0]
       }
@@ -315,11 +316,13 @@ export default {
         })
       })
     },
+    async getCurrentSeed () {
+      this.seedValue = await this.esWallet.getTestSeed()
+    },
     async init () {
       // Initialize defaults
       const getExchangeList = this.D.suppertedLegals()
       this.exchangeRate = this.editExchangeList(getExchangeList)
-      this.seedValue = await this.esWallet.getTestSeed()
       if (localStorage) {
         this.initLang = Store.fetch('lang') ? Store.fetch('lang') : navigator.language
         this.unitBitChecked = Store.fetch('bitUnit') ? Store.fetch('bitUnit') : this.D.unit.btc.BTC
