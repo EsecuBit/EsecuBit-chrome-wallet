@@ -319,6 +319,7 @@ export default {
       // Initialize defaults
       const getExchangeList = this.D.suppertedLegals()
       this.exchangeRate = this.editExchangeList(getExchangeList)
+      this.seedValue = await this.esWallet.getTestSeed()
       if (localStorage) {
         this.initLang = Store.fetch('lang') ? Store.fetch('lang') : navigator.language
         this.unitBitChecked = Store.fetch('bitUnit') ? Store.fetch('bitUnit') : this.D.unit.btc.BTC
@@ -326,20 +327,17 @@ export default {
         this.selectedExchangeRate = Store.fetch('exchange') ? Store.fetch('exchange') : this.D.unit.legal.USD
         this.deviceChecked = Store.fetch('device') ? Store.fetch('device') : 'soft'
         this.netChecked = Store.fetch('net') ? Store.fetch('net') : 'test'
-        if (Store.fetch('seedValue')) this.seedValue = Store.fetch('seedValue')
       } else {
         const lang = await Store.setPromise('lang')
         const bitUnit = await Store.setPromise('bitUnit')
         const ethUnit = await Store.setPromise('ethUnit')
         const exchange = await Store.setPromise('exchange')
-        const seedValue = await Store.setPromise('seedValue')
         const device = await Store.setPromise('device')
         const net = await Store.setPromise('net')
         this.initLang = lang['lang'] ? lang['lang'] : navigator.language
         this.unitBitChecked = bitUnit['bitUnit'] ? bitUnit['bitUnit'] : this.D.unit.btc.BTC
         this.unitEthChecked = ethUnit['ethUnit'] ? ethUnit['ethUnit'] : this.D.unit.eth.ETH
         this.selectedExchangeRate = exchange['exchange'] ? exchange['exchange'] : this.D.unit.legal.USD
-        this.seedValue = seedValue['seedValue'] ? seedValue['seedValue'] : ''
         this.deviceChecked = device['device'] ? device['device'] : 'soft'
         this.netChecked = net['net'] ? net['net'] : 'test'
         this.currentNet = net['net'] ? net['net'] : 'test'
@@ -395,10 +393,8 @@ export default {
     randomGenerate () {
       this.seedValue = this.D.test.generateSeed()
     },
-    setSeed () {
-      Store.saveChromeStore('seedValue', this.seedValue)
-      this.D.test.txSeed = this.seedValue
-      this.D.test.txWalletId = this.seedValue
+    async setSeed () {
+      await this.esWallet.setTextSeed(this.seedValue)
       layer.msg(this.$t('message.setting_setting_success'), { icon: 1 })
     }
   }
