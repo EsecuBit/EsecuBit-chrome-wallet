@@ -69,14 +69,6 @@ npm run build
 
 # Screenshot
 
-### init page
-
-<img src="https://github.com/EsecuBit/EsecuBit-chrome-wallet/blob/master/screenshots/init.bmp" width="600" height="350"/>
-
-### sync page
-
-<img src="https://github.com/EsecuBit/EsecuBit-chrome-wallet/blob/master/screenshots/sync.bmp" width="600" height="350"/>
-
 ### accounts page
 
 <img src="https://github.com/EsecuBit/EsecuBit-chrome-wallet/blob/master/screenshots/accounts.bmp" width="600" height="350"/>
