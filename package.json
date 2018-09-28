@@ -1,9 +1,9 @@
 {
-  "name": "wallet2",
+  "name": "Esecubit wallet",
   "version": "3.0.0",
-  "description": "A Vue.js project",
-  "author": "zhengli",
-  "private": true,
+  "description": "A secure account management tool",
+  "author": "EsecuBit",
+  "license": "LGPLv3",
   "scripts": {
     "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
     "start": "npm run dev",
