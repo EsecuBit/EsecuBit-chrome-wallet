@@ -1,16 +1,11 @@
-# Esecubit wallet
+# EsecuBit wallet
 
 # Introduction
 
-This project is used to manage your Bitcoin and Ether Wallet, It needs to work with hardware--Esecubit wallet.But this system also allows you to use it without hardware for demonstration purposes.
+This is the source code of the EsecuBit wallet chrome application, this application requires a EsecuBit hardware wallet and can be used for managing your crytocurrencies. You can use the application to create accounts, receive and send crytocurrencies with a EsecuBit hardware wallet.
 
-On the Settings page, you configure whether to use hardware and switch networks in the initialization options based on your usage.
+You can also  build the application package yourself to use it without hardware for demonstration purposes.
 
-You can trade Bitcoin and Ethereum on the Send and Accept page and view recent transaction information on the Home page.
-
-### Choose your usage scenario
-
-<img src="https://github.com/EsecuBit/EsecuBit-chrome-wallet/blob/master/screenshots/init-setting.png" width="600" height="350"/>
 
 
 ## Main technology
@@ -74,29 +69,21 @@ npm run build
 
 # Screenshot
 
-### init page
-
-<img src="https://github.com/EsecuBit/EsecuBit-chrome-wallet/blob/master/screenshots/init.png" width="600" height="350"/>
-
-### sync page
-
-<img src="https://github.com/EsecuBit/EsecuBit-chrome-wallet/blob/master/screenshots/sync.png" width="600" height="350"/>
-
 ### accounts page
 
-<img src="https://github.com/EsecuBit/EsecuBit-chrome-wallet/blob/master/screenshots/accounts.png" width="600" height="350"/>
+<img src="https://github.com/EsecuBit/EsecuBit-chrome-wallet/blob/master/screenshots/accounts.bmp" width="600" height="350"/>
 
 ### send page
 
-<img src="https://github.com/EsecuBit/EsecuBit-chrome-wallet/blob/master/screenshots/send.png" width="600" height="350"/>
+<img src="https://github.com/EsecuBit/EsecuBit-chrome-wallet/blob/master/screenshots/send.bmp" width="600" height="350"/>
 
 ### receive page
 
-<img src="https://github.com/EsecuBit/EsecuBit-chrome-wallet/blob/master/screenshots/receive.png" width="600" height="350"/>
+<img src="https://github.com/EsecuBit/EsecuBit-chrome-wallet/blob/master/screenshots/receive.bmp" width="600" height="350"/>
 
 ### setting page
 
-<img src="https://github.com/EsecuBit/EsecuBit-chrome-wallet/blob/master/screenshots/setting.png" width="600" height="350"/>
+<img src="https://github.com/EsecuBit/EsecuBit-chrome-wallet/blob/master/screenshots/setting.bmp" width="600" height="350"/>
 
 
 # App download Link
