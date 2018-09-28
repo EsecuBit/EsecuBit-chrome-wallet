@@ -71,19 +71,19 @@ npm run build
 
 ### accounts page
 
-<img src="https://github.com/EsecuBit/EsecuBit-chrome-wallet/blob/master/screenshots/accounts.bmp" width="600" height="350"/>
+<img src="https://github.com/EsecuBit/EsecuBit-chrome-wallet/blob/master/screenshots/accounts.png" width="600" height="350"/>
 
 ### send page
 
-<img src="https://github.com/EsecuBit/EsecuBit-chrome-wallet/blob/master/screenshots/send.bmp" width="600" height="350"/>
+<img src="https://github.com/EsecuBit/EsecuBit-chrome-wallet/blob/master/screenshots/send.png" width="600" height="350"/>
 
 ### receive page
 
-<img src="https://github.com/EsecuBit/EsecuBit-chrome-wallet/blob/master/screenshots/receive.bmp" width="600" height="350"/>
+<img src="https://github.com/EsecuBit/EsecuBit-chrome-wallet/blob/master/screenshots/receive.png" width="600" height="350"/>
 
 ### setting page
 
-<img src="https://github.com/EsecuBit/EsecuBit-chrome-wallet/blob/master/screenshots/setting.bmp" width="600" height="350"/>
+<img src="https://github.com/EsecuBit/EsecuBit-chrome-wallet/blob/master/screenshots/setting.png" width="600" height="350"/>
 
 
 # App download Link
