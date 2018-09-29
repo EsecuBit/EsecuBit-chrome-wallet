@@ -29,12 +29,12 @@ const webpackConfig = merge(baseWebpackConfig, {
   },
   resolve: {
     alias: {
-      'chrome-excelsecu-wallet': 'chrome-excelsecu-wallet/dist/eswallet'
+      'esecubit-wallet-sdk': 'esecubit-wallet-sdk/dist/eswallet'
     }
   },
   plugins: [
     new webpack.ProvidePlugin({
-      'chrome-excelsecu-wallet': 'chrome-excelsecu-wallet'
+      'esecubit-wallet-sdk': 'esecubit-wallet-sdk'
     }),
     // http://vuejs.github.io/vue-loader/en/workflow/production.html
     new webpack.DefinePlugin({

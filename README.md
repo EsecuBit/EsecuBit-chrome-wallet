@@ -14,7 +14,6 @@ vue2 + layui + webpack + ES6/7 + less + flex
 
 ## Development
 
-Tips:This project used some properties such as ES6/7, so node 6.0.0+ is required.
 
 ```
 git clone https://github.com/EsecuBit/EsecuBit-chrome-wallet.git

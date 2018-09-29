@@ -4,7 +4,7 @@ import Vue from 'vue'
 import App from './App'
 import Store from './common/js/store'
 import VueI18n from 'vue-i18n'
-import {D, EsWallet} from 'chrome-excelsecu-wallet'
+import {D, EsWallet} from 'esecubit-wallet-sdk'
 
 Store.init().then(result => {
   Vue.prototype.esWallet = new EsWallet()

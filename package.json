@@ -1,5 +1,5 @@
 {
-  "name": "EsecubitWallet",
+  "name": "EsecubitChromeWallet",
   "version": "3.0.0",
   "description": "A secure account management tool",
   "author": "EsecuBit",
@@ -12,8 +12,8 @@
     "test": "node build/test.js"
   },
   "dependencies": {
-    "chrome-excelsecu-wallet": "git+http://gogs.sickworm.com/sickworm/chrome-excelsecu-wallet.git",
     "clipboard": "^2.0.1",
+    "esecubit-wallet-sdk": "git+https://github.com/EsecuBit/EsecuBit-wallet-sdk.git",
     "fs-promise": "^2.0.3",
     "jquery": "^3.3.1",
     "node-gyp": "^3.7.0",

@@ -1,4 +1,4 @@
-import {D} from 'chrome-excelsecu-wallet'
+import {D, Provider} from 'esecubit-wallet-sdk'
 export default {
   isOfficial: false,
   printLog () {
