@@ -4,12 +4,14 @@ import Vue from 'vue'
 import App from './App'
 import Store from './common/js/store'
 import VueI18n from 'vue-i18n'
+import axios from 'axios'
 import {D, EsWallet} from 'esecubit-wallet-sdk'
 
 Store.init().then(result => {
   Vue.prototype.esWallet = new EsWallet()
   Vue.prototype.D = D
   Vue.config.productionTip = false
+  Vue.prototype.axios = axios
   Vue.use(VueI18n)
   Store.getLang().then(value => {
     const i18n = new VueI18n({

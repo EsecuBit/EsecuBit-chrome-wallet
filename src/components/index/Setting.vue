@@ -186,7 +186,7 @@ const $ = layui.jquery
 const layer = layui.layer
 export default {
   name: 'Setting',
-  props: ['walletInfo', 'accountInfo', 'netInfo'],
+  props: ['walletInfo', 'accountInfo', 'netInfo', 'appVersion'],
   data () {
     return {
       unitBitChecked: '',
@@ -214,7 +214,6 @@ export default {
       deviceChecked: '',
       netChecked: '',
       currentNet: '',
-      appVersion: '0.1.23',
       isOfficial: Store.isOfficial
     }
   },

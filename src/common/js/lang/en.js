@@ -20,6 +20,11 @@ export const message = {
   app_add_accounts_title: 'Add Account',
   app_plug_out: 'Device has been disconnected',
   app_version_prompt: 'The version of Google Chrome you are using is too low. Please upgrade to version 45 or above!',
+  app_update_force_msg: 'The latest APP version has big changes, it is recommended to update!',
+  app_msg: 'Message',
+  app_update_msg: 'Your APP version is too low, is it updated?',
+  app_update_btn_yes: 'Yes',
+  app_update_btn_no: 'Cancel',
 
   login_title: 'Bitcion Wallet',
   login_detail: 'A secure account management tool',

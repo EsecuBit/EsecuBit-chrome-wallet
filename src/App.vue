@@ -53,7 +53,8 @@
               </div>
               <div class="main-tab-item" :class="{'layui-show': 3 === pageIndex}">
                 <Setting @settingColor = "settingColor" @setExchangeRate="setExchangeRate"
-                         @setBitUnit="setBitUnit"  @setEthUnit="setEthUnit" :account-info ="accounts" :wallet-info="walletInfo" :net-info='netInfo'/>
+                         @setBitUnit="setBitUnit"  @setEthUnit="setEthUnit" :account-info ="accounts"
+                         :app-version="appVersion" :wallet-info="walletInfo" :net-info='netInfo'/>
               </div>
             </div>
           </div>
@@ -113,6 +114,7 @@ import Send from './components/index/Send'
 import Setting from './components/index/Setting'
 import Accept from './components/index/Accept'
 import Store from './common/js/store'
+import qs from 'qs'
 
 // Introducing layui plugin variables
 // eslint-disable-next-line
@@ -143,7 +145,9 @@ export default {
       addAccountTimes: 0,
       pageIndex: 0,
       isPreventSwitch: false,
-      loginErrorMsg: ''
+      loginErrorMsg: '',
+      appVersion: '0.1.24',
+      getNewAppUrl: 'http://39.106.201.178/app-update-server/getNewApp'
     }
   },
   watch: {
@@ -231,26 +235,7 @@ export default {
       }
     }
     form.render('select', 'form1')
-    this.isLowVersion()
-
-    // offline mode, currently not used in chrome
-    // this.esWallet.enterOfflineMode().then(() => {
-    //   this.onLoginFinish()
-    // }).catch(e => {
-    //   if (e === this.D.error.offlineModeNotAllowed) {
-    //     console.warn('offlineModeNotAllowed')
-    //     return
-    //   }
-    //   if (e === this.D.error.offlineModeUnnecessary) {
-    //     console.warn('offlineModeUnnecessary')
-    //     return
-    //   }
-    //   if (e === this.D.error.networkProviderError) {
-    //     console.warn('networkProviderError')
-    //     return
-    //   }
-    //   console.warn('other error, stop', e)
-    // })
+    this.checkVersionUpdateMsg()
   },
   methods: {
     switchPage (index) {
@@ -265,14 +250,60 @@ export default {
     allowPageSwitch () {
       this.isPreventSwitch = false
     },
-    isLowVersion () {
+    checkVersionUpdateMsg () {
       // current chrome version < 45
       let currentVersion = this.getChromeVersion()
       if (currentVersion < 45) {
         layer.msg(this.$t('message.app_version_prompt'), {anim: 6, time: 100000})
         return false
       }
-      this.listenLoginStatus()
+      this.isNeedUpdate()
+    },
+    isNeedUpdate () {
+      let btn1 = [ this.$t('message.app_update_btn_yes'), this.$t('message.app_update_btn_no') ]
+      let btn2 = [ this.$t('message.app_update_btn_yes') ]
+      let versionMsg = this.$t('message.app_update_msg')
+      let versionMsgForce = this.$t('message.app_update_force_msg')
+      let title = this.$t('message.app_msg')
+      let versionData = {
+        platform: 'Chrome',
+        versionName: this.appVersion,
+        versionCode: 1,
+        hardwareVersionCode: 'bd0802030ae420180829'
+      }
+      this.axios.post(this.getNewAppUrl, qs.stringify(versionData), {headers: {'Content-Type': 'application/x-www-form-urlencoded'}}).then((response) => {
+        console.log(response.data)
+        if (response.data.errorCode === 0) {
+          // force to update
+          if (response.data.data.isForceUpdate) {
+            layer.confirm(versionMsgForce, {
+              title: title,
+              btn: btn2
+            }, (index) => {
+              window.open('https://www.esecubit.com/')
+              layer.close(index)
+            })
+          } else {
+            // Suggest to update
+            layer.confirm(versionMsg, {
+              title: title,
+              btn: btn1
+            }, (index) => {
+              window.open('https://www.esecubit.com/')
+              layer.close(index)
+            }, () => {
+              // user update
+              this.listenLoginStatus()
+            })
+          }
+        } else {
+          // enter system
+          this.listenLoginStatus()
+        }
+      }).catch((value) => {
+        // enter system
+        this.listenLoginStatus()
+      })
     },
     getChromeVersion () {
       let arr = navigator.userAgent.split(' ')

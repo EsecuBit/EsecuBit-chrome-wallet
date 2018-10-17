@@ -1,6 +1,6 @@
 import {D, Provider} from 'esecubit-wallet-sdk'
 export default {
-  isOfficial: false,
+  isOfficial: true,
   printLog () {
     document.getElementById('clear').onclick = function () {
       document.getElementById('log').innerHTML = ''

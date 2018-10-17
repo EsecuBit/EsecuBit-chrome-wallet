@@ -20,6 +20,11 @@ export const message = {
   app_add_accounts_title: '添加账户',
   app_plug_out: '设备已断开连接',
   app_version_prompt: '为了您更好的体验，请更新浏览器到最新版本！',
+  app_msg: '消息',
+  app_update_force_msg: 'APP版本有大的变化，建议更新！',
+  app_update_msg: '您的APP版本太低，是否更新？',
+  app_update_btn_yes: '确定',
+  app_update_btn_no: '取消',
 
   login_title: '比特币钱包',
   login_detail: '一套安全的账户管理工具',
