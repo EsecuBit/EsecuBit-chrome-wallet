@@ -71,22 +71,20 @@
 </template>
 
 <script>
-import Bus from '../../common/js/bus'
 import Store from '../../common/js/store'
 import Clipboard from 'clipboard'
+import { mapState } from 'vuex'
 
 const form = layui.form
 const layer = layui.layer
 
 export default {
   name: 'accept',
-  props: ['accountInfo', 'resetStatus', 'errorCodeMsg'],
+  props: ['errorCodeMsg'],
   data () {
     return {
       isFirst: true,
       qrAddress: null,
-      accountIndex: 0,
-      accountOrder: [],
       currentAccount: {label: ''},
       accountQrcode: null,
       coinType: '',
@@ -100,6 +98,12 @@ export default {
     }
   },
   computed: {
+    ...mapState({
+      'accountInfo': 'accountList',
+      'resetStatus': 'resetStatus',
+      'currentAccountIndex': 'currentAccountIndex',
+      'switchLangTimes': 'switchLangTimes'
+    }),
     receiveCoinTypeMsg  () {
       let coinTypeName = this.D.isBtc(this.coinType) ? 'Bitcoin' : 'Ether'
       return this.$t('message.accept_accept_msg') + ' ' + coinTypeName
@@ -118,18 +122,17 @@ export default {
     },
     accountInfo: {
       handler (newValue, oldValue) {
-        this.accountOrder = newValue
         if (this.isInit) {
           this.coinType = newValue[0].coinType
-          this.currentAccount = this.accountOrder[0]
+          this.currentAccount = this.accountInfo[0]
         }
         this.isInit = false
       }
     },
-    accountIndex: {
+    currentAccountIndex: {
       handler (newValue, oldValue) {
-        this.coinType = this.accountOrder[newValue].coinType
-        this.currentAccount = this.accountOrder[newValue]
+        this.coinType = this.accountInfo[newValue].coinType
+        this.currentAccount = this.accountInfo[newValue]
         this.initDisplay()
       }
     },
@@ -148,9 +151,6 @@ export default {
   },
   mounted () {
     this.init()
-    Bus.$on('switchAccount', (index) => {
-      this.accountIndex = index
-    })
     form.on('checkbox(setAddressStatus)', (data) => {
       this.isSetAddress = data.elem.checked
       Store.saveChromeStore('isSetAddress', data.elem.checked)

@@ -1,6 +1,6 @@
-import {D, Provider} from 'esecubit-wallet-sdk'
+import {D} from 'esecubit-wallet-sdk'
 export default {
-  isOfficial: true,
+  isOfficial: false,
   printLog () {
     document.getElementById('clear').onclick = function () {
       document.getElementById('log').innerHTML = ''
@@ -15,7 +15,7 @@ export default {
 
     const log = function (logLevel, args = []) {
       let color = (logLevel === 0 && '#009688') || (logLevel === 1 && '#333') || (logLevel === 2 && '#f6ae85')
-      document.getElementById('log').innerHTML += `<p style="color: ${color}"> ${getLogString(args)} </p>`;
+      document.getElementById('log').innerHTML += `<p style="color: ${color}"> ${getLogString(args)} </p>`
     }
 
     console.debug = function (...args) {
@@ -33,8 +33,8 @@ export default {
   fetch (key) {
     return JSON.parse(window.localStorage.getItem(key))
   },
-  save (key, value){
-    window.localStorage.setItem(key,JSON.stringify(value))
+  save (key, value) {
+    window.localStorage.setItem(key, JSON.stringify(value))
   },
   generateSeed () {
     let seedValue = D.test.generateSeed()
@@ -78,14 +78,13 @@ export default {
       const netValue = await this.setPromise('net')
       device = deviceValue['device'] ? deviceValue['device'] : 'soft'
       net = netValue['net'] ? netValue['net'] : 'test'
-
     }
     if (this.isOfficial) {
       D.test.jsWallet = false
       D.test.coin = false
     } else {
       D.test.jsWallet = (device === 'soft')
-      D.test.coin =  (net === 'test')
+      D.test.coin = (net === 'test')
     }
   }
 }

@@ -4,7 +4,7 @@
       <div class="layadmin-user-login-main">
         <div class="layadmin-user-login-box layadmin-user-login-header">
           <div class="img">
-            <img src="../common/imgs/49.png"  height=80>
+            <img src="../../common/imgs/49.png"  height=80>
           </div>
           <p>{{$t('message.login_detail')}}</p>
         </div>

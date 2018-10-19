@@ -178,15 +178,14 @@
 </template>
 
 <script>
-import Bus from '../../common/js/bus'
 import Store from '../../common/js/store'
+import { mapState, mapMutations } from 'vuex'
 
 const form = layui.form
 const $ = layui.jquery
 const layer = layui.layer
 export default {
   name: 'Setting',
-  props: ['walletInfo', 'accountInfo', 'netInfo', 'appVersion'],
   data () {
     return {
       unitBitChecked: '',
@@ -206,10 +205,6 @@ export default {
         {label: '简体中文', value: 'zh-CN'}
       ],
       exchangeRate: null,
-      currentAccount: {},
-      coinType: '',
-      isBitcoin: true,
-      accountOrder: [],
       seedValue: '',
       deviceChecked: '',
       netChecked: '',
@@ -221,18 +216,16 @@ export default {
     accountInfo: {
       handler (newValue, oldValue) {
         this.getCurrentSeed()
-        this.accountOrder = newValue
-        this.currentAccount = this.accountOrder[0]
-      }
-    },
-    currentAccount: {
-      handler (newValue, oldValue) {
-        this.coinType = newValue.coinType
-        this.isBitcoin = !!this.D.isBtc(this.coinType)
       }
     }
   },
   computed: {
+    ...mapState({
+      'accountInfo': 'accountList',
+      'walletInfo': 'walletInfo',
+      'netInfo': 'netInfo',
+      'appVersion': 'appVersion'
+    }),
     hardwareList () {
       if (this.walletInfo) {
         let hardwareArr = [
@@ -283,12 +276,19 @@ export default {
   },
   mounted () {
     this.init()
-    Bus.$on('switchAccount', (index) => { this.currentAccount = this.accountOrder[index] })
     this.switchLang()
     this.switchExchange()
     this.switchTab()
   },
   methods: {
+    ...mapMutations({
+      setCurrentExchangeRate: 'SET_CURRENT_EXCHANGE_RATE',
+      setCurrentUnitBtc: 'SET_CURRENT_UNIT_BTC',
+      setCurrentUnitEth: 'SET_CURRENT_UNIT_ETH',
+      setHeadColor: 'SET_HEAD_COLOR',
+      setCustomizeColor: 'SET_CUSTOMIZE_COLOR',
+      setSwitchLangTimes: 'SET_SWITCH_LANG_TIMES'
+    }),
     initUnitsForm () {
       this.bitUnitValueList = [
         {label: this.D.unit.btc.BTC, value: this.D.unit.btc.BTC},
@@ -304,14 +304,12 @@ export default {
         form.render('radio', 'form3')
         form.on('radio(bitUnit)', data => {
           Store.saveChromeStore('bitUnit', data.value)
-          this.$emit('setBitUnit', data.value)
-          Bus.$emit('setBitUnit', true)
+          this.setCurrentUnitBtc(data.value)
         })
         form.render('radio', 'form3')
         form.on('radio(ethUnit)', data => {
           Store.saveChromeStore('ethUnit', data.value)
-          this.$emit('setEthUnit', data.value)
-          Bus.$emit('setEthUnit', true)
+          this.setCurrentUnitEth(data.value)
         })
       })
     },
@@ -369,19 +367,22 @@ export default {
       form.on('select(exchange)', (data) => {
         this.selectedExchangeRate = data.value
         Store.saveChromeStore('exchange', data.value)
-        this.$emit('setExchangeRate', data.value)
+        this.setCurrentExchangeRate(data.value)
       })
     },
     switchLang () {
       form.on('select(lang)', (data) => {
         this.$i18n.locale = data.value
         Store.saveChromeStore('lang', data.value)
-        Bus.$emit('switchLang', true)
+        this.setSwitchLangTimes()
       })
     },
     switchColor (color) {
       Store.saveChromeStore('skin', color)
-      this.$emit('settingColor', color)
+      let getHeadColor = color + '-skin'
+      this.setHeadColor(getHeadColor)
+      let getCustomizeColor = color + '-customize'
+      this.setCustomizeColor(getCustomizeColor)
     },
     switchTab () {
       $('.tab-title-2 a').click(function () {

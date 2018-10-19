@@ -57,7 +57,7 @@
                      :placeholder="$t('message.send_amount')" autocomplete="off" class="layui-input amount-input">
             </div>
             <button class="layui-btn layui-btn-radius layui-btn-sm max-btn" type="button" @click="maxAmount">MAX</button>
-            <div class="usd-amount" v-if="coinType && currentUnit && currentExchangeRate && isDisplayExchange">{{toExchangeText}}</div>
+            <div class="usd-amount" v-if="coinType && currentUnitBtc && currentExchangeRate && isDisplayExchange">{{toExchangeText}}</div>
           </div>
         </div>
 
@@ -164,13 +164,13 @@
 </template>
 
 <script>
-import Bus from '../../common/js/bus'
+import { mapState, mapMutations } from 'vuex'
 
 const form = layui.form
 const layer = layui.layer
 export default {
   name: 'Sending',
-  props: ['accountInfo', 'currentUnit', 'currentUnitEth', 'currentExchangeRate', 'resetStatus', 'errorCodeMsg', 'pageIndex'],
+  props: ['errorCodeMsg'],
   data () {
     return {
       count: 2,
@@ -185,7 +185,6 @@ export default {
       ],
       switchFee: false,
       currentAccount: {label: ''},
-      homeAccountIndex: 0,
       totalFee: 0,
       transFee: 0,
       totalFeeDisplay: '',
@@ -214,11 +213,24 @@ export default {
     }
   },
   computed: {
+    ...mapState({
+      'accountInfo': 'accountList',
+      'resetStatus': 'resetStatus',
+      'currentUnitBtc': 'currentUnitBtc',
+      'currentUnitEth': 'currentUnitEth',
+      'currentExchangeRate': 'currentExchangeRate',
+      'pageIndex': 'pageIndex',
+      'currentAccountIndex': 'currentAccountIndex',
+      'renameTimes': 'renameTimes',
+      'switchLangTimes': 'switchLangTimes',
+      'fillTableTimes': 'fillTableTimes',
+      'autoFillTableData': 'autoFillTableData'
+    }),
     isBtc () {
       return this.D.isBtc(this.coinType)
     },
     toExchangeText () {
-      if (this.currentUnit && this.currentExchangeRate) {
+      if (this.currentUnitBtc && this.currentExchangeRate) {
         let nowUnit = this.currentDisplayUnit(this.coinType)
         let getMoney = this.amountValue ? this.amountValue : '0'
         let exchange = Number(this.esWallet.convertValue(this.coinType, String(getMoney), nowUnit, this.currentExchangeRate)).toFixed(2)
@@ -234,7 +246,7 @@ export default {
       return '(' + this.$t('message.send_balance') + this.toTargetCoinUnit(this.currentAccount.balance) + ' ' + coinType + ')'
     },
     totalDisplayFee () {
-      if (this.coinType && this.currentUnit && this.currentExchangeRate && this.isDisplayDetails) {
+      if (this.coinType && this.currentUnitBtc && this.currentExchangeRate && this.isDisplayDetails) {
         let nowUnit = this.currentDisplayUnit(this.coinType)
         let exchange = this.esWallet.convertValue(this.coinType, this.totalFee, nowUnit, this.currentExchangeRate)
         let feeExchange = this.esWallet.convertValue(this.coinType, this.transFee, nowUnit, this.currentExchangeRate)
@@ -247,6 +259,47 @@ export default {
     }
   },
   watch: {
+    fillTableTimes: {
+      handler (newValue, oldValue) {
+        let table = this.autoFillTableData
+        this.isReSendStatus = true
+        this.switchCurrentAccount(this.currentAccountIndex)
+        this.$nextTick(() => {
+          let getValue = table.outputs[0].value
+          this.amountValue = this.toTargetCoinUnit(String(getValue))
+          this.addressValue = table.outputs[0].address
+          this.etcData = table.data ? table.data : ''
+          this.isShowData = !!table.data
+          this.oldTxId = table.txId
+        })
+      }
+    },
+    renameTimes: {
+      handler (newValue, oldValue) {
+        this.setMenuList(this.accountInfo)
+      }
+    },
+    switchLangTimes: {
+      handler (newValue, oldValue) {
+        // Re-render the form when setting the language
+        this.renderFeeForm(this.currentAccount)
+      }
+    },
+    currentAccountIndex: {
+      handler (newValue, oldValue) {
+        this.switchCurrentAccount(newValue)
+      }
+    },
+    currentUnitEth: {
+      handler (newValue, oldValue) {
+        !this.D.isBtc(this.coinType) && this.clearFormData()
+      }
+    },
+    currentUnitBtc: {
+      handler (newValue, oldValue) {
+        this.D.isBtc(this.coinType) && this.clearFormData()
+      }
+    },
     resetStatus: {
       handler (newValue, oldValue) {
         if (newValue) {
@@ -371,7 +424,6 @@ export default {
         this.setMenuList(newValue)
         console.log(this.groupingAccounts, 'newValue')
         if (this.isInit) this.currentAccount = newValue[0]
-        this.homeAccountIndex = 0
         this.isInit = false
       }
     },
@@ -395,40 +447,12 @@ export default {
   },
   mounted () {
     this.verifyForm()
-    // Automatically switch accounts
-    Bus.$on('switchAccount', (index) => {
-      this.homeAccountIndex = index
-      this.switchCurrentAccount(index)
-    })
-
-    // Autofill form
-    Bus.$on('fillSendData', (table) => {
-      console.log(table)
-      this.isReSendStatus = true
-      this.switchCurrentAccount(this.homeAccountIndex)
-      this.$nextTick(() => {
-        let getValue = table.outputs[0].value
-        this.amountValue = this.toTargetCoinUnit(String(getValue))
-        this.addressValue = table.outputs[0].address
-        this.etcData = table.data ? table.data : ''
-        this.isShowData = !!table.data
-        this.oldTxId = table.txId
-      })
-    })
-
-    // Empty the form when setting the unit
-    Bus.$on('setBitUnit', () => {
-      this.D.isBtc(this.coinType) && this.clearFormData()
-    })
-    Bus.$on('setEthUnit', () => {
-      !this.D.isBtc(this.coinType) && this.clearFormData()
-    })
-
-    // Re-render the form when setting the language
-    Bus.$on('switchLang', () => { this.renderFeeForm(this.currentAccount) })
-    Bus.$on('rename', () => { this.setMenuList(this.accountInfo) })
   },
   methods: {
+    ...mapMutations({
+      setPageIndex: 'SET_PAGE_INDEX',
+      setIsPreventSwitch: 'SET_IS_PREVENT_SWITCH'
+    }),
     switchCurrentAccount (index) {
       this.currentSelectedAccountIndex = index
       this.currentAccount = this.accountInfo[index]
@@ -549,7 +573,7 @@ export default {
       }
     },
     currentDisplayUnit (coinType) {
-      return this.D.isBtc(coinType) ? this.currentUnit : this.currentUnitEth
+      return this.D.isBtc(coinType) ? this.currentUnitBtc : this.currentUnitEth
     },
     currentTransactionUnit (coinType) {
       return this.D.isBtc(coinType) ? 'satoshi per byte' : 'Gwei per byte'
@@ -717,7 +741,7 @@ export default {
       let formData = this.getFormData()
       if (this.isPreventClick) return
       this.isPreventClick = true
-      this.$emit('preventPageSwitch', true)
+      this.setIsPreventSwitch(true)
       setTimeout(() => {
         this.currentAccount.prepareTx(formData).then(value => {
           console.log(value, 'prepareTx')
@@ -734,15 +758,15 @@ export default {
             if (this.oldTxId) this.clearResendStatus()
             // Formatted form
             this.isPreventClick = false
-            this.$emit('allowPageSwitch', true)
+            this.setIsPreventSwitch(false)
             this.clearFormData()
             layer.closeAll('msg')
             layer.msg(this.$t('message.send_submit_success'), { icon: 1 })
-            this.$emit('switchTargetPage', 0)
+            this.setPageIndex(0)
           }).catch(value => {
             this.isPreventClick = false
             console.warn(value)
-            this.$emit('allowPageSwitch', true)
+            this.setIsPreventSwitch(false)
             layer.closeAll('msg')
             this.displayErrorCode(value)
           })

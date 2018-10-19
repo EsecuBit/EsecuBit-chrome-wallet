@@ -2,10 +2,25 @@
 <div>
   <!-- left sidebar -->
   <div class="site-tree">
-    <ul class="layui-tree">
+    <!--<ul class="layui-tree">-->
+      <!--<template v-for="(item, walletIndex) in wallet">-->
+        <!--<li class="menu-title" v-if="item.label"><h2>{{item.label}}</h2></li>-->
+        <!--<li class="site-tree-noicon tab-title-1"-->
+            <!--v-for="(account, index) in item.account"-->
+            <!--:class="{'layui-this': (walletIndex > 0 ? (wallet[walletIndex - 1].account.length + index) : index) === currentAccountIndex}">-->
+          <!--<a href="#" @click="switchTab(index, walletIndex)"><cite>{{account}}</cite></a></li>-->
+      <!--</template>-->
+    <!--</ul>-->
+    <ul class="layui-nav layui-nav-tree">
       <template v-for="(item, walletIndex) in wallet">
-        <li class="menu-title" v-if="item.label"><h2>{{item.label}}</h2></li>
-        <li class="site-tree-noicon tab-title-1" v-for="(account, index) in item.account" :class="{'layui-this': (walletIndex > 0 ? (wallet[walletIndex - 1].account.length + index) : index) === currentIndex}"><a href="#" @click="switchTab(index, walletIndex)"><cite>{{account}}</cite></a></li>
+        <li class="layui-nav-item " :class="{'layui-nav-itemed': item.active}">
+          <a href="#" class="nav-title" @click="switchMenu(item)">{{item.label}}<span class="layui-nav-more"></span></a>
+          <dl class="layui-nav-child">
+            <dd v-for="(account, index) in item.account"
+                :class="{'layui-this': (walletIndex > 0 ? (wallet[walletIndex - 1].account.length + index) : index) === currentAccountIndex}">
+              <a href="#" @click="switchTab(index, walletIndex)"><span>{{account}}</span></a></dd>
+          </dl>
+        </li>
       </template>
     </ul>
   </div>
@@ -13,7 +28,7 @@
   <!-- main content -->
   <div class="site-content">
     <div class="tab-content-1" id="tab-content-1">
-      <div class="tab-item" v-for="(tablecount, index) in gridList"  :class="{'layui-show': index === currentIndex}">
+      <div class="tab-item" v-for="(tablecount, index) in gridList"  :class="{'layui-show': index === currentAccountIndex}">
         <!-- account information -->
         <div class="account-information">
           <div class="account-msg">
@@ -126,6 +141,7 @@
         </div>
       </div>
     </div>
+    <Progress :radius="radius" :percent="percent"></Progress>
   </div>
   <!-- edit account name layer -->
   <div class="edit-account-wrapper" id="edit-account">
@@ -142,21 +158,23 @@
       </div>
     </form>
   </div>
-
 </div>
 </template>
 
 <script>
-import Bus from '../../common/js/bus'
+import Progress from '../progress/Progress'
+import { mapState, mapMutations } from 'vuex'
 
 const $ = layui.jquery
 const layer = layui.layer
 const laypage = layui.laypage
 export default {
   name: 'accouts',
-  props: ['accountInfo', 'currentUnit', 'currentUnitEth', 'currentExchangeRate', 'errorCodeMsg', 'addAccountTimes', 'resetStatus'],
+  props: ['errorCodeMsg'],
   data () {
     return {
+      radius: 126,
+      percent: 0.1,
       grid_pager: 'grid_pager',
       description: {
         txId: '',
@@ -165,6 +183,7 @@ export default {
         time: '',
         direction: ''
       },
+      menuActiveIndex: 0,
       loadingClass: {
         'layui-anim': false,
         'layui-anim-rotate': false,
@@ -173,10 +192,6 @@ export default {
       renameValue: '',
       newAccount: [],
       wallet: [
-        {
-          label: 'bitcoin',
-          account: ['account1']
-        }
       ],
       gridList: [
         []
@@ -186,14 +201,26 @@ export default {
       active: 'active-count',
       green: 'green-font',
       red: 'red-font',
-      currentIndex: 0,
-      renameTimes: 0,
       isShowAgainSendMsg: true,
       isShowSendList: [],
       limit: 5,
       pageStartIndex: 0,
       pageEndIndex: 5
     }
+  },
+  computed: {
+    ...mapState({
+      'accountInfo': 'accountList',
+      'resetStatus': 'resetStatus',
+      'currentUnitBtc': 'currentUnitBtc',
+      'currentUnitEth': 'currentUnitEth',
+      'addAccountTimes': 'addAccountTimes',
+      'currentExchangeRate': 'currentExchangeRate',
+      'currentAccountIndex': 'currentAccountIndex'
+    })
+  },
+  components: {
+    Progress
   },
   watch: {
     accountInfo: {
@@ -236,24 +263,18 @@ export default {
         this.setMenuList(newValue)
       }
     },
-    currentIndex: {
-      handler (newValue, oldValue) {
-        // Notify other page
-        Bus.$emit('switchAccount', newValue)
-      }
-    },
     resetStatus: {
       handler (newValue, oldValue) {
         // exit app
         if (newValue) {
-          this.currentIndex = 0
+          this.setCurrentAccountIndex(0)
           this.clearCanvas(false)
         }
       }
     },
     addAccountTimes: {
       handler (newValue, oldValue) {
-        if (newValue > 0 && (this.currentIndex >= this.wallet[0].account.length - 1)) this.currentIndex = this.currentIndex + 1
+        if (newValue > 0 && (this.currentAccountIndex >= this.wallet[0].account.length - 1)) this.addCurrentAccountIndex()
       }
     },
     gridList: {
@@ -279,6 +300,14 @@ export default {
     this.listenTXInfo()
   },
   methods: {
+    ...mapMutations({
+      setPageIndex: 'SET_PAGE_INDEX',
+      setCurrentAccountIndex: 'SET_CURRENT_ACCOUNT_INDEX',
+      addCurrentAccountIndex: 'ADD_CURRENT_ACCOUNT_INDEX',
+      addRenameTimes: 'ADD_RENAME_TIMES',
+      setFillTableTimes: 'SET_FILL_TABLE_TIMES',
+      setAutoFillTableData: 'SET_AUTO_FILL_TABLE_DATA'
+    }),
     listenTXInfo () {
       this.esWallet.listenTxInfo((error, txInfo) => {
         if (this.errorCodeMsg[String(error)]) {
@@ -306,6 +335,14 @@ export default {
           this.displayErrorCode(value)
         })
       })
+    },
+    switchMenu (item) {
+      console.log(item)
+      if (item.active) {
+        this.$set(item, 'active', false)
+      } else {
+        this.$set(item, 'active', true)
+      }
     },
     reSendPrompt (canResend, shouldResend, index, trIndex) {
       let msg = shouldResend ? this.$t('message.accounts_resend_prompt') : this.$t('message.accounts_resend_prompt_1')
@@ -362,15 +399,18 @@ export default {
       return newValue + ' '
     },
     currentDisplayUnit (coinType) {
-      return this.D.isBtc(coinType) ? this.currentUnit : this.currentUnitEth
+      return this.D.isBtc(coinType) ? this.currentUnitBtc : this.currentUnitEth
     },
     toExchangeText (coinType, value) {
       let newValue = this.toTargetCoinUnit(coinType, value)
-      let exchange = this.D.isBtc(coinType) ? this.esWallet.convertValue(coinType, newValue, this.currentUnit, this.currentExchangeRate) : this.esWallet.convertValue(coinType, newValue, this.currentUnitEth, this.currentExchangeRate)
+      let exchange = this.D.isBtc(coinType) ? this.esWallet.convertValue(coinType, newValue, this.currentUnitBtc, this.currentExchangeRate) : this.esWallet.convertValue(coinType, newValue, this.currentUnitEth, this.currentExchangeRate)
       return this.formatNum(exchange)
     },
+    weiToGwei (coinType, value) {
+      return this.esWallet.convertValue(coinType, value, this.D.unit.eth.Wei, this.D.unit.eth.GWei) + '  '
+    },
     toTargetCoinUnit (coinType, value) {
-      return this.D.isBtc(coinType) ? this.esWallet.convertValue(coinType, value, this.D.unit.btc.satoshi, this.currentUnit) : this.esWallet.convertValue(coinType, value, this.D.unit.eth.Wei, this.currentUnitEth)
+      return this.D.isBtc(coinType) ? this.esWallet.convertValue(coinType, value, this.D.unit.btc.satoshi, this.currentUnitBtc) : this.esWallet.convertValue(coinType, value, this.D.unit.eth.Wei, this.currentUnitEth)
     },
     tableCanvas (index) {
       let canvasClass = index ? ('canvas-' + index) : 'canvas'
@@ -433,7 +473,7 @@ export default {
         this.loadingClass['layui-anim-rotate'] = false
         this.loadingClass['layui-anim-loop'] = false
       }, 2000)
-      let index = this.currentIndex
+      let index = this.currentAccountIndex
       let total = 0
       this.clearCanvas(index)
       this.newAccount[index].sync(false).then(value => {
@@ -470,6 +510,7 @@ export default {
         }
       }
       // Stitching into ideal data types
+      accountList[0].active = true
       this.wallet = accountList
     },
     editAccount () {
@@ -495,9 +536,9 @@ export default {
         document.getElementById('editNameInput').focus()
         return false
       }
-      if (this.newAccount[this.currentIndex].rename) {
-        this.newAccount[this.currentIndex].rename(this.renameValue).then(value => {
-          Bus.$emit('rename', this.renameTimes + 1)
+      if (this.newAccount[this.currentAccountIndex].rename) {
+        this.newAccount[this.currentAccountIndex].rename(this.renameValue).then(value => {
+          this.addRenameTimes()
           this.setMenuList(this.newAccount)
           layer.closeAll('page')
           layer.msg(this.$t('message.accounts_update_msg'), { icon: 1 })
@@ -553,10 +594,8 @@ export default {
       })
     },
     switchTab (index, walletIndex) {
-      this.currentIndex = walletIndex > 0 ? (this.wallet[walletIndex - 1].account.length + index) : index
-    },
-    weiToGwei (coinType, value) {
-      return this.esWallet.convertValue(coinType, value, this.D.unit.eth.Wei, this.D.unit.eth.GWei) + '  '
+      let accountIndex = walletIndex > 0 ? (this.wallet[walletIndex - 1].account.length + index) : index
+      this.setCurrentAccountIndex(accountIndex)
     },
     getFormatTime (time) {
       let date = new Date(time)
@@ -590,24 +629,72 @@ export default {
     sendTransaction (table, canResend) {
       // jump to send page
       if (canResend) {
-        this.$emit('switchTargetPage', 1)
-        Bus.$emit('fillSendData', table)
+        this.setPageIndex(1)
+        this.setFillTableTimes()
+        this.setAutoFillTableData(table)
       }
     }
   }
 }
 </script>
 
-<style scoped>
+<style scoped lang="less">
+  @blue:#409eff;
+  @font-color: #333;
+  @gray: #fff;
   .site-title {
     margin-top:30px;
   }
-  .content {
-    font-size: 13px;
-    min-height: 100px;
-    padding: 15px;
-    margin-right: auto;
-    margin-left: auto;
+  .site-tree{
+    background-color: @gray;
+    padding-top: 15px;
+  }
+  .layui-nav-tree{
+    width: auto;
+
+    .layui-nav-item a{
+      height: 40px;
+      line-height: 40px;
+      &:hover{
+        background-color: #eee;
+      }
+    }
+    .layui-nav-itemed .layui-nav-more {
+      top: 12px;
+    }
+    .layui-nav-child {
+      dd.layui-this{
+        background-color: @gray!important;
+        color: @font-color;
+      }
+      a{
+        color: @font-color;
+        &:hover{
+          background-color: #fff;
+          color: @font-color;
+        }
+      }
+    }
+    .layui-nav-itemed .layui-nav-child{
+      background: @gray!important;
+    }
+  }
+  /*rewrite sidebar css*/
+  .layui-nav{
+    background: #f2f2f2;
+    color: @font-color;
+    .layui-nav-itemed>a{
+      color: @font-color;
+    }
+    .layui-nav-more{
+      border-color: @font-color transparent transparent;
+    }
+    .layui-nav-itemed .layui-nav-more {
+      border-color: transparent transparent @font-color!important;
+    }
+    .layui-nav-item a{
+      color: @font-color!important;
+    }
   }
   .account-information {
     display: block;
@@ -740,8 +827,8 @@ export default {
     font-size:16px;
     height: 36px;
     line-height: 36px;
-    color: #333;
-    background-color: #F8F8F8;
+    color: @font-color;
+    background-color: @gray;
     border-radius: 6px;
     margin: 0 20px 20px;
   }
@@ -780,7 +867,7 @@ export default {
     line-height: 28px;
     margin: 0 -1px 5px 0;
     background-color: #fff;
-    color: #333;
+    color: @font-color;
     font-size: 12px;
   }
   .layui-tree {

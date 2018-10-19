@@ -71,7 +71,6 @@ export const message = {
   accounts_resend_prompt: 'This record cannot be confirmed due to the low transaction fee. You can choose to increase the transaction fee and resend it.',
   accounts_resend_prompt_1: 'If the record cannot be confirmed for a long time, you can choose to resend it.',
 
-
   send_prompt_msg: 'Before the transaction, please confirm that the address, amount and transaction fee you entered are correct!',
   send_current_account: 'Current Account',
   send_amount: 'Amount',
@@ -82,7 +81,7 @@ export const message = {
   send_data: 'Data',
   send_total_fee: 'Total cost',
   send_fee: 'Cost',
-  send_advance:'Advanced: Add Data',
+  send_advance: 'Advanced: Add Data',
   send_submit_btn: 'Send',
   send_reset_btn: 'Reset',
   send_fastest_confirm: 'Fastest confirmation',
@@ -107,22 +106,18 @@ export const message = {
   send_allow_amount_msg_1: 'The amount you filled in exceeds the amount allowed by the transaction, the system has automatically filled in the highest amount for you.',
   send_allow_amount_msg_2: ' automatically turns off',
 
-
   accept_prompt_msg: 'Please use the mobile phone to scan the QR code in the picture',
   accept_current_account: 'Current Account:',
   accept_qrcode_msg: 'QR code Address:',
   accept_accept_msg: 'Receive',
-  accept_set_address:'Set this address onto the device',
-  accept_copy_success:'Successfully copied to the clipboard',
+  accept_set_address: 'Set this address onto the device',
+  accept_copy_success: 'Successfully copied to the clipboard',
   accept_generate_address: 'Generate Address',
   accept_prompt_msg1: 'Click the button to generate a QR code, please check the address and confirm on the device',
   accept_prompt_msg2: 'Please double-check the address on your device. Press the OK button to confirm',
   accept_tips: 'Tips:',
   accept_loading: 'Loading...',
   accept_confirm: 'Please confirm on the wallet...',
-
-
-
   setting_display: 'Display',
   setting_hardware: 'Hardware Information',
   setting_interface_lang: 'Interface Language',
@@ -157,7 +152,6 @@ export const message = {
   setting_fee: 'Transaction Fee Suggestion Provider',
   setting_btc_info: 'Network Access Provider',
   setting_version: 'Version Information',
-
 
   error_noDevice: 'No hardware, no instructions can be sent',
   error_deviceComm: 'Sending a hid packet failed',

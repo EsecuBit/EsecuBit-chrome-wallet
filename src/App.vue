@@ -10,7 +10,7 @@
       <div v-show="!isShowLogin">
         <!-- header -->
         <div class="main-admin" :class="[customizeColor]">
-          <div class="fly-header bg-black" v-bind:class="[heardColor]">
+          <div class="fly-header bg-black" v-bind:class="[headColor]">
             <div class="layui-container">
               <a class="logo" href="#"> <img src="./common/imgs/logo.png" alt="Wallet Bitcion"></a>
               <!-- header nav.menu -->
@@ -42,19 +42,16 @@
           <div class="layui-container page-content ">
             <div class="main-tab-content">
               <div class="main-tab-item" :class="{'layui-show': 0 === pageIndex}">
-                <Accounts @switchTargetPage="switchTargetPage" :account-info ="accounts" :reset-status="resetStatus" :add-account-times="addAccountTimes" :current-unit="currentUnit" :current-unit-eth="currentUnitEth" :current-exchange-rate="currentExchangeRate" :error-code-msg="errorCodeMsg"/>
+                <Accounts :error-code-msg="errorCodeMsg"/>
               </div>
               <div class="main-tab-item" :class="{'layui-show': 1 === pageIndex}">
-                <Send @switchTargetPage="switchTargetPage" @preventPageSwitch="preventPageSwitch" @allowPageSwitch="allowPageSwitch" :account-info ="accounts"  :page-index="pageIndex"
-                      :current-unit="currentUnit" :current-unit-eth="currentUnitEth" :current-exchange-rate="currentExchangeRate" :reset-status="resetStatus" :error-code-msg="errorCodeMsg"/>
+                <Send :error-code-msg="errorCodeMsg"/>
               </div>
               <div class="main-tab-item" :class="{'layui-show': 2 === pageIndex}">
-                <Accept :account-info ="accounts" :reset-status="resetStatus" :error-code-msg="errorCodeMsg"/>
+                <Accept :error-code-msg="errorCodeMsg"/>
               </div>
               <div class="main-tab-item" :class="{'layui-show': 3 === pageIndex}">
-                <Setting @settingColor = "settingColor" @setExchangeRate="setExchangeRate"
-                         @setBitUnit="setBitUnit"  @setEthUnit="setEthUnit" :account-info ="accounts"
-                         :app-version="appVersion" :wallet-info="walletInfo" :net-info='netInfo'/>
+                <Setting/>
               </div>
             </div>
           </div>
@@ -108,13 +105,14 @@
 </template>
 
 <script>
-import Login from './components/Login'
+import Login from './components/login/Login'
 import Accounts from './components/index/Accounts'
 import Send from './components/index/Send'
 import Setting from './components/index/Setting'
 import Accept from './components/index/Accept'
 import Store from './common/js/store'
 import qs from 'qs'
+import { mapState, mapMutations } from 'vuex'
 
 // Introducing layui plugin variables
 // eslint-disable-next-line
@@ -129,24 +127,11 @@ export default {
     return {
       isShowLogin: true,
       loginStatus: null,
-      walletInfo: null,
-      netInfo: null,
-      accounts: null,
-      heardColor: '',
-      customizeColor: '',
       isAddAccounts: true,
       selected: '',
       isHasAccount: true,
       accountType: [],
-      currentUnit: '',
-      currentUnitEth: '',
-      currentExchangeRate: '',
-      resetStatus: 0,
-      addAccountTimes: 0,
-      pageIndex: 0,
-      isPreventSwitch: false,
       loginErrorMsg: '',
-      appVersion: '0.1.24',
       getNewAppUrl: 'http://39.106.201.178/app-update-server/getNewApp'
     }
   },
@@ -170,6 +155,14 @@ export default {
     }
   },
   computed: {
+    ...mapState({
+      'accountList': 'accountList',
+      'appVersion': 'appVersion',
+      'pageIndex': 'pageIndex',
+      'isPreventSwitch': 'isPreventSwitch',
+      'headColor': 'headColor',
+      'customizeColor': 'customizeColor'
+    }),
     pageList () {
       // nav.menu label and icon
       return [
@@ -238,17 +231,26 @@ export default {
     this.checkVersionUpdateMsg()
   },
   methods: {
+    ...mapMutations({
+      setAccountList: 'SET_ACCOUNT',
+      setResetStatus: 'ADD_RESET_STATUS',
+      setWalletInfo: 'SET_WALLET_INFO',
+      setCurrentUnitBtc: 'SET_CURRENT_UNIT_BTC',
+      setCurrentUnitEth: 'SET_CURRENT_UNIT_ETH',
+      setAddAccountTimes: 'SET_ADD_ACCOUNT_TIMES',
+      putAccount: 'PUT_ACCOUNT',
+      setCurrentExchangeRate: 'SET_CURRENT_EXCHANGE_RATE',
+      setNetInfo: 'SET_NET_INFO',
+      setPageIndex: 'SET_PAGE_INDEX',
+      setIsPreventSwitch: 'SET_IS_PREVENT_SWITCH',
+      setHeadColor: 'SET_HEAD_COLOR',
+      setCustomizeColor: 'SET_CUSTOMIZE_COLOR'
+    }),
     switchPage (index) {
       if (!this.isPreventSwitch) {
-        this.pageIndex = index
+        this.setPageIndex(index)
         this.isAddAccounts = index === 0
       }
-    },
-    preventPageSwitch () {
-      this.isPreventSwitch = true
-    },
-    allowPageSwitch () {
-      this.isPreventSwitch = false
     },
     checkVersionUpdateMsg () {
       // current chrome version < 45
@@ -315,40 +317,34 @@ export default {
     },
     async init () {
       if (localStorage) {
-        this.currentUnit = Store.fetch('bitUnit') ? Store.fetch('bitUnit') : this.D.unit.btc.BTC
-        this.currentUnitEth = Store.fetch('ethUnit') ? Store.fetch('ethUnit') : this.D.unit.eth.ETH
-        this.currentExchangeRate = Store.fetch('exchange') ? Store.fetch('exchange') : this.D.unit.legal.USD
+        let getBtcUnit = Store.fetch('bitUnit') ? Store.fetch('bitUnit') : this.D.unit.btc.BTC
+        this.setCurrentUnitBtc(getBtcUnit)
+        let getEthUnit = Store.fetch('ethUnit') ? Store.fetch('ethUnit') : this.D.unit.eth.ETH
+        this.setCurrentUnitEth(getEthUnit)
+        let getCurrentExchangeRate = Store.fetch('exchange') ? Store.fetch('exchange') : this.D.unit.legal.USD
+        this.setCurrentExchangeRate(getCurrentExchangeRate)
         let currentSkin = Store.fetch('skin') ? Store.fetch('skin') : 'gray'
-        this.heardColor = currentSkin + '-skin'
-        this.customizeColor = currentSkin + '-customize'
+        let getHeadColor = currentSkin + '-skin'
+        this.setHeadColor(getHeadColor)
+        let getCustomizeColor = currentSkin + '-customize'
+        this.setCustomizeColor(getCustomizeColor)
       } else {
         const bitUnit = await Store.setPromise('bitUnit')
         const ethUnit = await Store.setPromise('ethUnit')
         const exchange = await Store.setPromise('exchange')
         const skin = await Store.setPromise('skin')
-        this.currentUnit = bitUnit['bitUnit'] ? bitUnit['bitUnit'] : this.D.unit.btc.BTC
-        this.currentUnitEth = ethUnit['ethUnit'] ? ethUnit['ethUnit'] : this.D.unit.eth.ETH
-        this.currentExchangeRate = exchange['exchange'] ? exchange['exchange'] : this.D.unit.legal.USD
+        let getBtcUnit = bitUnit['bitUnit'] ? bitUnit['bitUnit'] : this.D.unit.btc.BTC
+        this.setCurrentUnitBtc(getBtcUnit)
+        let getEthUnit = ethUnit['ethUnit'] ? ethUnit['ethUnit'] : this.D.unit.eth.ETH
+        this.setCurrentUnitEth(getEthUnit)
+        let getCurrentExchangeRate = exchange['exchange'] ? exchange['exchange'] : this.D.unit.legal.USD
+        this.setCurrentExchangeRate(getCurrentExchangeRate)
         let currentSkin = skin['skin'] ? skin['skin'] : 'gray'
-        this.heardColor = currentSkin + '-skin'
-        this.customizeColor = currentSkin + '-customize'
+        let getHeadColor = currentSkin + '-skin'
+        this.setHeadColor(getHeadColor)
+        let getCustomizeColor = currentSkin + '-customize'
+        this.setCustomizeColor(getCustomizeColor)
       }
-    },
-    switchTargetPage (...data) {
-      this.pageIndex = data[0]
-    },
-    setExchangeRate (...data) {
-      this.currentExchangeRate = data[0]
-    },
-    settingColor (...data) {
-      this.heardColor = data[0] + '-skin'
-      this.customizeColor = data[0] + '-customize'
-    },
-    setBitUnit (...data) {
-      this.currentUnit = data[0]
-    },
-    setEthUnit (...data) {
-      this.currentUnitEth = data[0]
     },
     displayErrorCode (value) {
       layer.closeAll()
@@ -377,9 +373,9 @@ export default {
         if (status === this.D.status.plugOut) {
           this.loginStatus = 99
           this.isShowLogin = true
-          this.resetStatus = this.resetStatus + 1
-          this.pageIndex = 0
-          this.isPreventSwitch = false
+          this.setResetStatus()
+          this.setPageIndex(0)
+          this.setIsPreventSwitch(false)
           layer.msg(this.$t('message.app_plug_out'))
         }
       })
@@ -387,19 +383,18 @@ export default {
     onLoginFinish () {
       this.isShowLogin = false
       this.esWallet.getWalletInfo().then(value => {
-        this.walletInfo = value
+        this.setWalletInfo(value)
       }).catch(value => {
         console.warn(value)
         this.displayErrorCode(value)
       })
       this.esWallet.getAccounts().then(value => {
-        if (value) this.accounts = this.orderArr(value)
+        if (value) this.setAccountList(this.orderArr(value))
       }).catch(value => {
         console.warn(value)
         layer.msg(this.$t('message.app_error_get_account'), { icon: 2, anim: 6 })
       })
-      this.netInfo = this.esWallet.getProviders()
-      console.log(this.esWallet.getProviders(), 'net')
+      this.setNetInfo(this.esWallet.getProviders())
     },
     addAccountContent () {
       let btnDisplay = [this.$t('message.app_submit_btn'), this.$t('message.app_cancel_btn')]
@@ -433,14 +428,14 @@ export default {
             })
             // add new account operation
             that.esWallet.newAccount(that.selected).then(value => {
-              if (that.D.isBtc(that.selected)) that.addAccountTimes = that.addAccountTimes + 1
+              if (that.D.isBtc(that.selected)) that.setAddAccountTimes()
               // close loading layer
               layer.close(loadingIndex)
               layer.close(index)
               layer.msg(that.$t('message.app_successful'), { icon: 1 })
-              if (Array.isArray(that.accounts) && that.accounts.length > 0) {
-                that.accounts.push(value)
-                that.accounts = that.orderArr(that.accounts)
+              if (Array.isArray(that.accountList) && that.accountList.length > 0) {
+                that.putAccount(value)
+                this.setAccountList(this.orderArr(that.accountList))
               }
             }).catch(value => {
               layer.closeAll()
@@ -457,13 +452,13 @@ export default {
     orderArr (targetArr) {
       // Group accounts by coin type
       const arr = []
-      const accountList = []
+      const newAccountList = []
       for (let val of targetArr) {
         if (!arr.includes(val.coinType)) {
           arr.push(val.coinType)
-          accountList.push({type: val.coinType, list: [val]})
+          newAccountList.push({type: val.coinType, list: [val]})
         } else {
-          for (let item of accountList) {
+          for (let item of newAccountList) {
             if (item.type === val.coinType) {
               item.list.push(val)
               break
@@ -472,7 +467,7 @@ export default {
         }
       }
       let a = []
-      for (let val of accountList) {
+      for (let val of newAccountList) {
         a = a.concat(val.list)
       }
       return a
@@ -505,6 +500,7 @@ export default {
   @orange2: #ef7631;
   @orange3: #f99b64;
   @darkGreen: #2e5c62;
+  @green: #009688;
   .underline(@color){
     content: '';
     background-color: @color;
@@ -550,6 +546,44 @@ export default {
     .header-skin(@gray);
   }
   /*Custom skin style*/
+  /*menu*/
+  .layui-nav-tree{
+    .nav-title{
+      border-left: 4px solid @green;
+    }
+    .layui-nav-child{
+      dd.layui-this a{
+        background-color: #fff;
+        color:  @green!important;
+      }
+      dd a{
+        &:hover{
+          color:  @green!important;
+          span{
+            &:after{
+              width: calc(100%);
+
+            }
+          }
+        }
+        span{
+          display: inline-block;
+          position: relative;
+          &:after{
+            .underline(@green);
+            height: 3px;
+            width: 0;
+            margin: 0 auto;
+            bottom: 4px;
+            left: 0;
+            right: 0;
+            transition: width .2s ease,bottom .2s ease;
+          }
+        }
+      }
+    }
+  }
+
   .gray-customize {
     .layui-form-radioed>i{
       color: @orange1;
@@ -557,6 +591,44 @@ export default {
         color: @orange1;
       }
     }
+    /*menu*/
+    .layui-nav-tree{
+      .nav-title{
+        border-left: 4px solid @orange1;
+      }
+      .layui-nav-child{
+        dd.layui-this a{
+          background-color: #fff;
+          color:  @orange1!important;
+        }
+        dd a{
+          &:hover{
+            color:  @orange1!important;
+            span{
+              &:after{
+                width: calc(100%);
+
+              }
+            }
+          }
+          span{
+            display: inline-block;
+            position: relative;
+            &:after{
+              .underline(@orange1);
+              height: 3px;
+              width: 0;
+              margin: 0 auto;
+              bottom: 4px;
+              left: 0;
+              right: 0;
+              transition: width .2s ease,bottom .2s ease;
+            }
+          }
+        }
+      }
+    }
+
     .layui-form-select dl dd.layui-this{
       background-color: @orange3;
     }
@@ -647,6 +719,44 @@ export default {
     }
   }
   .blue-customize {
+    /*menu*/
+    .layui-nav-tree{
+      .nav-title{
+        border-left: 4px solid @darkRed2;
+      }
+      .layui-nav-child{
+        dd.layui-this a{
+          background-color: #fff;
+          color:  @darkRed2!important;
+        }
+        dd a{
+          &:hover{
+            color:  @darkRed2!important;
+            span{
+              &:after{
+                width: calc(100%);
+
+              }
+            }
+          }
+          span{
+            display: inline-block;
+            position: relative;
+            &:after{
+              .underline(@darkRed2);
+              height: 3px;
+              width: 0;
+              margin: 0 auto;
+              bottom: 4px;
+              left: 0;
+              right: 0;
+              transition: width .2s ease,bottom .2s ease;
+            }
+          }
+        }
+      }
+    }
+
     .layui-form-radio>i:hover, .layui-form-radioed>i {
       color: @darkRed2;
     }
