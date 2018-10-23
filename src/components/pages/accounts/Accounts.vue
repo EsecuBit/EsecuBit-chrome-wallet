@@ -1,5 +1,5 @@
 <template>
-<div>
+<div style="height: 100%">
   <!-- left sidebar -->
   <div class="site-tree">
     <!--<ul class="layui-tree">-->
@@ -26,9 +26,12 @@
   </div>
 
   <!-- main content -->
-  <div class="site-content">
+  <div class="site-content height-scroll">
     <div class="tab-content-1" id="tab-content-1">
-      <div class="tab-item" v-for="(tablecount, index) in gridList"  :class="{'layui-show': index === currentAccountIndex}">
+      <div v-if="isTest">
+        <EosAccounts></EosAccounts>
+      </div>
+      <div class="tab-item" v-else v-for="(tablecount, index) in gridList"  :class="{'layui-show': index === currentAccountIndex}">
         <!-- account information -->
         <div class="account-information">
           <div class="account-msg">
@@ -45,13 +48,10 @@
             <div class="max-width-400">
               <span class="layui-badge-dot layui-bg-green"></span>
               <span>{{$t('message.accounts_balance')}}</span>
-              <span v-if="coinTypeList[index] && newAccount.length > 0">{{formatBalance(newAccount[index].coinType, newAccount[index].balance)}}</span>
-              <span v-if="coinTypeList[index]">{{currentDisplayUnit(coinTypeList[index])}}</span>
+              <span v-if="coinTypeList[index] && newAccount.length > 0">{{formatBalance(newAccount[index].coinType, newAccount[index].balance) + currentDisplayUnit(coinTypeList[index])}}</span>
               <span v-if="newAccount.length > 0 && newAccount[index].balance">
-                <span class="exchange-rate">(</span>
-                <span class="exchange-rate" v-if="currentExchangeRate && coinTypeList[index] && newAccount[index].balance">{{toExchangeText(coinTypeList[index], newAccount[index].balance)}}</span>
-                <span class="exchange-rate">{{currentExchangeRate}}</span>
-                <span class="exchange-rate">)</span>
+                <span class="exchange-rate" v-if="currentExchangeRate && coinTypeList[index] && newAccount[index].balance"
+                >{{'( ' + toExchangeText(coinTypeList[index], newAccount[index].balance) + currentExchangeRate + ' )'}}</span>
               </span>
             </div>
           </div>
@@ -97,7 +97,6 @@
               <!-- Determine whether to resend -->
                 <tr style="height: 39px;overflow-x: hidden" @mouseenter="reSendPrompt(table.canResend, table.shouldResend, index, trIndex)" @mouseleave="clearLayer" :class="'prompt_' + index + '_' + trIndex">
                   <td>{{getFormatTime(table.time)}}</td>
-
                   <td>
                     <span :class ="[table.direction === 'in'?green:red]" class="text-opacity">{{toOrForm(table.direction)}}</span>
                     <span style="cursor: text;">{{getTableAddress(table)}}</span>
@@ -117,7 +116,6 @@
                     <canvas class="canvas" :class="['canvas-'+ index, table.canResend ? 'hoverClass' : '']" :data-canresend='table.canResend' :data-shouldresend="table.shouldResend"
                             width="100" height="30" :data-counts="table.confirmations" @click="sendTransaction(table,  table.canResend)"></canvas>
                   </td>
-
                   <td>
                     <a title="search" :href="table.link" target="_blank">
                       <i class="layui-icon">&#xe615;</i>
@@ -141,7 +139,6 @@
         </div>
       </div>
     </div>
-    <Progress :radius="radius" :percent="percent"></Progress>
   </div>
   <!-- edit account name layer -->
   <div class="edit-account-wrapper" id="edit-account">
@@ -162,8 +159,8 @@
 </template>
 
 <script>
-import Progress from '../progress/Progress'
 import { mapState, mapMutations } from 'vuex'
+import EosAccounts from '../../eos/accounts/EosAccounts'
 
 const $ = layui.jquery
 const layer = layui.layer
@@ -171,10 +168,12 @@ const laypage = layui.laypage
 export default {
   name: 'accouts',
   props: ['errorCodeMsg'],
+  components: {
+    EosAccounts
+  },
   data () {
     return {
-      radius: 126,
-      percent: 0.1,
+      isTest: false,
       grid_pager: 'grid_pager',
       description: {
         txId: '',
@@ -218,9 +217,6 @@ export default {
       'currentExchangeRate': 'currentExchangeRate',
       'currentAccountIndex': 'currentAccountIndex'
     })
-  },
-  components: {
-    Progress
   },
   watch: {
     accountInfo: {
@@ -337,12 +333,7 @@ export default {
       })
     },
     switchMenu (item) {
-      console.log(item)
-      if (item.active) {
-        this.$set(item, 'active', false)
-      } else {
-        this.$set(item, 'active', true)
-      }
+      item.active ? this.$set(item, 'active', false) : this.$set(item, 'active', true)
     },
     reSendPrompt (canResend, shouldResend, index, trIndex) {
       let msg = shouldResend ? this.$t('message.accounts_resend_prompt') : this.$t('message.accounts_resend_prompt_1')
@@ -641,16 +632,37 @@ export default {
 <style scoped lang="less">
   @blue:#409eff;
   @font-color: #333;
-  @gray: #fff;
+  @white: #fff;
+  @cyan-blue: #009688;
+  @red: #e74c3c;
+  .max-width(@width){
+    display: inline-block;
+    max-width: @width;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space:nowrap;
+  }
   .site-title {
     margin-top:30px;
   }
   .site-tree{
-    background-color: @gray;
-    padding-top: 15px;
+    height: 100%;
+    background-color: @white;
+    padding: 0;
+    border: 0;
+    .layui-nav-tree{
+      padding: 15px 0 10px;
+      border-right: 1px solid #eee;
+      height: 100%;
+      .layui-nav-item{
+        .nav-title{
+          background: #eee;
+        }
+      }
+    }
   }
   .layui-nav-tree{
-    width: auto;
+    width: 170px;
 
     .layui-nav-item a{
       height: 40px;
@@ -664,24 +676,24 @@ export default {
     }
     .layui-nav-child {
       dd.layui-this{
-        background-color: @gray!important;
+        background-color: @white!important;
         color: @font-color;
       }
       a{
         color: @font-color;
         &:hover{
-          background-color: #fff;
+          background-color: @white;
           color: @font-color;
         }
       }
     }
     .layui-nav-itemed .layui-nav-child{
-      background: @gray!important;
+      background: @white!important;
     }
   }
   /*rewrite sidebar css*/
   .layui-nav{
-    background: #f2f2f2;
+    background: #fff;
     color: @font-color;
     .layui-nav-itemed>a{
       color: @font-color;
@@ -696,6 +708,7 @@ export default {
       color: @font-color!important;
     }
   }
+  /*account-information*/
   .account-information {
     display: block;
     height: 52px;
@@ -705,117 +718,64 @@ export default {
     border-radius: 5px;
     border: 1px solid #f0f0f0;
     box-shadow: 1px 4px 8px 0 rgba(0,0,0,0.15);
+    .account-msg {
+      display: inline-block;
+      max-height: 19px;
+      margin-right: 30px;
+      .exchange-rate{
+        font-size: 12px;
+        color:#666;
+      }
+      .layui-badge-dot {
+        margin-right: 4px;
+      }
+      .max-width-250 {
+        .max-width(250px);
+      }
+      .max-width-400 {
+        .max-width(400px);
+      }
+      .edit-account{
+        margin-left: 10px;
+        height: 16px;
+        &:hover{
+          color: @cyan-blue;
+        }
+      }
+      .refresh-data {
+        height: 16px;
+        &:hover{
+          color: @cyan-blue;
+        }
+      }
+    }
   }
-  .account-msg {
-    display: inline-block;
-    max-height: 19px;
-    margin-right: 30px;
-
-  }
-  .max-width-250 {
-    display: inline-block;
-    max-width: 250px;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    white-space:nowrap;
-  }
-  .max-width-400 {
-    display: inline-block;
-    max-width: 400px;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    white-space:nowrap;
-  }
-  .edit-account{
-    margin-left: 10px;
-    height: 16px;
-  }
-  .edit-account :hover{
-    color: #009688;
-  }
-  .refresh-data {
-    height: 16px;
-  }
-  .account-msg .refresh-data:hover {
-    color: #009688;
-  }
-  .layui-badge-dot {
-    margin-right: 4px;
-  }
-  table{
+  /*table*/
+  .layui-table{
     table-layout:fixed;
-  }
-  td {
-    text-overflow: ellipsis;
-    overflow: hidden;
-    white-space:nowrap;
-  }
-  .content .table {
-    width: 100%;
-    max-width: 100%;
-    margin-bottom: 17px;
-    background-color: transparent;
-    border-collapse: collapse;
-    border-spacing: 0;
-    display: table;
-  }
-  .content thead {
-    display: table-header-group;
-    vertical-align: middle;
-    border-color: inherit;
-  }
-  tr {
-    display: table-row;
-    vertical-align: inherit;
-    border-color: inherit;
-  }
-  th {
-    font-weight: bold;
-    display: table-cell;
-    text-align: left;
-  }
-  .table td {
-    box-sizing: border-box;
-  }
-  .layui-table td, .layui-table th{
-    text-overflow: ellipsis;
-    overflow: hidden;
-    text-align: center;
-  }
-  .table > thead > tr > th {
-    width: 40px;
-    border-bottom: 2px solid #f4f4f4;
-    vertical-align: bottom;
-    padding: 8px;
-    line-height: 1.42857143;
-  }
-  .table > thead:first-child > tr:first-child > th{
-    border-top: 0
-  }
-  tbody {
-    display: table-row-group;
-    vertical-align: middle;
-    border-color: inherit;
-  }
-  .table-striped > tbody > tr:nth-of-type(odd) {
-    background-color: #f9f9f9;
-  }
-  .table > tbody > tr > td {
-    border-top: 1px solid #f4f4f4;
-    padding: 8px;
-    line-height: 1.42857143;
-    vertical-align: top;
-    word-break: break-all;
-    white-space: pre-wrap;
+    td,th {
+      text-align: center;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space:nowrap;
+    }
+    tr {
+      display: table-row;
+      vertical-align: inherit;
+      border-color: inherit;
+    }
+    thead {
+      font-weight: bold;
+    }
   }
   .active-count {
-    color: #e74c3c;
+    color: @red;
   }
   .green-font {
     color: #009a61;
   }
   .red-font {
-    color: #e74c3c;
+    color: @red;
   }
   /*Edit account name*/
   .edit-account-wrapper{
@@ -828,13 +788,9 @@ export default {
     height: 36px;
     line-height: 36px;
     color: @font-color;
-    background-color: @gray;
+    background-color: @white;
     border-radius: 6px;
     margin: 0 20px 20px;
-  }
-  .exchange-rate{
-    font-size: 12px;
-    color:#666;
   }
   .text-opacity {
     opacity: 0.8;
@@ -866,7 +822,7 @@ export default {
     height: 28px;
     line-height: 28px;
     margin: 0 -1px 5px 0;
-    background-color: #fff;
+    background-color: @white;
     color: @font-color;
     font-size: 12px;
   }
@@ -909,9 +865,9 @@ export default {
     right: 15px;
     height: 39px;
     line-height: 39px;
-  }
-  .close-msg .layui-icon:hover {
-    font-weight: 900;
+    & .layui-icon:hover {
+      font-weight: 900;
+    }
   }
   .hoverClass:hover {
     cursor: pointer;

@@ -87,8 +87,11 @@ export default {
     font-family: 'Open Sans','Helvetica Neue',Helvetica,Arial,sans-serif;
   }
   .login-container{
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
     width: 100%;
-    height: 100%;
     display: -webkit-flex;
     display: flex;
     flex-direction: column;

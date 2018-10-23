@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="height-scroll">
     <!-- prompt msg -->
     <blockquote class="site-text layui-elem-quote" style="margin-top: 20px">
       <i class="layui-icon" style="vertical-align: middle;font-size: 20px">&#xe645;</i>   {{$t('message.accept_prompt_msg')}}
@@ -71,7 +71,7 @@
 </template>
 
 <script>
-import Store from '../../common/js/store'
+import Store from '../../../common/js/store'
 import Clipboard from 'clipboard'
 import { mapState } from 'vuex'
 
@@ -85,7 +85,7 @@ export default {
     return {
       isFirst: true,
       qrAddress: null,
-      currentAccount: {label: ''},
+      currentAccount: {},
       accountQrcode: null,
       coinType: '',
       showButton: true,

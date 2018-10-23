@@ -40,7 +40,7 @@ export default {
     position: relative;
     display: inline-block;
     circle{
-      stroke-width: 4.8px;
+      stroke-width: 8px;
       transform-origin: center;
       &.progress-background{
         transform: scale(0.9);
@@ -48,7 +48,7 @@ export default {
       }
       &.progress-bar{
         transform: scale(0.9) rotate(-90deg);
-        stroke: rgb(32, 160, 255)
+        stroke: #00dfb9
       }
     }
     .progress-text{

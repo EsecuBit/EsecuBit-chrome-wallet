@@ -24,7 +24,8 @@ const state = {
   renameTimes: 0,
   switchLangTimes: 0,
   fillTableTimes: 0,
-  autoFillTableData: {}
+  autoFillTableData: {},
+  isAddAccounts: true
 }
 
 export default new Vuex.Store({

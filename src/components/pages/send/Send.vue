@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="height-scroll">
     <!-- prompt message -->
     <blockquote class="site-text layui-elem-quote" style="margin-top: 20px">
       <i class="layui-icon" style="vertical-align: middle;">&#xe645;</i> {{$t('message.send_prompt_msg')}}
@@ -184,7 +184,7 @@ export default {
         {}
       ],
       switchFee: false,
-      currentAccount: {label: ''},
+      currentAccount: {},
       totalFee: 0,
       transFee: 0,
       totalFeeDisplay: '',

@@ -55,6 +55,9 @@ const mutations = {
   },
   SET_AUTO_FILL_TABLE_DATA: (state, autoFillTableData) => {
     state.autoFillTableData = autoFillTableData
+  },
+  SET_IS_Add_ACCOUNTS: (state, isAddAccounts) => {
+    state.isAddAccounts = isAddAccounts
   }
 }
 export default mutations

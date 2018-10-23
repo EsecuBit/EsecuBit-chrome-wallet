@@ -1,0 +1,230 @@
+@blue: #2d3451;
+@darkRed1: #6d3028;
+@darkRed2: #B03A5B;
+@darkRed3: #ba6a81;
+@black: #263238;
+@gray: #424650;
+@orange1: #F47023;
+@orange2: #ef7631;
+@orange3: #f99b64;
+@darkGreen: #2e5c62;
+@green: #009688;
+.underline(@color){
+  content: '';
+  background-color: @color;
+  position: absolute;
+  z-index: 1;
+}
+.header-skin(@color){
+  background:@color;
+  color: #fff;
+  border-bottom: 1px solid @color;
+  border-right: 1px solid @color;
+}
+.bg-black{
+  background-color:@black;
+}
+.fly-column{
+  background-color: #f5f5f5;
+}
+.logo {
+  position: absolute;
+  left: 0;
+  top: 6px;
+  width: 126px;
+  height: 46px;
+  img {
+    width: 100%;
+    height: 100%;
+  }
+}
+.blue-skin {
+  .header-skin(@blue);
+}
+.green-skin {
+  .header-skin(@darkGreen);
+}
+.black-skin {
+  .header-skin(@black);
+}
+.gray-skin {
+  .header-skin(@gray);
+}
+/*Custom skin style*/
+/*menu*/
+.layui-nav-tree{
+  .nav-title{
+    border-left: 4px solid @green;
+  }
+  .layui-nav-child{
+    dd.layui-this a{
+      background-color: #fff;
+      color:  @green!important;
+    }
+    dd a{
+      &:hover{
+        color:  @green!important;
+        span{
+          &:after{
+            width: calc(100%);
+
+          }
+        }
+      }
+      span{
+        display: inline-block;
+        position: relative;
+        &:after{
+          .underline(@green);
+          height: 3px;
+          width: 0;
+          margin: 0 auto;
+          bottom: 4px;
+          left: 0;
+          right: 0;
+          transition: width .2s ease,bottom .2s ease;
+        }
+      }
+    }
+  }
+}
+.customize-skin(@color, @color2){
+  .layui-form-radioed>i{
+    color: @color;
+    &:hover{
+      color: @color;
+    }
+  }
+  /*menu*/
+  .layui-nav-tree{
+    .nav-title{
+      border-left: 4px solid @color;
+    }
+    .layui-nav-child{
+      dd.layui-this a{
+        background-color: #fff;
+        color:  @color!important;
+      }
+      dd a{
+        &:hover{
+          color:  @color!important;
+          span{
+            &:after{
+              width: calc(100%);
+
+            }
+          }
+        }
+        span{
+          display: inline-block;
+          position: relative;
+          &:after{
+            .underline(@color);
+            height: 3px;
+            width: 0;
+            margin: 0 auto;
+            bottom: 4px;
+            left: 0;
+            right: 0;
+            transition: width .2s ease,bottom .2s ease;
+          }
+        }
+      }
+    }
+  }
+
+  .layui-form-select dl dd.layui-this{
+    background-color: @color;
+  }
+  .menu-switch li.layui-this a:after{
+    .underline(@color);
+    height: 3px;
+    width: calc(100% - 30px);
+    bottom: 0;
+    left: 5px;
+    right: 0;
+  }
+  .menu-switch li a{
+    &:after{
+      .underline(@color);
+      height: 3px;
+      width: 0;
+      margin: 0 auto;
+      bottom: 0;
+      left: 5px;
+      right: 0;
+      transition: width .2s ease,bottom .2s ease;
+    }
+    &:hover:after{
+      width: calc(100% - 30px);
+    }
+  }
+  .site-tree .layui-tree li h2{
+    border-left-color: @color;
+  }
+  .site-tree .layui-tree .layui-this .layui-icon{
+    color: @color;
+  }
+  .site-tree .layui-tree .layui-this a {
+    color:@color;
+  }
+  .layui-bg-green {
+    background-color: @color!important;
+  }
+  .layui-elem-quote{
+    border-left: 5px solid @color;
+  }
+  .layui-btn {
+    background-color: @color;
+  }
+  .layui-btn-primary:hover {
+    border-color: @color;
+    color: #333;
+  }
+  .layui-laypage .layui-laypage-curr .layui-laypage-em {
+    background-color: @color2;
+  }
+  .layui-laypage a:hover {
+    color: @color2;
+  }
+  .site-tree .layui-tree a {
+    padding-bottom: 4px;
+    position: relative;
+    height: 30px;
+    &:hover:after{
+      width: calc(100% - 10px);
+      color: @color;
+    }
+    &:after{
+      .underline(@color);
+      height: 2px;
+      width: 0;
+      margin: 0 auto;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      transition: width .2s ease,bottom .2s ease;
+    }
+    &:hover{
+      color: @color;
+    }
+  }
+  a:hover li i {
+    color: @color!important;
+  }
+  .layui-form-checked[lay-skin=primary] i {
+    border-color: @color2;
+    background-color: @color2;
+    color: #fff;
+  }
+  .layui-form-checkbox[lay-skin=primary]:hover i {
+    border-color: @color2;
+    color: #fff;
+  }
+}
+.gray-customize {
+  .customize-skin(@orange1, @orange2)
+}
+.blue-customize {
+  .customize-skin(@darkRed2, @darkRed3)
+}

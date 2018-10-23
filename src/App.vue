@@ -1,104 +1,32 @@
 <template>
-  <div style="height: 100%">
-    <div v-cloak style="height: 100%">
-      <!-- login page -->
-      <div v-show="isShowLogin" style="height: 100%">
-        <Login :status="loginStatus" :login-error-msg="loginErrorMsg"/>
-      </div>
+  <div v-cloak>
+    <!-- login page -->
+    <div v-show="isShowLogin">
+      <Login :status="loginStatus" :login-error-msg="loginErrorMsg"/>
+    </div>
+    <!-- app page -->
+    <div class="app-page-container" :class="[customizeColor]" v-show="!isShowLogin">
+      <!-- header -->
+      <v-header></v-header>
+      <!-- breadcrumb and add accounts btn -->
+      <v-breadcrumb :nav-title="navTitle" :is-add-accounts="isAddAccounts"></v-breadcrumb>
 
-      <!-- app page -->
-      <div v-show="!isShowLogin">
-        <!-- header -->
-        <div class="main-admin" :class="[customizeColor]">
-          <div class="fly-header bg-black" v-bind:class="[headColor]">
-            <div class="layui-container">
-              <a class="logo" href="#"> <img src="./common/imgs/logo.png" alt="Wallet Bitcion"></a>
-              <!-- header nav.menu -->
-              <ul class="layui-nav fly-nav layui-hide-xs menu-switch">
-                <li class="layui-nav-item " :class="{'layui-this': index === pageIndex}" v-for="(item, index) in pageList" @click="switchPage(index)">
-                  <a href="#"><i class="icon iconfont" :class="item.icon"></i>{{item.label}}</a>
-                </li>
-              </ul>
-
-            </div>
+      <!-- main page -->
+      <div class="layui-container main-content-wrapper">
+        <div class="main-tab-content">
+          <div class="main-tab-item" :class="{'layui-show': 0 === pageIndex}">
+            <Accounts :error-code-msg="errorCodeMsg"/>
           </div>
-
-          <!-- breadcrumb and add accounts btn -->
-          <div class="fly-panel fly-column">
-            <div class="layui-container">
-              <p style="height: 40px;line-height: 40px">
-                <span class="layui-breadcrumb" style="visibility: visible;">
-                  <a href="#">{{$t('message.app_home')}}</a><span lay-separator="">&gt;</span>
-                  <a href="#" id="message" class="message" v-text="navTitle"></a>
-                  <div class="add-btn-wrapper clearfix" v-show="isAddAccounts">
-                    <a href="#" class="add-btn" @click="addAccountContent"><i class="layui-icon ">&#xe770;</i>{{$t('message.app_add_accounts')}}</a>
-                  </div>
-                 </span>
-              </p>
-            </div>
+          <div class="main-tab-item" :class="{'layui-show': 1 === pageIndex}">
+            <Send :error-code-msg="errorCodeMsg"/>
           </div>
-
-          <!-- main page -->
-          <div class="layui-container page-content ">
-            <div class="main-tab-content">
-              <div class="main-tab-item" :class="{'layui-show': 0 === pageIndex}">
-                <Accounts :error-code-msg="errorCodeMsg"/>
-              </div>
-              <div class="main-tab-item" :class="{'layui-show': 1 === pageIndex}">
-                <Send :error-code-msg="errorCodeMsg"/>
-              </div>
-              <div class="main-tab-item" :class="{'layui-show': 2 === pageIndex}">
-                <Accept :error-code-msg="errorCodeMsg"/>
-              </div>
-              <div class="main-tab-item" :class="{'layui-show': 3 === pageIndex}">
-                <Setting/>
-              </div>
-            </div>
+          <div class="main-tab-item" :class="{'layui-show': 2 === pageIndex}">
+            <Accept :error-code-msg="errorCodeMsg"/>
+          </div>
+          <div class="main-tab-item" :class="{'layui-show': 3 === pageIndex}">
+            <Setting/>
           </div>
         </div>
-
-        <!-- add accounts Pop-up layer -->
-        <div class="add-accounts-content" id="account-content">
-          <div class="content-wrapper">
-            <div class="form-content" v-show="isHasAccount">
-              <p class="description">
-                <i class="layui-icon" style="color: #dd4b39;">&#xe702;</i>&nbsp;
-                <span>{{$t('message.app_select_prompt')}}</span>
-              </p>
-              <form class="layui-form" lay-filter="form1">
-                <div class="layui-form-item" >
-                  <label class="layui-form-label" style="width: 130px">{{$t('message.app_accounts_type')}}</label>
-                  <div class="layui-input-inline" style="width: 350px">
-                    <select lay-verify="required" lay-filter="addAccount" >
-                      <option v-for="item in accountType" :value="item">{{item}}</option>
-                    </select>
-                  </div>
-                </div>
-              </form>
-            </div>
-            <div class="msg-wrapper" v-show="!isHasAccount">
-              <div class="msg-content">
-                <p class="error-msg">
-                  <i class="layui-icon" style="color: #dd4b39;font-size: 26px">&#xe702;</i>&nbsp;
-                  <span>
-                    {{$t('message.app_error_prompt_msg')}}
-                  </span>
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- add accounts loading-->
-        <div class="add-accounts-content" id="loading">
-          <div class="loading-center">
-            <div class="loading-wrapper">
-              <i class="layui-icon layui-anim layui-anim-rotate layui-anim-loop" style="font-size: 30px;"> </i>
-              <span>{{$t('message.app_init_new_account')}}</span>
-            </div>
-          </div>
-        </div>
-
       </div>
     </div>
   </div>
@@ -106,47 +34,40 @@
 
 <script>
 import Login from './components/login/Login'
-import Accounts from './components/index/Accounts'
-import Send from './components/index/Send'
-import Setting from './components/index/Setting'
-import Accept from './components/index/Accept'
+import Accounts from './components/pages/accounts/Accounts'
+import Send from './components/pages/send/Send'
+import Setting from './components/pages/setting/Setting'
+import Accept from './components/pages/accept/Accept'
+import Breadcrumb from './components/breadcrumb/Breadcrumb'
+import Header from './components/header/Header'
 import Store from './common/js/store'
 import qs from 'qs'
 import { mapState, mapMutations } from 'vuex'
 
 // Introducing layui plugin variables
-// eslint-disable-next-line
-const element = layui.element
-const $ = layui.jquery
 const layer = layui.layer
-const form = layui.form
 
 export default {
   name: 'App',
+  components: {
+    Login,
+    Accounts,
+    Send,
+    Setting,
+    Accept,
+    'v-breadcrumb': Breadcrumb,
+    'v-header': Header
+  },
   data () {
     return {
       isShowLogin: true,
       loginStatus: null,
       isAddAccounts: true,
-      selected: '',
-      isHasAccount: true,
-      accountType: [],
       loginErrorMsg: '',
       getNewAppUrl: 'http://39.106.201.178/app-update-server/getNewApp'
     }
   },
   watch: {
-    accountType: {
-      handler (newValue, oldValue) {
-        this.selected = newValue[0]
-        this.$nextTick(() => {
-          form.render('select', 'form1')
-          form.on('select(addAccount)', data => {
-            this.selected = data.value
-          })
-        })
-      }
-    },
     pageIndex: {
       handler (newValue, oldValue) {
         // Display add accounts button on the home page
@@ -159,19 +80,8 @@ export default {
       'accountList': 'accountList',
       'appVersion': 'appVersion',
       'pageIndex': 'pageIndex',
-      'isPreventSwitch': 'isPreventSwitch',
-      'headColor': 'headColor',
       'customizeColor': 'customizeColor'
     }),
-    pageList () {
-      // nav.menu label and icon
-      return [
-        {label: this.$t('message.app_accounts'), icon: 'icon-zhanghu1'},
-        {label: this.$t('message.app_send'), icon: 'icon-msnui-cloud-upload'},
-        {label: this.$t('message.app_accept'), icon: 'icon-msnui-cloud-download'},
-        {label: this.$t('message.app_setting'), icon: 'icon-shezhi2'}
-      ]
-    },
     navTitle () {
       // breadcrumb: get current page
       let pageTitle = [this.$t('message.app_accounts'), this.$t('message.app_send'), this.$t('message.app_accept'), this.$t('message.app_setting')]
@@ -227,7 +137,6 @@ export default {
         window.event.returnValue = false
       }
     }
-    form.render('select', 'form1')
     this.checkVersionUpdateMsg()
   },
   methods: {
@@ -237,7 +146,6 @@ export default {
       setWalletInfo: 'SET_WALLET_INFO',
       setCurrentUnitBtc: 'SET_CURRENT_UNIT_BTC',
       setCurrentUnitEth: 'SET_CURRENT_UNIT_ETH',
-      setAddAccountTimes: 'SET_ADD_ACCOUNT_TIMES',
       putAccount: 'PUT_ACCOUNT',
       setCurrentExchangeRate: 'SET_CURRENT_EXCHANGE_RATE',
       setNetInfo: 'SET_NET_INFO',
@@ -246,12 +154,6 @@ export default {
       setHeadColor: 'SET_HEAD_COLOR',
       setCustomizeColor: 'SET_CUSTOMIZE_COLOR'
     }),
-    switchPage (index) {
-      if (!this.isPreventSwitch) {
-        this.setPageIndex(index)
-        this.isAddAccounts = index === 0
-      }
-    },
     checkVersionUpdateMsg () {
       // current chrome version < 45
       let currentVersion = this.getChromeVersion()
@@ -396,59 +298,6 @@ export default {
       })
       this.setNetInfo(this.esWallet.getProviders())
     },
-    addAccountContent () {
-      let btnDisplay = [this.$t('message.app_submit_btn'), this.$t('message.app_cancel_btn')]
-      // Get available currency types
-      this.esWallet.availableNewAccountCoinTypes().then(value => {
-        if (Array.isArray(value) && value.length > 0) {
-          this.accountType = value
-          this.isHasAccount = true
-        } else {
-          this.isHasAccount = false
-          btnDisplay = null
-        }
-        const that = this
-        layer.open({
-          type: 1,
-          area: ['567px', '315px'],
-          shadeClose: false,
-          title: that.$t('message.app_add_accounts_title'),
-          btn: btnDisplay,
-          content: $('#account-content'),
-          yes (index) {
-            // open loading layer
-            let loadingIndex = layer.open({
-              type: 1,
-              anim: 2,
-              closeBtn: 0,
-              title: false,
-              maxmin: false,
-              area: ['315px', '100px'],
-              content: $('#loading')
-            })
-            // add new account operation
-            that.esWallet.newAccount(that.selected).then(value => {
-              if (that.D.isBtc(that.selected)) that.setAddAccountTimes()
-              // close loading layer
-              layer.close(loadingIndex)
-              layer.close(index)
-              layer.msg(that.$t('message.app_successful'), { icon: 1 })
-              if (Array.isArray(that.accountList) && that.accountList.length > 0) {
-                that.putAccount(value)
-                this.setAccountList(this.orderArr(that.accountList))
-              }
-            }).catch(value => {
-              layer.closeAll()
-              console.warn(value)
-              layer.msg(that.$t('message.app_error_add_account'), { icon: 2, anim: 6 })
-            })
-          }
-        })
-      }).catch(value => {
-        console.warn(value)
-        this.displayErrorCode(value)
-      })
-    },
     orderArr (targetArr) {
       // Group accounts by coin type
       const arr = []
@@ -472,361 +321,46 @@ export default {
       }
       return a
     }
-  },
-  components: {
-    Login,
-    Accounts,
-    Send,
-    Setting,
-    Accept
   }
 }
 </script>
 
-<style>
-@import './common/css/iconfont.css' ;
-@import './common/css/main.css' ;
-</style>
-
 <style lang="less">
-  /*Global style*/
-  @blue: #2d3451;
-  @darkRed1: #6d3028;
-  @darkRed2: #B03A5B;
-  @darkRed3: #ba6a81;
-  @black: #263238;
-  @gray: #424650;
-  @orange1: #F47023;
-  @orange2: #ef7631;
-  @orange3: #f99b64;
-  @darkGreen: #2e5c62;
-  @green: #009688;
-  .underline(@color){
-    content: '';
-    background-color: @color;
-    position: absolute;
-    z-index: 1;
-  }
-  .header-skin(@color){
-    background:@color;
-    color: #fff;
-    border-bottom: 1px solid @color;
-    border-right: 1px solid @color;
-  }
+  @import './common/css/iconfont.css' ;
+  @import './common/css/main.css' ;
+  @import './common/css/skin';
   div{
     font: 14px Helvetica Neue,Helvetica,PingFang SC,\5FAE\8F6F\96C5\9ED1,Tahoma,Arial,sans-serif;
   }
-  .bg-black{
-    background-color:@black;
-  }
-  .fly-column{
-    background-color: #f5f5f5;
-  }
-  .logo {
+  .app-page-container{
     position: absolute;
+    top: 0;
+    bottom: 0;
     left: 0;
-    top: 6px;
-    width: 126px;
-    height: 46px;
-    img {
-      width: 100%;
-      height: 100%;
-    }
-  }
-  .blue-skin {
-    .header-skin(@blue);
-  }
-  .green-skin {
-    .header-skin(@darkGreen);
-  }
-  .black-skin {
-    .header-skin(@black);
-  }
-  .gray-skin {
-    .header-skin(@gray);
-  }
-  /*Custom skin style*/
-  /*menu*/
-  .layui-nav-tree{
-    .nav-title{
-      border-left: 4px solid @green;
-    }
-    .layui-nav-child{
-      dd.layui-this a{
-        background-color: #fff;
-        color:  @green!important;
-      }
-      dd a{
-        &:hover{
-          color:  @green!important;
-          span{
-            &:after{
-              width: calc(100%);
-
-            }
-          }
-        }
-        span{
-          display: inline-block;
-          position: relative;
-          &:after{
-            .underline(@green);
-            height: 3px;
-            width: 0;
-            margin: 0 auto;
-            bottom: 4px;
-            left: 0;
-            right: 0;
-            transition: width .2s ease,bottom .2s ease;
-          }
+    width: 100%;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    flex-direction: column;
+    .main-content-wrapper{
+      display: flex;
+      -webkit-box-orient: horizontal;
+      -webkit-box-direction: normal;
+      flex-direction: row;
+      -webkit-box-flex: 1;
+      flex: 1;
+      flex-basis: auto;
+      .main-tab-content{
+        width: 100%;
+        .main-tab-item{
+          height: 100%;
         }
       }
     }
   }
-
-  .gray-customize {
-    .layui-form-radioed>i{
-      color: @orange1;
-      &:hover{
-        color: @orange1;
-      }
-    }
-    /*menu*/
-    .layui-nav-tree{
-      .nav-title{
-        border-left: 4px solid @orange1;
-      }
-      .layui-nav-child{
-        dd.layui-this a{
-          background-color: #fff;
-          color:  @orange1!important;
-        }
-        dd a{
-          &:hover{
-            color:  @orange1!important;
-            span{
-              &:after{
-                width: calc(100%);
-
-              }
-            }
-          }
-          span{
-            display: inline-block;
-            position: relative;
-            &:after{
-              .underline(@orange1);
-              height: 3px;
-              width: 0;
-              margin: 0 auto;
-              bottom: 4px;
-              left: 0;
-              right: 0;
-              transition: width .2s ease,bottom .2s ease;
-            }
-          }
-        }
-      }
-    }
-
-    .layui-form-select dl dd.layui-this{
-      background-color: @orange3;
-    }
-    .menu-switch li.layui-this a:after{
-      .underline(@orange1);
-      height: 3px;
-      width: calc(100% - 30px);
-      bottom: 0;
-      left: 5px;
-      right: 0;
-    }
-    .menu-switch li a{
-      &:after{
-        .underline(@orange1);
-        height: 3px;
-        width: 0;
-        margin: 0 auto;
-        bottom: 0;
-        left: 5px;
-        right: 0;
-        transition: width .2s ease,bottom .2s ease;
-      }
-      &:hover:after{
-        width: calc(100% - 30px);
-      }
-    }
-    .site-tree .layui-tree li h2{
-      border-left-color: @orange1;
-    }
-    .site-tree .layui-tree .layui-this .layui-icon{
-      color: @orange1;
-    }
-    .site-tree .layui-tree .layui-this a {
-      color: @orange1;
-    }
-    .layui-bg-green {
-      background-color: @orange1!important;
-    }
-    .layui-elem-quote{
-      border-left: 5px solid @orange1;
-    }
-    .layui-btn {
-      background-color: @orange2;
-    }
-    .layui-btn-primary:hover {
-      border-color: @orange1;
-      color: #333;
-    }
-    .layui-laypage .layui-laypage-curr .layui-laypage-em {
-      background-color: @orange2;
-    }
-    .layui-laypage a:hover {
-      color: @orange2;
-    }
-    .site-tree .layui-tree a {
-      padding-bottom: 4px;
-      position: relative;
-      height: 30px;
-      &:hover:after{
-        width: calc(100% - 10px);
-        color: @orange1;
-      }
-      &:after{
-        .underline(@orange1);
-        height: 2px;
-        width: 0;
-        margin: 0 auto;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        transition: width .2s ease,bottom .2s ease;
-      }
-      &:hover{
-        color: @orange1;
-      }
-    }
-    a:hover li i {
-      color: @orange1!important;
-    }
-    .layui-form-checked[lay-skin=primary] i {
-      border-color: @orange2;
-      background-color: @orange2;
-      color: #fff;
-    }
-    .layui-form-checkbox[lay-skin=primary]:hover i {
-      border-color: @orange2;
-      color: #fff;
-    }
-  }
-  .blue-customize {
-    /*menu*/
-    .layui-nav-tree{
-      .nav-title{
-        border-left: 4px solid @darkRed2;
-      }
-      .layui-nav-child{
-        dd.layui-this a{
-          background-color: #fff;
-          color:  @darkRed2!important;
-        }
-        dd a{
-          &:hover{
-            color:  @darkRed2!important;
-            span{
-              &:after{
-                width: calc(100%);
-
-              }
-            }
-          }
-          span{
-            display: inline-block;
-            position: relative;
-            &:after{
-              .underline(@darkRed2);
-              height: 3px;
-              width: 0;
-              margin: 0 auto;
-              bottom: 4px;
-              left: 0;
-              right: 0;
-              transition: width .2s ease,bottom .2s ease;
-            }
-          }
-        }
-      }
-    }
-
-    .layui-form-radio>i:hover, .layui-form-radioed>i {
-      color: @darkRed2;
-    }
-    .layui-form-select dl dd.layui-this{
-      background-color: #cb617f;
-    }
-    .site-tree .layui-tree li h2 {
-      border-left-color: @darkRed2;
-    }
-    .site-tree .layui-tree .layui-this .layui-icon {
-      color: @darkRed2;
-    }
-    .site-tree .layui-tree .layui-this a {
-      color: @darkRed2;
-    }
-    .layui-bg-green {
-      background-color: @darkRed3!important;
-    }
-    .layui-elem-quote{
-      border-left: 5px solid @darkRed3;
-    }
-    .layui-btn {
-      background-color: @darkRed3;
-    }
-    .layui-btn-primary:hover {
-      border-color: @darkRed3;
-      color: #333;
-    }
-    .layui-laypage .layui-laypage-curr .layui-laypage-em {
-      background-color: @darkRed3;
-    }
-    .layui-laypage a:hover {
-      color: @darkRed3;
-    }
-    .layui-form-checked[lay-skin=primary] i {
-      border-color:  @darkRed3;
-      background-color:  @darkRed3;
-      color: #fff;
-    }
-    .layui-form-checkbox[lay-skin=primary]:hover i {
-      border-color:  @darkRed3;
-      color: #fff;
-    }
-  }
-  .layui-breadcrumb a:hover {
-    color: #999!important
-  }
-  .add-btn-wrapper{
-    display: inline-block;
-    height: 40px;
-    line-height:40px;
-    font-size: 12px;
-    float: right;
-    margin-right: 10px;
-    font-weight: 600;
-  }
-  .clearfix:before{
-    clear: both;
-    content: '';
-    height: 0;
-    line-height: 0;
-  }
-  .add-btn-wrapper a:hover {
-    color: #009688!important
-  }
-  .add-accounts-content {
-    display: none;
-  }
-  .content-wrapper{
-    margin: 30px 12px 10px
+  .height-scroll{
+    height: 100%;
+    overflow-y: scroll;
   }
   .description {
     text-indent: 2em;
@@ -841,7 +375,7 @@ export default {
   .msg-wrapper{
     display: inline-block;
     text-indent: 2em;
-    margin: 0 10px 0;
+    margin: 20px 10px 0;
     background-color: #f8f8f8;
     height: 150px;
     border-radius: 8px;
@@ -855,16 +389,6 @@ export default {
     font-weight: 600;
     word-wrap: break-word;
     word-spacing: 0.1em;
-  }
-  .loading-center {
-    padding: 32px 0;
-  }
-  .loading-wrapper{
-    margin: auto 12px;
-    height: 36px;
-    line-height: 36px;
-    text-align: center;
-    font-size: 14px;
   }
   .display-log{
     display: block;

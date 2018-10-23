@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div style="height: 100%">
     <!-- menu -->
     <div class="site-tree">
       <ul class="layui-tree ">
@@ -26,7 +26,7 @@
     </div>
 
     <!-- content -->
-    <div class="site-content">
+    <div class="site-content height-scroll">
       <div class="tab-content-2">
 
         <div class="tab-item layui-show">
@@ -178,7 +178,7 @@
 </template>
 
 <script>
-import Store from '../../common/js/store'
+import Store from '../../../common/js/store'
 import { mapState, mapMutations } from 'vuex'
 
 const form = layui.form
@@ -191,14 +191,8 @@ export default {
       unitBitChecked: '',
       unitEthChecked: '',
       selectedExchangeRate: '',
-      bitUnitValueList: [
-        {label: 'BTC', value: 'btc'},
-        {label: 'mBTC', value: 'mbtc'}
-      ],
-      ethUnitValueList: [
-        {label: 'BTC', value: 'btc'},
-        {label: 'mBTC', value: 'mbtc'}
-      ],
+      bitUnitValueList: [],
+      ethUnitValueList: [],
       initLang: null,
       langList: [
         {label: 'English', value: 'en-US'},
@@ -409,6 +403,12 @@ export default {
     background:@color;
     border-color:@color;
     color: #fff;
+  }
+  .site-tree{
+    height: 100%;
+    .layui-tree{
+      width: 170px;
+    }
   }
   a.layui-btn {
     color: #fff;
