@@ -9,37 +9,19 @@
       <!-- header -->
       <v-header></v-header>
       <!-- breadcrumb and add accounts btn -->
-      <v-breadcrumb :nav-title="navTitle" :is-add-accounts="isAddAccounts"></v-breadcrumb>
+      <v-breadcrumb></v-breadcrumb>
 
       <!-- main page -->
-      <div class="layui-container main-content-wrapper">
-        <div class="main-tab-content">
-          <div class="main-tab-item" :class="{'layui-show': 0 === pageIndex}">
-            <Accounts :error-code-msg="errorCodeMsg"/>
-          </div>
-          <div class="main-tab-item" :class="{'layui-show': 1 === pageIndex}">
-            <Send :error-code-msg="errorCodeMsg"/>
-          </div>
-          <div class="main-tab-item" :class="{'layui-show': 2 === pageIndex}">
-            <Accept :error-code-msg="errorCodeMsg"/>
-          </div>
-          <div class="main-tab-item" :class="{'layui-show': 3 === pageIndex}">
-            <Setting/>
-          </div>
-        </div>
-      </div>
+      <v-content :error-code-msg="errorCodeMsg"></v-content>
     </div>
   </div>
 </template>
 
 <script>
 import Login from './components/login/Login'
-import Accounts from './components/pages/accounts/Accounts'
-import Send from './components/pages/send/Send'
-import Setting from './components/pages/setting/Setting'
-import Accept from './components/pages/accept/Accept'
 import Breadcrumb from './components/breadcrumb/Breadcrumb'
 import Header from './components/header/Header'
+import Content from './components/content/Content'
 import Store from './common/js/store'
 import qs from 'qs'
 import { mapState, mapMutations } from 'vuex'
@@ -51,28 +33,16 @@ export default {
   name: 'App',
   components: {
     Login,
-    Accounts,
-    Send,
-    Setting,
-    Accept,
     'v-breadcrumb': Breadcrumb,
-    'v-header': Header
+    'v-header': Header,
+    'v-content': Content
   },
   data () {
     return {
       isShowLogin: true,
       loginStatus: null,
-      isAddAccounts: true,
       loginErrorMsg: '',
       getNewAppUrl: 'http://39.106.201.178/app-update-server/getNewApp'
-    }
-  },
-  watch: {
-    pageIndex: {
-      handler (newValue, oldValue) {
-        // Display add accounts button on the home page
-        this.isAddAccounts = newValue === 0
-      }
     }
   },
   computed: {
@@ -82,11 +52,6 @@ export default {
       'pageIndex': 'pageIndex',
       'customizeColor': 'customizeColor'
     }),
-    navTitle () {
-      // breadcrumb: get current page
-      let pageTitle = [this.$t('message.app_accounts'), this.$t('message.app_send'), this.$t('message.app_accept'), this.$t('message.app_setting')]
-      return pageTitle[this.pageIndex]
-    },
     errorCodeMsg () {
       // error code
       return {
@@ -142,17 +107,16 @@ export default {
   methods: {
     ...mapMutations({
       setAccountList: 'SET_ACCOUNT',
-      setResetStatus: 'ADD_RESET_STATUS',
       setWalletInfo: 'SET_WALLET_INFO',
       setCurrentUnitBtc: 'SET_CURRENT_UNIT_BTC',
       setCurrentUnitEth: 'SET_CURRENT_UNIT_ETH',
-      putAccount: 'PUT_ACCOUNT',
       setCurrentExchangeRate: 'SET_CURRENT_EXCHANGE_RATE',
       setNetInfo: 'SET_NET_INFO',
       setPageIndex: 'SET_PAGE_INDEX',
       setIsPreventSwitch: 'SET_IS_PREVENT_SWITCH',
       setHeadColor: 'SET_HEAD_COLOR',
-      setCustomizeColor: 'SET_CUSTOMIZE_COLOR'
+      setCustomizeColor: 'SET_CUSTOMIZE_COLOR',
+      setCurrentAccountIndex: 'SET_CURRENT_ACCOUNT_INDEX'
     }),
     checkVersionUpdateMsg () {
       // current chrome version < 45
@@ -275,7 +239,7 @@ export default {
         if (status === this.D.status.plugOut) {
           this.loginStatus = 99
           this.isShowLogin = true
-          this.setResetStatus()
+          this.setCurrentAccountIndex(0)
           this.setPageIndex(0)
           this.setIsPreventSwitch(false)
           layer.msg(this.$t('message.app_plug_out'))
@@ -291,35 +255,12 @@ export default {
         this.displayErrorCode(value)
       })
       this.esWallet.getAccounts().then(value => {
-        if (value) this.setAccountList(this.orderArr(value))
+        if (value) this.setAccountList(value)
       }).catch(value => {
         console.warn(value)
         layer.msg(this.$t('message.app_error_get_account'), { icon: 2, anim: 6 })
       })
       this.setNetInfo(this.esWallet.getProviders())
-    },
-    orderArr (targetArr) {
-      // Group accounts by coin type
-      const arr = []
-      const newAccountList = []
-      for (let val of targetArr) {
-        if (!arr.includes(val.coinType)) {
-          arr.push(val.coinType)
-          newAccountList.push({type: val.coinType, list: [val]})
-        } else {
-          for (let item of newAccountList) {
-            if (item.type === val.coinType) {
-              item.list.push(val)
-              break
-            }
-          }
-        }
-      }
-      let a = []
-      for (let val of newAccountList) {
-        a = a.concat(val.list)
-      }
-      return a
     }
   }
 }
@@ -327,7 +268,7 @@ export default {
 
 <style lang="less">
   @import './common/css/iconfont.css' ;
-  @import './common/css/main.css' ;
+  @import './common/css/layer.css';
   @import './common/css/skin';
   div{
     font: 14px Helvetica Neue,Helvetica,PingFang SC,\5FAE\8F6F\96C5\9ED1,Tahoma,Arial,sans-serif;
@@ -370,7 +311,7 @@ export default {
     color: #333;
     background-color: #F8F8F8;
     border-radius: 6px;
-    margin: 0 20px 20px;
+    margin: 20px;
   }
   .msg-wrapper{
     display: inline-block;

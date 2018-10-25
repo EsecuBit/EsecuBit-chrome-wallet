@@ -28,6 +28,7 @@ export default {
   },
   computed: {
     ...mapState({
+      'isTest': 'isTest',
       'pageIndex': 'pageIndex',
       'isPreventSwitch': 'isPreventSwitch',
       'headColor': 'headColor',
@@ -35,12 +36,17 @@ export default {
     }),
     pageList () {
       // nav.menu label and icon
-      return [
+      let defaultPageList = [
         {label: this.$t('message.app_accounts'), icon: 'icon-zhanghu1'},
         {label: this.$t('message.app_send'), icon: 'icon-msnui-cloud-upload'},
         {label: this.$t('message.app_accept'), icon: 'icon-msnui-cloud-download'},
         {label: this.$t('message.app_setting'), icon: 'icon-shezhi2'}
       ]
+      let eosPageList = [
+        {label: this.$t('message.app_accounts'), icon: 'icon-zhanghu1'},
+        {label: '交易分类', icon: 'icon-msnui-cloud-upload'}
+      ]
+      return this.isTest ? eosPageList : defaultPageList
     }
   },
   methods: {

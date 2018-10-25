@@ -7,9 +7,8 @@ import getters from './getters'
 Vue.use(Vuex)
 
 const state = {
-  accountList: null,
+  accountList: [],
   walletInfo: null,
-  resetStatus: 0,
   currentUnitBtc: '',
   currentUnitEth: '',
   addAccountTimes: 0,
@@ -25,7 +24,8 @@ const state = {
   switchLangTimes: 0,
   fillTableTimes: 0,
   autoFillTableData: {},
-  isAddAccounts: true
+  isAddAccounts: true,
+  isTest: false
 }
 
 export default new Vuex.Store({

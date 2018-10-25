@@ -6,9 +6,7 @@
     </blockquote>
 
     <!-- coin type-->
-    <div class="site-title" style="margin-top: 20px">
-      <fieldset><legend><a name="use">{{receiveCoinTypeMsg}}</a></legend></fieldset>
-    </div>
+    <h1 class="table-title" style="margin-bottom: 6px">{{receiveCoinTypeMsg}}</h1>
 
     <!-- Receive form -->
     <div class="site-text site-block">
@@ -73,7 +71,7 @@
 <script>
 import Store from '../../../common/js/store'
 import Clipboard from 'clipboard'
-import { mapState } from 'vuex'
+import { mapState, mapGetters } from 'vuex'
 
 const form = layui.form
 const layer = layui.layer
@@ -85,60 +83,38 @@ export default {
     return {
       isFirst: true,
       qrAddress: null,
-      currentAccount: {},
       accountQrcode: null,
-      coinType: '',
       showButton: true,
       showAddress: false,
       isInitDisplay: true,
-      isInit: true,
       isSetAddress: null,
-      isShowSetAddress: true,
       isPreventClick: false
     }
   },
   computed: {
     ...mapState({
-      'accountInfo': 'accountList',
-      'resetStatus': 'resetStatus',
       'currentAccountIndex': 'currentAccountIndex',
       'switchLangTimes': 'switchLangTimes'
     }),
+    ...mapGetters({
+      'currentAccountType': 'currentAccountType',
+      'currentAccount': 'currentAccount'
+    }),
     receiveCoinTypeMsg  () {
-      let coinTypeName = this.D.isBtc(this.coinType) ? 'Bitcoin' : 'Ether'
+      let coinTypeName = this.D.isBtc(this.currentAccountType) ? 'Bitcoin' : 'Ether'
       return this.$t('message.accept_accept_msg') + ' ' + coinTypeName
     },
     setAddressMsg () {
       return this.$t('message.accept_set_address')
+    },
+    isShowSetAddress () {
+      return this.D.isBtc(this.currentAccountType)
     }
   },
   watch: {
-    resetStatus: {
-      handler (newValue, oldValue) {
-        if (newValue) {
-          this.isInit = true
-        }
-      }
-    },
-    accountInfo: {
-      handler (newValue, oldValue) {
-        if (this.isInit) {
-          this.coinType = newValue[0].coinType
-          this.currentAccount = this.accountInfo[0]
-        }
-        this.isInit = false
-      }
-    },
     currentAccountIndex: {
       handler (newValue, oldValue) {
-        this.coinType = this.accountInfo[newValue].coinType
-        this.currentAccount = this.accountInfo[newValue]
         this.initDisplay()
-      }
-    },
-    coinType: {
-      handler (newValue, oldValue) {
-        this.isShowSetAddress = this.D.isBtc(newValue)
       }
     },
     setAddressMsg: {
@@ -184,9 +160,9 @@ export default {
     generateAddress () {
       if (this.isPreventClick) return false
       this.isPreventClick = true
-      let layerIndex = (this.isSetAddress && this.D.isBtc(this.coinType)) ? layer.msg(this.$t('message.accept_confirm'), { time: 1000000 }) : layer.msg(this.$t('message.accept_loading'), { time: 1000000 })
+      let layerIndex = (this.isSetAddress && this.D.isBtc(this.currentAccountType)) ? layer.msg(this.$t('message.accept_confirm'), { time: 1000000 }) : layer.msg(this.$t('message.accept_loading'), { time: 1000000 })
       console.log(this.isSetAddress, 'this.isSetAddress')
-      let param = this.D.isBtc(this.coinType) ? this.isSetAddress : false
+      let param = this.D.isBtc(this.currentAccountType) ? this.isSetAddress : false
       if (this.isFirst) {
         setTimeout(() => {
           this.currentAccount.getAddress(param).then(value => {

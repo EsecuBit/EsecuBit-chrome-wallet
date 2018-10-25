@@ -323,3 +323,10 @@ blockquote{
 .fly-nav a .icon-msnui-cloud-download {
   font-size: 28px;
 }
+.table-title{
+  margin-top: 20px;
+  color: #5e5d5d;
+  font-size: 16px;
+  font-weight: 300;
+  text-indent: 10px;
+}

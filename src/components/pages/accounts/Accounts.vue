@@ -3,22 +3,22 @@
   <!-- left sidebar -->
   <div class="site-tree">
     <!--<ul class="layui-tree">-->
-      <!--<template v-for="(item, walletIndex) in wallet">-->
+      <!--<template v-for="(item, walletIndex) in walletGroup">-->
         <!--<li class="menu-title" v-if="item.label"><h2>{{item.label}}</h2></li>-->
         <!--<li class="site-tree-noicon tab-title-1"-->
             <!--v-for="(account, index) in item.account"-->
-            <!--:class="{'layui-this': (walletIndex > 0 ? (wallet[walletIndex - 1].account.length + index) : index) === currentAccountIndex}">-->
+            <!--:class="{'layui-this': (walletIndex > 0 ? (walletGroup[walletIndex - 1].account.length + index) : index) === currentAccountIndex}">-->
           <!--<a href="#" @click="switchTab(index, walletIndex)"><cite>{{account}}</cite></a></li>-->
       <!--</template>-->
     <!--</ul>-->
     <ul class="layui-nav layui-nav-tree">
-      <template v-for="(item, walletIndex) in wallet">
+      <template v-for="item in walletGroup">
         <li class="layui-nav-item " :class="{'layui-nav-itemed': item.active}">
           <a href="#" class="nav-title" @click="switchMenu(item)">{{item.label}}<span class="layui-nav-more"></span></a>
           <dl class="layui-nav-child">
-            <dd v-for="(account, index) in item.account"
-                :class="{'layui-this': (walletIndex > 0 ? (wallet[walletIndex - 1].account.length + index) : index) === currentAccountIndex}">
-              <a href="#" @click="switchTab(index, walletIndex)"><span>{{account}}</span></a></dd>
+            <dd v-for="account in item.children"
+                :class="{'layui-this': account.index === currentAccountIndex}">
+              <a href="#" @click="switchTab(account.index)"><span>{{account.label}}</span></a></dd>
           </dl>
         </li>
       </template>
@@ -31,14 +31,15 @@
       <div v-if="isTest">
         <EosAccounts></EosAccounts>
       </div>
-      <div class="tab-item" v-else v-for="(tablecount, index) in gridList"  :class="{'layui-show': index === currentAccountIndex}">
+
+      <div v-else>
         <!-- account information -->
         <div class="account-information">
           <div class="account-msg">
             <div class="max-width-250">
               <span class="layui-badge-dot layui-bg-green"></span>
               <span>{{$t('message.accounts_account')}}</span>
-              <span  style="color: #e74c3c" v-if="newAccount.length > 0">{{newAccount[index].label}}</span>
+              <span  style="color: #e74c3c" v-if="accountList.length > 0">{{currentAccount.label}}</span>
             </div>
             <a :title="$t('message.icon_title_edit')" href="#" class="edit-account max-width-250" @click="editAccount()">
               <i class="icon iconfont icon-bianji1 "></i>
@@ -48,10 +49,10 @@
             <div class="max-width-400">
               <span class="layui-badge-dot layui-bg-green"></span>
               <span>{{$t('message.accounts_balance')}}</span>
-              <span v-if="coinTypeList[index] && newAccount.length > 0">{{formatBalance(newAccount[index].coinType, newAccount[index].balance) + currentDisplayUnit(coinTypeList[index])}}</span>
-              <span v-if="newAccount.length > 0 && newAccount[index].balance">
-                <span class="exchange-rate" v-if="currentExchangeRate && coinTypeList[index] && newAccount[index].balance"
-                >{{'( ' + toExchangeText(coinTypeList[index], newAccount[index].balance) + currentExchangeRate + ' )'}}</span>
+              <span v-if="currentAccountType && accountList.length > 0">{{formatBalance(currentAccountType, currentAccount.balance) + currentDisplayUnit(currentAccountType)}}</span>
+              <span v-if="accountList.length > 0 && currentAccount.balance">
+                <span class="exchange-rate" v-if="currentExchangeRate && currentAccountType && currentAccount.balance"
+                >{{'( ' + toExchangeText(currentAccountType, currentAccount.balance) + currentExchangeRate + ' )'}}</span>
               </span>
             </div>
           </div>
@@ -60,21 +61,17 @@
           </a>
         </div>
 
-        <div class="site-title">
-          <fieldset>
-            <legend><a name="default">{{$t('message.accounts_recent_operations')}}</a></legend>
-          </fieldset>
-        </div>
+        <h1 class="table-title">{{$t('message.accounts_recent_operations')}}</h1>
 
         <div class="layui-row">
           <div class="layui-col-xs12 ">
             <!-- operation log table -->
-            <table class="layui-table" lay-skin="line"  v-if="tablecount.length > 0">
+            <table class="layui-table" lay-skin="line"  v-if="tableData.length > 0">
               <colgroup>
                 <col width="15%">
                 <col width="30%">
                 <col width="10%">
-                <col v-if="isEtcType(newAccount[index])" width="10%">
+                <col v-if="isEtcType()" width="10%">
                 <col width="10%">
                 <col width="6%">
               </colgroup>
@@ -85,52 +82,52 @@
                 <th>
                   <span>{{$t('message.accounts_table_blockNumber')}}</span>
                   <span class="table-unit">
-                    {{' ' + currentDisplayUnit(coinTypeList[index])}}
+                    {{' ' + currentDisplayUnit(currentAccountType)}}
                   </span>
                 </th>
-                <th v-if="isEtcType(newAccount[index])" >{{$t('message.accounts_table_fee')}}</th>
+                <th v-if="isEtcType()" >{{$t('message.accounts_table_fee')}}</th>
                 <th>{{$t('message.accounts_confirmations')}}</th>
                 <th>{{$t('message.accounts_details')}}</th>
               </tr>
               </thead>
-              <tbody v-for="(table, trIndex) in tablecount">
+              <tbody v-for="(table, trIndex) in tableData">
               <!-- Determine whether to resend -->
-                <tr style="height: 39px;overflow-x: hidden" @mouseenter="reSendPrompt(table.canResend, table.shouldResend, index, trIndex)" @mouseleave="clearLayer" :class="'prompt_' + index + '_' + trIndex">
-                  <td>{{getFormatTime(table.time)}}</td>
-                  <td>
-                    <span :class ="[table.direction === 'in'?green:red]" class="text-opacity">{{toOrForm(table.direction)}}</span>
-                    <span style="cursor: text;">{{getTableAddress(table)}}</span>
-                  </td>
+              <tr style="height: 39px;overflow-x: hidden" @mouseenter="reSendPrompt(table.canResend, table.shouldResend, trIndex)" @mouseleave="clearLayer" :class="'prompt_' + trIndex">
+                <td>{{getFormatTime(table.time)}}</td>
+                <td>
+                  <span :class ="[table.direction === 'in'?green:red]" class="text-opacity">{{toOrForm(table.direction)}}</span>
+                  <span style="cursor: text;">{{getTableAddress(table)}}</span>
+                </td>
 
-                  <td :class="[table.value>0?green:red]" >
-                    <span>{{tableBlockNumber(table)}}</span>
-                  </td>
-                  <!-- if current coin is etc, it will display transaction fee-->
-                  <td v-if="isEtcType(newAccount[index])" >
-                    <span>{{weiToGwei(newAccount[index].coinType, table.fee)}}</span>
-                    <span v-if="coinTypeList[index]" class="unit-display-2">{{D.unit.eth.GWei}}</span>
-                  </td>
+                <td :class="[table.value>0?green:red]" >
+                  <span>{{tableBlockNumber(table)}}</span>
+                </td>
+                <!-- if current coin is etc, it will display transaction fee-->
+                <td v-if="isEtcType()" >
+                  <span>{{weiToGwei(currentAccountType, table.fee)}}</span>
+                  <span v-if="currentAccountType" class="unit-display-2">{{D.unit.eth.GWei}}</span>
+                </td>
 
-                  <!-- Draw a circular state diagram -->
-                  <td style="padding: 0">
-                    <canvas class="canvas" :class="['canvas-'+ index, table.canResend ? 'hoverClass' : '']" :data-canresend='table.canResend' :data-shouldresend="table.shouldResend"
-                            width="100" height="30" :data-counts="table.confirmations" @click="sendTransaction(table,  table.canResend)"></canvas>
-                  </td>
-                  <td>
-                    <a title="search" :href="table.link" target="_blank">
-                      <i class="layui-icon">&#xe615;</i>
-                    </a>
-                  </td>
-                </tr>
+                <!-- Draw a circular state diagram -->
+                <td style="padding: 0">
+                  <canvas class="canvas" :class="[table.canResend ? 'hoverClass' : '']" :data-canresend='table.canResend' :data-shouldresend="table.shouldResend"
+                          width="100" height="30" :data-counts="table.confirmations" @click="sendTransaction(table,  table.canResend)"></canvas>
+                </td>
+                <td>
+                  <a title="search" :href="table.link" target="_blank">
+                    <i class="layui-icon">&#xe615;</i>
+                  </a>
+                </td>
+              </tr>
               </tbody>
             </table>
 
             <!-- Pagination -->
             <div class="page-wrapper">
-              <div v-bind:id="grid_pager + index" class="page-content"></div>
+              <div v-bind:id="grid_pager" class="page-content"></div>
               <div class="total-num-wrapper">
                 <div class="total-num">
-                  <span>{{$t('message.accounts_total') + ' ' + totalNum[index] + ' ' + $t('message.accounts_items')}}</span>
+                  <span>{{$t('message.accounts_total') + ' ' + total + ' ' + $t('message.accounts_items')}}</span>
                 </div>
               </div>
             </div>
@@ -159,21 +156,20 @@
 </template>
 
 <script>
-import { mapState, mapMutations } from 'vuex'
+import { mapState, mapMutations, mapGetters } from 'vuex'
 import EosAccounts from '../../eos/accounts/EosAccounts'
 
 const $ = layui.jquery
 const layer = layui.layer
 const laypage = layui.laypage
 export default {
-  name: 'accouts',
+  name: 'accounts',
   props: ['errorCodeMsg'],
   components: {
     EosAccounts
   },
   data () {
     return {
-      isTest: false,
       grid_pager: 'grid_pager',
       description: {
         txId: '',
@@ -189,19 +185,14 @@ export default {
         'layui-anim-loop': false
       },
       renameValue: '',
-      newAccount: [],
-      wallet: [
+      walletGroup: [
       ],
-      gridList: [
-        []
-      ],
-      coinTypeList: [],
-      totalNum: [],
+      tableData: [],
+      total: 0,
       active: 'active-count',
       green: 'green-font',
       red: 'red-font',
       isShowAgainSendMsg: true,
-      isShowSendList: [],
       limit: 5,
       pageStartIndex: 0,
       pageEndIndex: 5
@@ -209,85 +200,28 @@ export default {
   },
   computed: {
     ...mapState({
-      'accountInfo': 'accountList',
-      'resetStatus': 'resetStatus',
+      'isTest': 'isTest',
+      'accountList': 'accountList',
       'currentUnitBtc': 'currentUnitBtc',
       'currentUnitEth': 'currentUnitEth',
-      'addAccountTimes': 'addAccountTimes',
       'currentExchangeRate': 'currentExchangeRate',
       'currentAccountIndex': 'currentAccountIndex'
+    }),
+    ...mapGetters({
+      'currentAccountType': 'currentAccountType',
+      'currentAccount': 'currentAccount'
     })
   },
   watch: {
-    accountInfo: {
-      handler (newValue, oldValue) {
-        // create coin type array
-        let newCoinTypeList = []
-        for (let item of newValue) {
-          newCoinTypeList.push(item.coinType)
-        }
-        this.coinTypeList = newCoinTypeList
-        this.newAccount = newValue
-
-        // get accounts' Trading Information and Pagination
-        let newGridList = []
-        let total = []
-        let txInfoPromise = this.newAccount.map(item => item.getTxInfos(this.pageStartIndex, this.pageEndIndex))
-        Promise.all(txInfoPromise).then(data => {
-          for (let value of data) {
-            newGridList.push(value.txInfos)
-            total.push(value.total)
-          }
-          this.gridList = newGridList
-          this.totalNum = total
-
-          this.$nextTick(() => {
-            this.tableCanvas()
-            for (let index of this.gridList.keys()) {
-              this.pageList(index, total[index])
-            }
-          })
-        }).catch(value => {
-          console.warn(value)
-          this.displayErrorCode(value)
-        })
+    currentAccountIndex: {
+      handler () {
+        this.setTableData(this.pageStartIndex, this.pageEndIndex)
       }
     },
-    newAccount: {
+    accountList: {
       handler (newValue, oldValue) {
-        // group accounts
         this.setMenuList(newValue)
-      }
-    },
-    resetStatus: {
-      handler (newValue, oldValue) {
-        // exit app
-        if (newValue) {
-          this.setCurrentAccountIndex(0)
-          this.clearCanvas(false)
-        }
-      }
-    },
-    addAccountTimes: {
-      handler (newValue, oldValue) {
-        if (newValue > 0 && (this.currentAccountIndex >= this.wallet[0].account.length - 1)) this.addCurrentAccountIndex()
-      }
-    },
-    gridList: {
-      // table data list
-      handler (newValue, oldValue) {
-        let newArray = []
-        console.log(newValue)
-        for (let table of newValue) {
-          let status = false
-          for (let item of table) {
-            if (item.confirmations === -3) {
-              status = true
-            }
-          }
-          newArray.push(status)
-        }
-        this.isShowSendList = newArray
+        this.setTableData(this.pageStartIndex, this.pageEndIndex)
       }
     }
   },
@@ -299,7 +233,6 @@ export default {
     ...mapMutations({
       setPageIndex: 'SET_PAGE_INDEX',
       setCurrentAccountIndex: 'SET_CURRENT_ACCOUNT_INDEX',
-      addCurrentAccountIndex: 'ADD_CURRENT_ACCOUNT_INDEX',
       addRenameTimes: 'ADD_RENAME_TIMES',
       setFillTableTimes: 'SET_FILL_TABLE_TIMES',
       setAutoFillTableData: 'SET_AUTO_FILL_TABLE_DATA'
@@ -309,22 +242,16 @@ export default {
         if (this.errorCodeMsg[String(error)]) {
           this.displayErrorCode(error)
         }
-        let nowIndex = 10
-        if (this.newAccount.length === 0) return false
-        this.newAccount.forEach((item, index) => {
-          if (item.accountId === txInfo.accountId) nowIndex = index
-        })
+        if (this.currentAccount.accountId !== txInfo.accountId) return false
         // Refresh transaction history
-        let total = 0
-        this.clearCanvas(nowIndex)
+        this.clearCanvas()
         // table Repagination
-        this.newAccount[nowIndex].getTxInfos(this.pageStartIndex, this.pageEndIndex).then(value => {
-          this.$set(this.gridList, nowIndex, value.txInfos)
-          total = value.total
-          this.$set(this.totalNum, nowIndex, value.total)
+        this.currentAccount.getTxInfos(this.pageStartIndex, this.pageEndIndex).then(value => {
+          this.tableData = value.txInfos
+          this.total = value.total
           this.$nextTick(() => {
-            this.tableCanvas(nowIndex)
-            this.pageList(nowIndex, total)
+            this.tableCanvas()
+            this.pageList(value.total)
           })
         }).catch(value => {
           console.warn(value)
@@ -335,10 +262,10 @@ export default {
     switchMenu (item) {
       item.active ? this.$set(item, 'active', false) : this.$set(item, 'active', true)
     },
-    reSendPrompt (canResend, shouldResend, index, trIndex) {
+    reSendPrompt (canResend, shouldResend, trIndex) {
       let msg = shouldResend ? this.$t('message.accounts_resend_prompt') : this.$t('message.accounts_resend_prompt_1')
       if (canResend) {
-        let selector = '.prompt_' + index + '_' + trIndex
+        let selector = '.prompt_' + trIndex
         layer.tips(msg, selector, {
           tips: [3, '#f0ad47'],
           area: ['730px', '38px'],
@@ -349,9 +276,8 @@ export default {
     clearLayer () {
       layer.closeAll('tips')
     },
-    isEtcType (currentAccount) {
-      let type = currentAccount.coinType
-      return !this.D.isBtc(type)
+    isEtcType () {
+      return !this.D.isBtc(this.currentAccountType)
     },
     displayErrorCode (value) {
       layer.closeAll()
@@ -403,9 +329,8 @@ export default {
     toTargetCoinUnit (coinType, value) {
       return this.D.isBtc(coinType) ? this.esWallet.convertValue(coinType, value, this.D.unit.btc.satoshi, this.currentUnitBtc) : this.esWallet.convertValue(coinType, value, this.D.unit.eth.Wei, this.currentUnitEth)
     },
-    tableCanvas (index) {
-      let canvasClass = index ? ('canvas-' + index) : 'canvas'
-      let canvasList = document.getElementsByClassName(canvasClass)
+    tableCanvas () {
+      let canvasList = document.getElementsByClassName('canvas')
       for (let canvas of canvasList) {
         let context = canvas.getContext('2d') // Get the drawing environment, indicated as 2d
         let centerX = canvas.width / 2 // Canvas center point x-axis coordinates
@@ -444,8 +369,8 @@ export default {
         }
       }
     },
-    clearCanvas (index) {
-      let canvasClass = index ? ('canvas-' + index) : 'canvas'
+    clearCanvas () {
+      let canvasClass = 'canvas'
       let canvasList = document.getElementsByClassName(canvasClass)
       for (let canvas of canvasList) {
         let context = canvas.getContext('2d')
@@ -464,18 +389,14 @@ export default {
         this.loadingClass['layui-anim-rotate'] = false
         this.loadingClass['layui-anim-loop'] = false
       }, 2000)
-      let index = this.currentAccountIndex
-      let total = 0
-      this.clearCanvas(index)
-      this.newAccount[index].sync(false).then(value => {
-        this.newAccount[index].getTxInfos(this.pageStartIndex, this.pageEndIndex).then(value => {
-          this.$set(this.gridList, index, value.txInfos)
-          total = value.total
-          this.$set(this.totalNum, index, value.total)
-          console.log(this.totalNum, value.total)
+      this.clearCanvas()
+      this.currentAccount.sync(false).then(value => {
+        this.currentAccount.getTxInfos(this.pageStartIndex, this.pageEndIndex).then(value => {
+          this.tableData = value.txInfos
+          this.total = value.total
           this.$nextTick(() => {
-            this.tableCanvas(index)
-            this.pageList(index, total)
+            this.tableCanvas()
+            this.pageList(value.total)
           })
         })
         layer.msg(this.$t('message.accounts_sync_success'), { icon: 1 })
@@ -486,23 +407,22 @@ export default {
     },
     setMenuList (targetArray) {
       const arr = []
-      const accountList = []
-      for (let elem of targetArray) {
-        if (!arr.includes(elem.coinType)) {
-          arr.push(elem.coinType)
-          accountList.push({label: elem.coinType, account: [elem.label]})
+      const newAccountList = []
+      targetArray.forEach((currentValue, index) => {
+        if (!arr.includes(currentValue.coinType)) {
+          arr.push(currentValue.coinType)
+          newAccountList.push({label: currentValue.coinType, active: true, children: [{label: currentValue.label, index: index}]})
         } else {
-          for (let val of accountList) {
-            if (val.label === elem.coinType) {
-              val.account.push(elem.label)
+          for (let val of newAccountList) {
+            if (val.label === currentValue.coinType) {
+              val.children.push({label: currentValue.label, index: index})
               break
             }
           }
         }
-      }
+      })
       // Stitching into ideal data types
-      accountList[0].active = true
-      this.wallet = accountList
+      this.walletGroup = newAccountList
     },
     editAccount () {
       this.renameValue = ''
@@ -527,10 +447,10 @@ export default {
         document.getElementById('editNameInput').focus()
         return false
       }
-      if (this.newAccount[this.currentAccountIndex].rename) {
-        this.newAccount[this.currentAccountIndex].rename(this.renameValue).then(value => {
+      if (this.currentAccount.rename) {
+        this.currentAccount.rename(this.renameValue).then(value => {
           this.addRenameTimes()
-          this.setMenuList(this.newAccount)
+          this.setMenuList(this.accountList)
           layer.closeAll('page')
           layer.msg(this.$t('message.accounts_update_msg'), { icon: 1 })
         })
@@ -540,13 +460,12 @@ export default {
           })
       }
     },
-    pageList (i, totalCount) {
-      let total = totalCount
+    pageList (total) {
       let page = 1
       let limit = this.limit
       let that = this
       laypage.render({
-        elem: 'grid_pager' + i,
+        elem: 'grid_pager',
         count: total,
         limit: limit,
         curr: page,
@@ -562,31 +481,44 @@ export default {
             limit = obj.limit
             page = obj.curr
             // clear canvas
-            that.clearCanvas(i)
+            that.clearCanvas()
             // update data
-            that.changeTableData(i, limit, page)
+            that.changeTableData(limit, page)
           }
         }
       })
     },
-    changeTableData (id, limit, page) {
+    changeTableData (limit, page) {
       // Paging parameter
       const startItem = limit * (page - 1)
       const endItem = limit * (page - 1) + limit
       // Pagination
-      this.newAccount[id].getTxInfos(startItem, endItem).then(data => {
-        this.$set(this.gridList, id, data.txInfos)
+      this.currentAccount.getTxInfos(startItem, endItem).then(value => {
+        this.total = value.total
+        this.tableData = value.txInfos
         this.$nextTick(() => {
-          this.tableCanvas(id)
+          this.tableCanvas()
         })
       }).catch(value => {
         console.warn(value)
         this.displayErrorCode(value)
       })
     },
-    switchTab (index, walletIndex) {
-      let accountIndex = walletIndex > 0 ? (this.wallet[walletIndex - 1].account.length + index) : index
-      this.setCurrentAccountIndex(accountIndex)
+    setTableData (startItem, endItem) {
+      this.currentAccount.getTxInfos(startItem, endItem).then(value => {
+        this.total = value.total
+        this.tableData = value.txInfos
+        this.$nextTick(() => {
+          this.tableCanvas()
+          this.pageList(value.total)
+        })
+      }).catch(value => {
+        console.warn(value)
+        this.displayErrorCode(value)
+      })
+    },
+    switchTab (index) {
+      this.setCurrentAccountIndex(index)
     },
     getFormatTime (time) {
       let date = new Date(time)
@@ -650,6 +582,11 @@ export default {
     background-color: @white;
     padding: 0;
     border: 0;
+    .layui-tree{
+      border-right: 1px solid #eee;
+      height: 100%;
+      width: 170px;
+    }
     .layui-nav-tree{
       padding: 15px 0 10px;
       border-right: 1px solid #eee;
@@ -657,6 +594,7 @@ export default {
       .layui-nav-item{
         .nav-title{
           background: #eee;
+          text-transform: uppercase;
         }
       }
     }
@@ -799,36 +737,33 @@ export default {
   canvas{
     vertical-align: middle;
   }
+  /*Pagination*/
   .page-wrapper{
     display: block;
-  }
-  .page-content {
-    display: inline;
-  }
-  .total-num-wrapper {
-    display: inline;
-    font-size: 12px;
-    margin-left: 10px;
-  }
-  .total-num {
-    display: inline-block;
-    vertical-align: middle;
-    margin: 10px 0;
-    box-sizing: content-box;
-  }
-  .total-num span{
-    display: inline-block;
-    vertical-align: middle;
-    height: 28px;
-    line-height: 28px;
-    margin: 0 -1px 5px 0;
-    background-color: @white;
-    color: @font-color;
-    font-size: 12px;
-  }
-  .layui-tree {
-    max-height: 520px;
-    overflow-y: scroll;
+    .page-content {
+      display: inline;
+    }
+    .total-num-wrapper {
+      display: inline;
+      font-size: 12px;
+      margin-left: 10px;
+      .total-num {
+        display: inline-block;
+        vertical-align: middle;
+        margin: 10px 0;
+        box-sizing: content-box;
+        span{
+          display: inline-block;
+          vertical-align: middle;
+          height: 28px;
+          line-height: 28px;
+          margin: 0 -1px 5px 0;
+          background-color: @white;
+          color: @font-color;
+          font-size: 12px;
+        }
+      }
+    }
   }
   .unit-display-2 {
     font-size: .4em;

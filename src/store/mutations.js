@@ -5,9 +5,6 @@ const mutations = {
   PUT_ACCOUNT: (state, item) => {
     state.accountList.push(item)
   },
-  ADD_RESET_STATUS: (state) => {
-    state.resetStatus++
-  },
   SET_WALLET_INFO: (state, walletInfo) => {
     state.walletInfo = walletInfo
   },
@@ -40,9 +37,6 @@ const mutations = {
   },
   SET_CURRENT_ACCOUNT_INDEX: (state, currentAccountIndex) => {
     state.currentAccountIndex = currentAccountIndex
-  },
-  ADD_CURRENT_ACCOUNT_INDEX: (state) => {
-    state.currentAccountIndex++
   },
   ADD_RENAME_TIMES: (state) => {
     state.renameTimes++

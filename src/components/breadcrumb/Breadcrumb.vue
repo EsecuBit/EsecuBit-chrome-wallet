@@ -5,7 +5,7 @@
         <span class="layui-breadcrumb" style="visibility: visible;">
           <a href="#" @click="toHomePage">{{$t('message.app_home')}}</a><span lay-separator="">&gt;</span>
           <a href="#" id="message" class="message" v-text="navTitle"></a>
-          <div class="add-btn-wrapper clearfix" v-show="isAddAccounts">
+          <div class="add-btn-wrapper clearfix" v-show="pageIndex === 0">
             <a href="#" class="add-btn" @click="addAccountContent"><i class="layui-icon ">&#xe770;</i>{{$t('message.app_add_accounts')}}</a>
           </div>
         </span>
@@ -63,16 +63,6 @@ const layer = layui.layer
 const form = layui.form
 export default {
   name: 'breadcrumb',
-  props: {
-    isAddAccounts: {
-      type: Boolean,
-      default: true
-    },
-    navTitle: {
-      type: String,
-      default: ''
-    }
-  },
   data () {
     return {
       selected: '',
@@ -86,7 +76,12 @@ export default {
       'appVersion': 'appVersion',
       'pageIndex': 'pageIndex',
       'customizeColor': 'customizeColor'
-    })
+    }),
+    navTitle () {
+      // breadcrumb: get current page
+      let pageTitle = [this.$t('message.app_accounts'), this.$t('message.app_send'), this.$t('message.app_accept'), this.$t('message.app_setting')]
+      return pageTitle[this.pageIndex]
+    }
   },
   watch: {
     accountType: {
@@ -116,7 +111,8 @@ export default {
     },
     ...mapMutations({
       setPageIndex: 'SET_PAGE_INDEX',
-      setAddAccountTimes: 'SET_ADD_ACCOUNT_TIMES'
+      setAddAccountTimes: 'SET_ADD_ACCOUNT_TIMES',
+      putAccount: 'PUT_ACCOUNT'
     }),
     addAccountContent () {
       let btnDisplay = [this.$t('message.app_submit_btn'), this.$t('message.app_cancel_btn')]
@@ -150,15 +146,10 @@ export default {
             })
             // add new account operation
             that.esWallet.newAccount(that.selected).then(value => {
-              if (that.D.isBtc(that.selected)) that.setAddAccountTimes()
               // close loading layer
               layer.close(loadingIndex)
               layer.close(index)
               layer.msg(that.$t('message.app_successful'), { icon: 1 })
-              if (Array.isArray(that.accountList) && that.accountList.length > 0) {
-                that.putAccount(value)
-                this.setAccountList(this.orderArr(that.accountList))
-              }
             }).catch(value => {
               layer.closeAll()
               console.warn(value)
@@ -173,29 +164,6 @@ export default {
     },
     toHomePage () {
       this.setPageIndex(0)
-    },
-    orderArr (targetArr) {
-      // Group accounts by coin type
-      const arr = []
-      const newAccountList = []
-      for (let val of targetArr) {
-        if (!arr.includes(val.coinType)) {
-          arr.push(val.coinType)
-          newAccountList.push({type: val.coinType, list: [val]})
-        } else {
-          for (let item of newAccountList) {
-            if (item.type === val.coinType) {
-              item.list.push(val)
-              break
-            }
-          }
-        }
-      }
-      let a = []
-      for (let val of newAccountList) {
-        a = a.concat(val.list)
-      }
-      return a
     }
   }
 }

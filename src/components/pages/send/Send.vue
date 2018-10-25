@@ -6,9 +6,7 @@
     </blockquote>
 
     <!-- coin type -->
-    <div class="site-title" style="margin-top: 20px">
-      <fieldset><legend><a name="use">{{sendCoinTypeMsg}}</a></legend></fieldset>
-    </div>
+    <h1 class="table-title" style="margin-bottom: 6px">{{sendCoinTypeMsg}}</h1>
 
     <!-- warning message -->
     <div class="again-send-msg" v-if="isReSendStatus">
@@ -179,7 +177,6 @@ export default {
       addressValue: '',
       selected: null,
       customFees: 0,
-      accountList: [],
       feeList: [
         {}
       ],
@@ -195,7 +192,6 @@ export default {
       isDisplayIcon: false,
       isAddressError: false,
       isAddressTrue: false,
-      isInit: true,
       currentSelectedIndex: null,
       currentSelectedAccountIndex: 0,
       isClearFormData: false,
@@ -214,8 +210,7 @@ export default {
   },
   computed: {
     ...mapState({
-      'accountInfo': 'accountList',
-      'resetStatus': 'resetStatus',
+      'accountList': 'accountList',
       'currentUnitBtc': 'currentUnitBtc',
       'currentUnitEth': 'currentUnitEth',
       'currentExchangeRate': 'currentExchangeRate',
@@ -276,7 +271,7 @@ export default {
     },
     renameTimes: {
       handler (newValue, oldValue) {
-        this.setMenuList(this.accountInfo)
+        this.setMenuList(this.accountList)
       }
     },
     switchLangTimes: {
@@ -298,13 +293,6 @@ export default {
     currentUnitBtc: {
       handler (newValue, oldValue) {
         this.D.isBtc(this.coinType) && this.clearFormData()
-      }
-    },
-    resetStatus: {
-      handler (newValue, oldValue) {
-        if (newValue) {
-          this.isInit = true
-        }
       }
     },
     addressValue: {
@@ -419,12 +407,9 @@ export default {
         this.gasLimit = 21000 + dataLength * 68
       }
     },
-    accountInfo: {
+    accountList: {
       handler (newValue, oldValue) {
         this.setMenuList(newValue)
-        console.log(this.groupingAccounts, 'newValue')
-        if (this.isInit) this.currentAccount = newValue[0]
-        this.isInit = false
       }
     },
     currentAccount: {
@@ -455,20 +440,20 @@ export default {
     }),
     switchCurrentAccount (index) {
       this.currentSelectedAccountIndex = index
-      this.currentAccount = this.accountInfo[index]
+      this.currentAccount = this.accountList[index]
       this.$nextTick(() => {
         this.renderAccountForm()
       })
     },
     setMenuList (targetArray) {
       const arr = []
-      const accountList = []
+      const newAccountList = []
       for (let [index, elem] of targetArray.entries()) {
         if (!arr.includes(elem.coinType)) {
           arr.push(elem.coinType)
-          accountList.push({label: elem.coinType, account: [{label: elem.label, index: index}]})
+          newAccountList.push({label: elem.coinType, account: [{label: elem.label, index: index}]})
         } else {
-          for (let val of accountList) {
+          for (let val of newAccountList) {
             if (val.label === elem.coinType) {
               val.account.push({label: elem.label, index: index})
               break
@@ -476,7 +461,7 @@ export default {
           }
         }
       }
-      this.groupingAccounts = accountList
+      this.groupingAccounts = newAccountList
       this.$nextTick(() => {
         this.renderAccountForm()
       })
@@ -491,7 +476,7 @@ export default {
         let index = Number(data.value)
         this.$nextTick(() => {
           this.currentSelectedAccountIndex = index
-          this.currentAccount = this.accountInfo[index]
+          this.currentAccount = this.accountList[index]
         })
       })
     },
