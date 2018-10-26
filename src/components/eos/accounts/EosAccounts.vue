@@ -88,20 +88,18 @@
             <th>地址</th>
             <th>状态</th>
             <th>金额</th>
-            <th>状态</th>
             <th>备注</th>
+            <th>查询</th>
           </tr>
           </thead>
           <tbody >
           <!-- Determine whether to resend -->
-          <tr>
-            <td>数据</td>
-            <td>数据</td>
-
-            <td></td>
-            <!-- if current coin is etc, it will display transaction fee-->
-            <td>数据</td>
-            <td>数据</td>
+          <tr v-for="item in tableData">
+            <td>{{item.time}}</td>
+            <td>{{item.showAddresses}}</td>
+            <td>{{item.confirmations}}</td>
+            <td>{{item.value}}</td>
+            <td>{{item.memo}}</td>
             <td>
               <a title="search" href="#" target="_blank">
                 <i class="layui-icon">&#xe615;</i>
@@ -113,10 +111,10 @@
 
         <!-- Pagination -->
         <div class="page-wrapper">
-          <div class="page-content" id="grid_pager"></div>
+          <div class="page-content" id="pagination"></div>
           <div class="total-num-wrapper">
             <div class="total-num">
-              <span>{{$t('message.accounts_total') + ' ' + 10 + ' ' + $t('message.accounts_items')}}</span>
+              <span>{{$t('message.accounts_total') + ' ' + total + ' ' + $t('message.accounts_items')}}</span>
             </div>
           </div>
         </div>
@@ -138,21 +136,31 @@ export default {
     return {
       radius: 60,
       percent: 0.1,
+      tableData: [
+        {time: '2018-10-29', direction: '', showAddresses: 'oxasjkdhkjasdhja', value: '12', memo: '这是一个demo', confirmations: '1'},
+        {time: '2018-10-28', direction: '', showAddresses: 'oxasjkdhkjasdhja', value: '2313', memo: '这是一个demo', confirmations: '2'},
+        {time: '2018-10-27', direction: '', showAddresses: 'oxasjkdhkjasdhja', value: '1231', memo: '这是一个demo', confirmations: '3'},
+        {time: '2018-10-26', direction: '', showAddresses: 'oxasjkdhkjasdhja', value: '123', memo: '这是一个demo', confirmations: '4'},
+        {time: '2018-10-26', direction: '', showAddresses: 'oxasjkdhkjasdhja', value: '1231', memo: '这是一个demo', confirmations: '5'}
+      ],
       limit: 5,
       pageStartIndex: 0,
-      pageEndIndex: 5
+      pageEndIndex: 5,
+      total: 0
     }
   },
   mounted () {
+    this.total = 5
     this.pageList()
   },
   methods: {
     pageList () {
-      let total = 10
+      let total = this.total
       let page = 1
       let limit = this.limit
+      let that = this
       laypage.render({
-        elem: 'grid_pager',
+        elem: 'pagination',
         count: total,
         limit: limit,
         curr: page,
@@ -167,9 +175,23 @@ export default {
           if (!first) {
             limit = obj.limit
             page = obj.curr
+            that.changeTableData(limit, page)
           }
         }
       })
+    },
+    changeTableData (limit, page) {
+      // Paging parameter
+      // let startItem = limit * (page - 1)
+      // let endItem = limit * (page - 1) + limit
+      // Pagination
+      this.tableData = [
+        {time: '2018-10-29', direction: '', showAddresses: 'oxasjkdhkjasdhja', value: '12', memo: '', confirmations: '1'},
+        {time: '2018-10-28', direction: '', showAddresses: 'oxasjkdhkjasdhja', value: '2313', memo: '', confirmations: '2'},
+        {time: '2018-10-27', direction: '', showAddresses: 'oxasjkdhkjasdhja', value: '1231', memo: '', confirmations: '3'},
+        {time: '2018-10-26', direction: '', showAddresses: 'oxasjkdhkjasdhja', value: '123', memo: '', confirmations: '4'},
+        {time: '2018-10-26', direction: '', showAddresses: 'oxasjkdhkjasdhja', value: '1231', memo: '', confirmations: '5'}
+      ]
     }
   }
 }

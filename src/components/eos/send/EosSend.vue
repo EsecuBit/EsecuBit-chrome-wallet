@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <div class="layui-tab layui-tab-card">
+  <div class="height-scroll">
+    <div class="layui-tab layui-tab-brief">
       <ul class="layui-tab-title">
         <li class="layui-this">transaction</li>
         <li>Manage Stake</li>

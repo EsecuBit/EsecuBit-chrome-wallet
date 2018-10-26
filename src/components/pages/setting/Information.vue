@@ -1,0 +1,127 @@
+<template>
+  <div>
+    <div class="table-item">
+      <h3>{{$t('message.setting_version')}}</h3>
+      <table class="layui-table" >
+        <colgroup>
+          <col width="100">
+          <col width="200">
+        </colgroup>
+        <thead>
+        <tr>
+          <th>{{$t('message.setting_name')}}</th>
+          <th>{{$t('message.setting_information')}}</th>
+        </tr>
+        </thead>
+        <tbody >
+        <tr v-for="item in hardwareList" v-if="hardwareList.length > 0">
+          <td>{{item.name}}</td>
+          <td>{{item.value}}</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table-item">
+      <h3>{{$t('message.setting_btc_net')}}</h3>
+      <table class="layui-table" >
+        <colgroup>
+          <col width="100">
+          <col width="200">
+        </colgroup>
+        <thead>
+        <tr>
+          <th>{{$t('message.setting_name')}}</th>
+          <th>{{$t('message.setting_network')}}</th>
+        </tr>
+        </thead>
+        <tbody >
+        <tr v-for="item in bitNetList" v-if="bitNetList.length > 0">
+          <td>{{item.name}}</td>
+          <td>{{item.value}}</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="table-item">
+      <h3>{{$t('message.setting_etc_net')}}</h3>
+      <table class="layui-table" >
+        <colgroup>
+          <col width="100">
+          <col width="200">
+        </colgroup>
+        <thead>
+        <tr>
+          <th>{{$t('message.setting_name')}}</th>
+          <th>{{$t('message.setting_network')}}</th>
+        </tr>
+        </thead>
+        <tbody >
+        <tr v-for="item in etcNetList" v-if="etcNetList.length > 0">
+          <td>{{item.name}}</td>
+          <td>{{item.value}}</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</template>
+
+<script>
+import { mapState } from 'vuex'
+export default {
+  name: 'Information',
+  computed: {
+    ...mapState({
+      'walletInfo': 'walletInfo',
+      'netInfo': 'netInfo',
+      'appVersion': 'appVersion'
+    }),
+    hardwareList () {
+      if (this.walletInfo) {
+        let hardwareArr = [
+          {name: this.$t('message.setting_sdk_version'), value: this.walletInfo.sdk_version},
+          {name: this.$t('message.setting_cos_version'), value: this.walletInfo.cos_version},
+          {name: this.$t('message.setting_app_version'), value: this.appVersion}
+        ]
+        return hardwareArr
+      } else return []
+    },
+    bitNetList () {
+      if (this.netInfo) {
+        let netString = this.netInfo[this.D.coin.test.btcTestNet3] ? this.D.coin.test.btcTestNet3 : this.D.coin.main.btc
+        let exchangeNet = this.netInfo[netString].exchange
+        let feeNet = this.netInfo[netString].fee
+        let btcNet = this.netInfo[netString].network
+
+        let netList = [
+          {name: this.$t('message.setting_btc_info'), value: btcNet},
+          {name: this.$t('message.setting_fee'), value: feeNet},
+          {name: this.$t('message.setting_exchange'), value: exchangeNet}
+        ]
+        return netList
+      } else return []
+    },
+    etcNetList () {
+      if (this.netInfo) {
+        let netString = this.netInfo[this.D.coin.test.ethRinkeby] ? this.D.coin.test.ethRinkeby : this.D.coin.main.eth
+        let exchangeNet = this.netInfo[netString].exchange
+        let feeNet = this.netInfo[netString].fee
+        let btcNet = this.netInfo[netString].network
+        let netList = [
+          {name: this.$t('message.setting_btc_info'), value: btcNet},
+          {name: this.$t('message.setting_fee'), value: feeNet},
+          {name: this.$t('message.setting_exchange'), value: exchangeNet}
+        ]
+        return netList
+      } else return []
+    }
+  }
+}
+</script>
+
+<style scoped>
+  .layui-table td, .layui-table th {
+    padding: 6px 15px;
+    font-size: 13px;
+  }
+</style>

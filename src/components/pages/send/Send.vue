@@ -171,15 +171,11 @@ export default {
   props: ['errorCodeMsg'],
   data () {
     return {
-      count: 2,
-      unit: 'BTC',
       amountValue: null,
       addressValue: '',
       selected: null,
       customFees: 0,
-      feeList: [
-        {}
-      ],
+      feeList: [],
       switchFee: false,
       currentAccount: {},
       totalFee: 0,
@@ -205,7 +201,8 @@ export default {
       isReSendStatus: false,
       isShowAllowAmountMsg: false,
       AllowAmountMsg: '',
-      intervalId: null
+      intervalId: null,
+      isFirst: true
     }
   },
   computed: {
@@ -409,6 +406,10 @@ export default {
     },
     accountList: {
       handler (newValue, oldValue) {
+        if (this.isFirst && newValue.length > 0) {
+          this.currentAccount = newValue[0]
+          this.isFirst = false
+        }
         this.setMenuList(newValue)
       }
     },

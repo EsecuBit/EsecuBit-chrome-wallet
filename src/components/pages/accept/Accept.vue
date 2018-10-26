@@ -15,7 +15,7 @@
         <div class="layui-form-item" style="margin-bottom: 0">
           <label class="layui-form-label account-label" >{{$t('message.accept_current_account')}}</label>
           <div class="layui-input-block account-info">
-            <div class="account-msg" v-if="currentAccount.label">{{currentAccount.label}}</div>
+            <div class="account-msg" v-if="currentAccount">{{currentAccount.label}}</div>
           </div>
         </div>
 
@@ -35,7 +35,7 @@
         </div>
 
         <!-- generate qrcode btn -->
-        <div class="layui-form-item" v-show="showButton" >
+        <div class="layui-form-item" v-show="!showAddress" >
           <div class="layui-input-block account-info">
             <a href="#" class="layui-btn layui-btn-radius address-btn" @click="generateAddress">{{$t('message.accept_generate_address')}}
               <i class="layui-icon">&#xe623;</i>
@@ -84,7 +84,6 @@ export default {
       isFirst: true,
       qrAddress: null,
       accountQrcode: null,
-      showButton: true,
       showAddress: false,
       isInitDisplay: true,
       isSetAddress: null,
@@ -158,10 +157,10 @@ export default {
       }
     },
     generateAddress () {
+      // Prevent duplicate generation of verification codes
       if (this.isPreventClick) return false
       this.isPreventClick = true
       let layerIndex = (this.isSetAddress && this.D.isBtc(this.currentAccountType)) ? layer.msg(this.$t('message.accept_confirm'), { time: 1000000 }) : layer.msg(this.$t('message.accept_loading'), { time: 1000000 })
-      console.log(this.isSetAddress, 'this.isSetAddress')
       let param = this.D.isBtc(this.currentAccountType) ? this.isSetAddress : false
       if (this.isFirst) {
         setTimeout(() => {
@@ -197,12 +196,10 @@ export default {
       }
     },
     initDisplay () {
-      this.showButton = true
       this.showAddress = false
       this.isInitDisplay = true
     },
     switchDisplay () {
-      this.showButton = false
       this.showAddress = true
       this.isInitDisplay = false
     },

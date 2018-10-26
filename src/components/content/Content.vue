@@ -19,6 +19,9 @@
         <div class="main-tab-item" :class="{'layui-show': 1 === pageIndex}">
           <EosSend :error-code-msg="errorCodeMsg"/>
         </div>
+        <div class="main-tab-item" :class="{'layui-show': 2 === pageIndex}">
+          <Vote :error-code-msg="errorCodeMsg"/>
+        </div>
       </template>
     </div>
   </div>
@@ -31,6 +34,7 @@ import Send from '../pages/send/Send'
 import Setting from '../pages/setting/Setting'
 import Accept from '../pages/accept/Accept'
 import EosSend from '../eos/send/EosSend'
+import Vote from '../eos/vote/Vote'
 export default {
   name: 'Content',
   props: ['errorCodeMsg'],
@@ -39,7 +43,8 @@ export default {
     Send,
     Setting,
     Accept,
-    EosSend
+    EosSend,
+    Vote
   },
   computed: {
     ...mapState({

@@ -4,7 +4,7 @@ const getters = {
     return currentAccountType
   },
   currentAccount: (state) => {
-    let currentAccount = state.accountList.length > 0 ? state.accountList[state.currentAccountIndex] : {}
+    let currentAccount = state.accountList.length > 0 ? state.accountList[state.currentAccountIndex] : null
     return currentAccount
   }
 }

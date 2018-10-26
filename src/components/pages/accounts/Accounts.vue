@@ -12,7 +12,7 @@
       <!--</template>-->
     <!--</ul>-->
     <ul class="layui-nav layui-nav-tree">
-      <template v-for="item in walletGroup">
+      <template v-for="item in walletGroup" v-if="walletGroup.length > 0 ">
         <li class="layui-nav-item " :class="{'layui-nav-itemed': item.active}">
           <a href="#" class="nav-title" @click="switchMenu(item)">{{item.label}}<span class="layui-nav-more"></span></a>
           <dl class="layui-nav-child">
@@ -39,9 +39,9 @@
             <div class="max-width-250">
               <span class="layui-badge-dot layui-bg-green"></span>
               <span>{{$t('message.accounts_account')}}</span>
-              <span  style="color: #e74c3c" v-if="accountList.length > 0">{{currentAccount.label}}</span>
+              <span  style="color: #e74c3c" v-if="currentAccount">{{currentAccount.label}}</span>
             </div>
-            <a :title="$t('message.icon_title_edit')" href="#" class="edit-account max-width-250" @click="editAccount()">
+            <a :title="$t('message.icon_title_edit')" href="#" class="edit-account max-width-250" @click="updateAccountName()">
               <i class="icon iconfont icon-bianji1 "></i>
             </a>
           </div>
@@ -49,11 +49,9 @@
             <div class="max-width-400">
               <span class="layui-badge-dot layui-bg-green"></span>
               <span>{{$t('message.accounts_balance')}}</span>
-              <span v-if="currentAccountType && accountList.length > 0">{{formatBalance(currentAccountType, currentAccount.balance) + currentDisplayUnit(currentAccountType)}}</span>
-              <span v-if="accountList.length > 0 && currentAccount.balance">
-                <span class="exchange-rate" v-if="currentExchangeRate && currentAccountType && currentAccount.balance"
-                >{{'( ' + toExchangeText(currentAccountType, currentAccount.balance) + currentExchangeRate + ' )'}}</span>
-              </span>
+              <span v-if="currentAccount">{{formatBalance(currentAccountType, currentAccount.balance) + currentDisplayUnit(currentAccountType)}}</span>
+              <span class="exchange-rate" v-if="currentAccount"
+              >{{'( ' + toExchangeText(currentAccountType, currentAccount.balance) + currentExchangeRate + ' )'}}</span>
             </div>
           </div>
           <a :title="$t('message.icon_title_refresh')" href="#" class="refresh-data max-width-250" @click="refresh">
@@ -90,9 +88,10 @@
                 <th>{{$t('message.accounts_details')}}</th>
               </tr>
               </thead>
-              <tbody v-for="(table, trIndex) in tableData">
+              <tbody>
               <!-- Determine whether to resend -->
-              <tr style="height: 39px;overflow-x: hidden" @mouseenter="reSendPrompt(table.canResend, table.shouldResend, trIndex)" @mouseleave="clearLayer" :class="'prompt_' + trIndex">
+              <tr style="height: 39px;overflow-x: hidden" v-for="(table, trIndex) in tableData"
+                  @mouseenter="reSendPrompt(table.canResend, table.shouldResend, trIndex)" @mouseleave="clearLayer" :class="'prompt_' + trIndex" >
                 <td>{{getFormatTime(table.time)}}</td>
                 <td>
                   <span :class ="[table.direction === 'in'?green:red]" class="text-opacity">{{toOrForm(table.direction)}}</span>
@@ -424,7 +423,7 @@ export default {
       // Stitching into ideal data types
       this.walletGroup = newAccountList
     },
-    editAccount () {
+    updateAccountName () {
       this.renameValue = ''
       const that = this
       layer.open({
@@ -726,7 +725,7 @@ export default {
     height: 36px;
     line-height: 36px;
     color: @font-color;
-    background-color: @white;
+    background-color: #f2f2f2;
     border-radius: 6px;
     margin: 0 20px 20px;
   }

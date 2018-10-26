@@ -72,6 +72,7 @@ export default {
   },
   computed: {
     ...mapState({
+      'isTest': 'isTest',
       'accountList': 'accountList',
       'appVersion': 'appVersion',
       'pageIndex': 'pageIndex',
@@ -79,8 +80,9 @@ export default {
     }),
     navTitle () {
       // breadcrumb: get current page
-      let pageTitle = [this.$t('message.app_accounts'), this.$t('message.app_send'), this.$t('message.app_accept'), this.$t('message.app_setting')]
-      return pageTitle[this.pageIndex]
+      let defaultPageTitle = [this.$t('message.app_accounts'), this.$t('message.app_send'), this.$t('message.app_accept'), this.$t('message.app_setting')]
+      let eosPageTitle = [this.$t('message.app_accounts'), '交易', '投票']
+      return this.isTest ? eosPageTitle[this.pageIndex] : defaultPageTitle[this.pageIndex]
     }
   },
   watch: {
