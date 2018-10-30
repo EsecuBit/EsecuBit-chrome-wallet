@@ -25,6 +25,7 @@ const state = {
   fillTableTimes: 0,
   autoFillTableData: {},
   isAddAccounts: true,
+  isOfficial: false,
   isTest: false
 }
 

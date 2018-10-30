@@ -35,7 +35,7 @@
 </template>
 
 <script>
-import Store from '../../../common/js/store'
+import Store from '../../../../common/js/store'
 import { mapState } from 'vuex'
 const form = layui.form
 const layer = layui.layer

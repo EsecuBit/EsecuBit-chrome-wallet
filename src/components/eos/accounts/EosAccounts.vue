@@ -68,57 +68,24 @@
       </div>
     </div>
 
-    <h1 class="table-title">{{$t('message.accounts_recent_operations')}}</h1>
+    <h1 class="table-title"><i class="layui-icon">&#xe62d;</i> Account Transactions</h1>
 
     <div class="layui-row">
       <div class="layui-col-xs12 ">
-        <!-- operation log table -->
-        <table class="layui-table" lay-skin="line">
-          <colgroup>
-            <col width="15%">
-            <col width="30%">
-            <col width="10%">
-            <col width="10%">
-            <col width="10%">
-            <col width="6%">
-          </colgroup>
-          <thead>
-          <tr>
-            <th>时间</th>
-            <th>地址</th>
-            <th>状态</th>
-            <th>金额</th>
-            <th>备注</th>
-            <th>查询</th>
-          </tr>
-          </thead>
-          <tbody >
-          <!-- Determine whether to resend -->
-          <tr v-for="item in tableData">
-            <td>{{item.time}}</td>
-            <td>{{item.showAddresses}}</td>
-            <td>{{item.confirmations}}</td>
-            <td>{{item.value}}</td>
-            <td>{{item.memo}}</td>
-            <td>
-              <a title="search" href="#" target="_blank">
-                <i class="layui-icon">&#xe615;</i>
-              </a>
-            </td>
-          </tr>
-          </tbody>
-        </table>
-
-        <!-- Pagination -->
-        <div class="page-wrapper">
-          <div class="page-content" id="pagination"></div>
-          <div class="total-num-wrapper">
-            <div class="total-num">
-              <span>{{$t('message.accounts_total') + ' ' + total + ' ' + $t('message.accounts_items')}}</span>
+        <div class="layui-tab layui-tab-brief">
+          <ul class="layui-tab-title">
+            <li class="layui-this">All transaction</li>
+            <li>Token Transfers</li>
+          </ul>
+          <div class="layui-tab-content">
+            <div class="layui-tab-item layui-show">
+              <TransactionsTable></TransactionsTable>
+            </div>
+            <div class="layui-tab-item">
+              <TokenTransfers></TokenTransfers>
             </div>
           </div>
         </div>
-
       </div>
     </div>
   </div>
@@ -126,11 +93,14 @@
 
 <script>
 import Progress from './progress/Progress'
-const laypage = layui.laypage
+import TransactionsTable from './children/TransactionsTable'
+import TokenTransfers from './children/TokenTransfers'
 export default {
   name: 'EosAccounts',
   components: {
-    Progress
+    Progress,
+    TransactionsTable,
+    TokenTransfers
   },
   data () {
     return {
@@ -147,51 +117,6 @@ export default {
       pageStartIndex: 0,
       pageEndIndex: 5,
       total: 0
-    }
-  },
-  mounted () {
-    this.total = 5
-    this.pageList()
-  },
-  methods: {
-    pageList () {
-      let total = this.total
-      let page = 1
-      let limit = this.limit
-      let that = this
-      laypage.render({
-        elem: 'pagination',
-        count: total,
-        limit: limit,
-        curr: page,
-        prev: '<',
-        next: '>',
-        layout: ['first', 'prev', 'page', 'next', 'last'],
-        jump: function (obj, first) {
-          // obj包含了当前分页的所有参数，比如：
-          // console.log(obj.curr) // 得到当前页，以便向服务端请求对应页的数据。
-          // console.log(obj.limit) // 得到每页显示的条数
-          // 首次不执行
-          if (!first) {
-            limit = obj.limit
-            page = obj.curr
-            that.changeTableData(limit, page)
-          }
-        }
-      })
-    },
-    changeTableData (limit, page) {
-      // Paging parameter
-      // let startItem = limit * (page - 1)
-      // let endItem = limit * (page - 1) + limit
-      // Pagination
-      this.tableData = [
-        {time: '2018-10-29', direction: '', showAddresses: 'oxasjkdhkjasdhja', value: '12', memo: '', confirmations: '1'},
-        {time: '2018-10-28', direction: '', showAddresses: 'oxasjkdhkjasdhja', value: '2313', memo: '', confirmations: '2'},
-        {time: '2018-10-27', direction: '', showAddresses: 'oxasjkdhkjasdhja', value: '1231', memo: '', confirmations: '3'},
-        {time: '2018-10-26', direction: '', showAddresses: 'oxasjkdhkjasdhja', value: '123', memo: '', confirmations: '4'},
-        {time: '2018-10-26', direction: '', showAddresses: 'oxasjkdhkjasdhja', value: '1231', memo: '', confirmations: '5'}
-      ]
     }
   }
 }
@@ -294,51 +219,12 @@ export default {
     color: #5e5d5d;
     font-size: 18px;
     font-weight: 300;
-  }
-  /*table*/
-  .layui-table{
-    table-layout:fixed;
-    td,th {
-      text-align: center;
-      text-overflow: ellipsis;
-      overflow: hidden;
-      white-space:nowrap;
-    }
-    tr {
-      display: table-row;
-      vertical-align: inherit;
-      border-color: inherit;
-    }
-    thead {
-      font-weight: bold;
+    .layui-icon{
+      font-size: 20px;
     }
   }
-  /*Pagination*/
-  .page-wrapper{
-    display: block;
-    .page-content {
-      display: inline;
-    }
-    .total-num-wrapper {
-      display: inline;
-      font-size: 12px;
-      margin-left: 10px;
-      .total-num {
-        display: inline-block;
-        vertical-align: middle;
-        margin: 10px 0;
-        box-sizing: content-box;
-        span{
-          display: inline-block;
-          vertical-align: middle;
-          height: 28px;
-          line-height: 28px;
-          margin: 0 -1px 5px 0;
-          background-color: #fff;
-          color: #333;
-          font-size: 12px;
-        }
-      }
-    }
+  .layui-tab{
+    margin: 0;
   }
+
 </style>

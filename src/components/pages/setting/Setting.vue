@@ -4,19 +4,19 @@
     <div class="site-tree">
       <ul class="layui-tree ">
         <li><h2>{{$t('message.app_setting')}}</h2></li>
-        <li class="tab-title-2" :class="{'layui-this': 0 === currentMenuIndex}">
+        <li :class="{'layui-this': 0 === currentMenuIndex}">
           <a href="#" @click="switchMenu(0)">
             <i class="layui-icon">&#xe632;</i>
             <cite>{{$t('message.setting_display')}}</cite>
             </a>
         </li>
-        <li class="tab-title-2" :class="{'layui-this': 1 === currentMenuIndex}">
+        <li :class="{'layui-this': 1 === currentMenuIndex}">
           <a href="#" @click="switchMenu(1)">
             <i class="layui-icon" >&#xe628;</i>
             <cite>{{$t('message.setting_information')}}</cite>
           </a>
         </li>
-        <li class="tab-title-2" v-if="!isOfficial" :class="{'layui-this': 2 === currentMenuIndex}">
+        <li v-if="!isOfficial" :class="{'layui-this': 2 === currentMenuIndex}">
           <a href="#" @click="switchMenu(2)">
             <i class="layui-icon">&#xe857;</i>
             <cite>{{$t('message.setting_init')}}</cite>
@@ -49,10 +49,10 @@
 </template>
 
 <script>
-import Information from './Information'
-import Config from './Config'
-import Interface from './Interface'
-import Store from '../../../common/js/store'
+import Information from './children/Information'
+import Config from './children/Config'
+import Interface from './children/Interface'
+import { mapState } from 'vuex'
 
 export default{
   name: 'Setting',
@@ -63,9 +63,13 @@ export default{
   },
   data () {
     return {
-      currentMenuIndex: 0,
-      isOfficial: Store.isOfficial
+      currentMenuIndex: 0
     }
+  },
+  computed: {
+    ...mapState({
+      'isOfficial': 'isOfficial'
+    })
   },
   methods: {
     switchMenu (index) {

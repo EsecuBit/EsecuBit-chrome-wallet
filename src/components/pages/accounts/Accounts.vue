@@ -26,7 +26,7 @@
   </div>
 
   <!-- main content -->
-  <div class="site-content height-scroll">
+  <div class="site-content">
     <div class="tab-content-1" id="tab-content-1">
       <div v-if="isTest">
         <EosAccounts></EosAccounts>
@@ -49,9 +49,9 @@
             <div class="max-width-400">
               <span class="layui-badge-dot layui-bg-green"></span>
               <span>{{$t('message.accounts_balance')}}</span>
-              <span v-if="currentAccount">{{formatBalance(currentAccountType, currentAccount.balance) + currentDisplayUnit(currentAccountType)}}</span>
+              <span v-if="currentAccount">{{formatBalance(currentAccountType, currentAccount.balance) + ' ' + currentDisplayUnit(currentAccountType)}}</span>
               <span class="exchange-rate" v-if="currentAccount"
-              >{{'( ' + toExchangeText(currentAccountType, currentAccount.balance) + currentExchangeRate + ' )'}}</span>
+              >{{'( ' + toExchangeText(currentAccountType, currentAccount.balance) + ' ' + currentExchangeRate + ' )'}}</span>
             </div>
           </div>
           <a :title="$t('message.icon_title_refresh')" href="#" class="refresh-data max-width-250" @click="refresh">
@@ -59,7 +59,7 @@
           </a>
         </div>
 
-        <h1 class="table-title">{{$t('message.accounts_recent_operations')}}</h1>
+        <h1 class="table-title"><i class="layui-icon">&#xe62d;</i>{{$t('message.accounts_recent_operations')}}</h1>
 
         <div class="layui-row">
           <div class="layui-col-xs12 ">
@@ -762,6 +762,16 @@ export default {
           font-size: 12px;
         }
       }
+    }
+  }
+  .table-title{
+    margin-top: 10px;
+    margin-bottom: 5px;
+    color: #5e5d5d;
+    font-size: 18px;
+    font-weight: 300;
+    .layui-icon{
+      font-size: 20px;
     }
   }
   .unit-display-2 {

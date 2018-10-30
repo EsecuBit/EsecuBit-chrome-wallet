@@ -45,7 +45,9 @@ export default {
       let eosPageList = [
         {label: this.$t('message.app_accounts'), icon: 'icon-zhanghu1'},
         {label: '交易', icon: 'icon-msnui-cloud-upload'},
-        {label: '投票', icon: 'icon-msnui-cloud-upload'}
+        {label: '投票', icon: 'icon-msnui-cloud-upload'},
+        {label: '资源管理', icon: 'icon-msnui-cloud-upload'},
+        {label: this.$t('message.app_setting'), icon: 'icon-shezhi2'}
       ]
       return this.isTest ? eosPageList : defaultPageList
     }

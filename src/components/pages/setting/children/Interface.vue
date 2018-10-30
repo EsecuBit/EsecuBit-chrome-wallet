@@ -40,7 +40,7 @@
 </template>
 
 <script>
-import Store from '../../../common/js/store'
+import Store from '../../../../common/js/store'
 import { mapMutations } from 'vuex'
 
 const form = layui.form
