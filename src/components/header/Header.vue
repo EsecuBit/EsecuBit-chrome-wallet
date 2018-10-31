@@ -44,9 +44,9 @@ export default {
       ]
       let eosPageList = [
         {label: this.$t('message.app_accounts'), icon: 'icon-zhanghu1'},
-        {label: '交易', icon: 'icon-msnui-cloud-upload'},
-        {label: '投票', icon: 'icon-msnui-cloud-upload'},
-        {label: '资源管理', icon: 'icon-msnui-cloud-upload'},
+        {label: this.$t('message.app_transaction'), icon: 'icon-jiaoyi'},
+        {label: this.$t('message.app_vote'), icon: 'icon-toupiao'},
+        {label: this.$t('message.app_resource'), icon: 'icon-huabanfuben'},
         {label: this.$t('message.app_setting'), icon: 'icon-shezhi2'}
       ]
       return this.isTest ? eosPageList : defaultPageList
@@ -71,6 +71,14 @@ export default {
 }
 </script>
 
-<style lang="less">
-
+<style lang="less" >
+  .icon-huabanfuben{
+    font-size: 22px!important;
+  }
+  .icon-shezhi2{
+    font-size: 24px!important;
+  }
+  .icon-jiaoyi{
+    font-size: 24px!important;
+  }
 </style>

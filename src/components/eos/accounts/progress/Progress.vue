@@ -15,7 +15,7 @@ export default {
   props: {
     radius: {
       type: Number,
-      default: 126
+      default: 60
     },
     percent: {
       type: Number,

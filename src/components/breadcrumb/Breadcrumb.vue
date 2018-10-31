@@ -81,7 +81,7 @@ export default {
     navTitle () {
       // breadcrumb: get current page
       let defaultPageTitle = [this.$t('message.app_accounts'), this.$t('message.app_send'), this.$t('message.app_accept'), this.$t('message.app_setting')]
-      let eosPageTitle = [this.$t('message.app_accounts'), '交易', '投票']
+      let eosPageTitle = [this.$t('message.app_accounts'), this.$t('message.app_transaction'), this.$t('message.app_vote'), this.$t('message.app_resource'), this.$t('message.app_setting')]
       return this.isTest ? eosPageTitle[this.pageIndex] : defaultPageTitle[this.pageIndex]
     }
   },

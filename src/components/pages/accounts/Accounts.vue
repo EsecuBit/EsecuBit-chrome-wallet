@@ -18,7 +18,7 @@
           <dl class="layui-nav-child">
             <dd v-for="account in item.children"
                 :class="{'layui-this': account.index === currentAccountIndex}">
-              <a href="#" @click="switchTab(account.index)"><span>{{account.label}}</span></a></dd>
+              <a href="#" @click="switchTab(account.index)"><span><i class="layui-icon ">&#xe612;</i>{{account.label}}</span></a></dd>
           </dl>
         </li>
       </template>
@@ -55,7 +55,7 @@
             </div>
           </div>
           <a :title="$t('message.icon_title_refresh')" href="#" class="refresh-data max-width-250" @click="refresh">
-            <i class="layui-icon layui-icon-refresh-2" :class="loadingClass"></i>
+            <i class="layui-icon layui-icon-refresh-2 layui-anim" :class="loadingClass"></i>
           </a>
         </div>
 
@@ -179,7 +179,6 @@ export default {
       },
       menuActiveIndex: 0,
       loadingClass: {
-        'layui-anim': false,
         'layui-anim-rotate': false,
         'layui-anim-loop': false
       },
@@ -241,6 +240,7 @@ export default {
         if (this.errorCodeMsg[String(error)]) {
           this.displayErrorCode(error)
         }
+        if (this.currentAccount) return false
         if (this.currentAccount.accountId !== txInfo.accountId) return false
         // Refresh transaction history
         this.clearCanvas()
@@ -380,17 +380,13 @@ export default {
     },
     refresh () {
       // refresh Transaction Record
-      this.loadingClass['layui-anim'] = true
       this.loadingClass['layui-anim-rotate'] = true
       this.loadingClass['layui-anim-loop'] = true
-      setTimeout(() => {
-        this.loadingClass['layui-anim'] = false
-        this.loadingClass['layui-anim-rotate'] = false
-        this.loadingClass['layui-anim-loop'] = false
-      }, 2000)
       this.clearCanvas()
       this.currentAccount.sync(false).then(value => {
         this.currentAccount.getTxInfos(this.pageStartIndex, this.pageEndIndex).then(value => {
+          this.loadingClass['layui-anim-rotate'] = false
+          this.loadingClass['layui-anim-loop'] = false
           this.tableData = value.txInfos
           this.total = value.total
           this.$nextTick(() => {
@@ -400,6 +396,8 @@ export default {
         })
         layer.msg(this.$t('message.accounts_sync_success'), { icon: 1 })
       }).catch(value => {
+        this.loadingClass['layui-anim-rotate'] = false
+        this.loadingClass['layui-anim-loop'] = false
         console.warn(value)
         this.displayErrorCode(value)
       })
@@ -621,6 +619,10 @@ export default {
         &:hover{
           background-color: @white;
           color: @font-color;
+        }
+        .layui-icon{
+          display: inline-block;
+          margin-right: 4px;
         }
       }
     }

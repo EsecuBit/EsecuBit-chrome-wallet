@@ -6,16 +6,16 @@
           <div class="max-width-250">
             <span class="layui-badge-dot layui-bg-green"></span>
             <span>{{$t('message.accounts_account')}}</span>
-            <span  style="color: #e74c3c">accounts</span>
+            <span  style="color: #e74c3c" v-if="currentAccount">{{currentAccount.label}}</span>
           </div>
         </div>
         <div class="account-msg">
           <div class="max-width-400">
             <span class="layui-badge-dot layui-bg-green"></span>
             <span>{{$t('message.accounts_balance')}}</span>
-            <span >123</span>
+            <span >{{accountBalance}}</span>
             <span>
-            <span class="exchange-rate">(100 eu)</span>
+            <span class="exchange-rate">{{displayExchangeRate}}</span>
           </span>
           </div>
         </div>
@@ -26,15 +26,15 @@
             <span style="color: #e74c3c">200.2 EOS</span>
           </div>
         </div>
-        <a :title="$t('message.icon_title_refresh')" href="#" class="refresh-data max-width-250">
-          <i class="layui-icon layui-icon-refresh-2"></i>
+        <a :title="$t('message.icon_title_refresh')" href="#" class="refresh-data max-width-250" @click="refresh">
+          <i class="layui-icon layui-icon-refresh-2 layui-anim " :class="loadingClass"></i>
         </a>
       </div>
 
       <div class="resource-list-wrapper">
         <div class="resource-item">
           <div class="resource-item-circle">
-            <Progress :radius="radius" :percent="percent" class="progress"></Progress>
+            <Progress :percent="percent.RAM" class="progress"></Progress>
           </div>
           <div class="resource-item-description-wrapper">
             <div class="resource-item-description">
@@ -45,7 +45,7 @@
         </div>
         <div class="resource-item">
           <div class="resource-item-circle">
-            <Progress :radius="radius" :percent="percent"></Progress>
+            <Progress :percent="percent.CPU"></Progress>
           </div>
           <div class="resource-item-description-wrapper">
             <div class="resource-item-description">
@@ -56,7 +56,7 @@
         </div>
         <div class="resource-item">
           <div class="resource-item-circle">
-            <Progress :radius="radius" :percent="percent"></Progress>
+            <Progress :percent="percent.NET"></Progress>
           </div>
           <div class="resource-item-description-wrapper">
             <div class="resource-item-description">
@@ -95,6 +95,7 @@
 import Progress from './progress/Progress'
 import TransactionsTable from './children/TransactionsTable'
 import TokenTransfers from './children/TokenTransfers'
+import { mapState, mapGetters } from 'vuex'
 export default {
   name: 'EosAccounts',
   components: {
@@ -102,10 +103,31 @@ export default {
     TransactionsTable,
     TokenTransfers
   },
+  computed: {
+    ...mapState({
+      'currentExchangeRate': 'currentExchangeRate'
+    }),
+    ...mapGetters({
+      'currentAccount': 'currentAccount'
+    }),
+    accountBalance () {
+      return this.currentAccount ? this.currentAccount.balance + ' EOS' : ''
+    },
+    displayExchangeRate () {
+      return this.currentExchangeRate ? `(100 ${this.currentExchangeRate})` : ''
+    }
+  },
   data () {
     return {
-      radius: 60,
-      percent: 0.1,
+      loadingClass: {
+        'layui-anim-rotate': false,
+        'layui-anim-loop': false
+      },
+      percent: {
+        RAM: 0.45,
+        CPU: 0.23,
+        NET: 0.87
+      },
       tableData: [
         {time: '2018-10-29', direction: '', showAddresses: 'oxasjkdhkjasdhja', value: '12', memo: '这是一个demo', confirmations: '1'},
         {time: '2018-10-28', direction: '', showAddresses: 'oxasjkdhkjasdhja', value: '2313', memo: '这是一个demo', confirmations: '2'},
@@ -117,6 +139,16 @@ export default {
       pageStartIndex: 0,
       pageEndIndex: 5,
       total: 0
+    }
+  },
+  methods: {
+    refresh () {
+      this.loadingClass['layui-anim-rotate'] = true
+      this.loadingClass['layui-anim-loop'] = true
+      setTimeout(() => {
+        this.loadingClass['layui-anim-rotate'] = false
+        this.loadingClass['layui-anim-loop'] = false
+      }, 2000)
     }
   }
 }
