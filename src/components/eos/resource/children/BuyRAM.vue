@@ -5,24 +5,27 @@
       <form class="layui-form" lay-filter="form">
         <div class="layui-form-item">
           <label class="from-label">RAM Payer</label>
-          <input type="text" placeholder="Account paying for RAM" autocomplete="off" class="layui-input">
+          <input type="text" placeholder="Account paying for RAM" lay-verify="isEmpty"
+                 v-model="payerUsername" autocomplete="off" class="layui-input">
         </div>
         <div class="layui-form-item">
           <label class="from-label">RAM Receiver: </label>
-          <input type="text" placeholder="Account receiving RAM (may be same as payer to buy for yourself)" autocomplete="off" class="layui-input">
+          <input type="text" placeholder="Account receiving RAM (may be same as payer to buy for yourself)"
+                 v-model="ReceiverUsername" lay-verify="isEmpty" autocomplete="off" class="layui-input">
         </div>
         <div class="layui-form-item">
           <label class="from-label">By in EOS or Bytes?</label>
-          <input type="radio" lay-filter="unit" name="unit" value="EOS" title="EOS">
-          <input type="radio" lay-filter="unit" name="unit" value="Bytes" title="Bytes" checked>
+          <input type="radio" lay-filter="unit" name="unit" value="eos" title="EOS" :checked="unitChecked === 'eos'">
+          <input type="radio" lay-filter="unit" name="unit" value="bytes" title="Bytes" :checked="unitChecked === 'bytes'">
         </div>
         <div class="layui-form-item">
           <label class="from-label">Amount of RAM to Buy in EOS</label>
-          <input type="number" placeholder="Amount of RAM to Buy in EOS" autocomplete="off" class="layui-input">
+          <input type="number" placeholder="Amount of RAM to Buy in EOS"
+                 v-model="amount" lay-verify="isEmpty" autocomplete="off" class="layui-input">
         </div>
         <div class="layui-form-item">
-          <button class="layui-btn">立即提交</button>
-          <button type="button" class="layui-btn layui-btn-primary">重置</button>
+          <button class="layui-btn" lay-submit type="button">立即提交</button>
+          <button type="button" class="layui-btn layui-btn-primary" @click="resetForm">重置</button>
         </div>
       </form>
     </div>
@@ -33,8 +36,44 @@
 const form = layui.form
 export default {
   name: 'BuyRAM',
+  data () {
+    return {
+      payerUsername: '',
+      ReceiverUsername: '',
+      amount: '',
+      unitChecked: 'eos'
+    }
+  },
   mounted () {
-    form.render('radio', 'form')
+    this.renderForm()
+    this.verifyForm()
+  },
+  methods: {
+    resetForm () {
+      this.payerUsername = ''
+      this.ReceiverUsername = ''
+      this.amount = ''
+      this.unitChecked = 'eos'
+      this.$nextTick(() => {
+        this.renderForm()
+      })
+    },
+    verifyForm () {
+      let that = this
+      form.verify({
+        isEmpty (value) {
+          if (!value) return that.$t('message.send_form_is_empty')
+        }
+      })
+    },
+    renderForm () {
+      form.render('radio', 'form')
+      form.on('radio(unit)', data => {
+        this.unitChecked = data.value
+      })
+    },
+    submit () {
+    }
   }
 }
 </script>
@@ -54,7 +93,7 @@ export default {
   }
   .layui-form-item{
     margin-bottom: 4px!important;
-    padding: 5px;
+    padding: 4px;
     .layui-btn{
       color: #fff;
     }

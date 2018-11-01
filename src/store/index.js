@@ -26,7 +26,7 @@ const state = {
   autoFillTableData: {},
   isAddAccounts: true,
   isOfficial: false,
-  isTest: false
+  isTest: true
 }
 
 export default new Vuex.Store({

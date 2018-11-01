@@ -2,30 +2,32 @@
   <div class="layui-card">
     <div class="layui-card-header">Transfer Tokens</div>
     <div class="layui-card-body layui-row layui-col-space10">
-      <div class="layui-form-item">
-        <label class="from-label">Sender (tokens are auto-detected from this account)</label>
-        <input type="text" placeholder="Username to send tokens from" lay-verify="isEmpty"
-               autocomplete="off" class="layui-input" v-model="senderUsername">
-      </div>
-      <div class="layui-form-item">
-        <label class="from-label">Receiver </label>
-        <input type="text" placeholder="Username to receive tokens" lay-verify="isEmpty"
-               autocomplete="off" class="layui-input" v-model="receiveUsername">
-      </div>
-      <div class="layui-form-item">
-        <label class="from-label">Amount</label>
-        <input type="number" placeholder="Amount" lay-verify="isEmpty"
-               autocomplete="off" class="layui-input" v-model="amount">
-      </div>
-      <div class="layui-form-item">
-        <label class="from-label">Memo (optional): </label>
-        <input type="text" placeholder="Memo" lay-verify="isEmpty"
-               autocomplete="off" class="layui-input" v-model="memo">
-      </div>
-      <div class="layui-form-item">
-        <button class="layui-btn" lay-submit type="button" @clik="submit">{{$t('message.send_submit_btn')}}</button>
-        <button type="button" class="layui-btn layui-btn-primary" @click="resetForm">{{$t('message.send_reset_btn')}}</button>
-      </div>
+      <form class="layui-form">
+        <div class="layui-form-item">
+          <label class="from-label">Sender (tokens are auto-detected from this account)</label>
+          <input type="text" placeholder="Username to send tokens from" lay-verify="isEmpty"
+                 autocomplete="off" class="layui-input" v-model="senderUsername">
+        </div>
+        <div class="layui-form-item">
+          <label class="from-label">Receiver </label>
+          <input type="text" placeholder="Username to receive tokens" lay-verify="isEmpty"
+                 autocomplete="off" class="layui-input" v-model="receiveUsername">
+        </div>
+        <div class="layui-form-item">
+          <label class="from-label">Amount</label>
+          <input type="number" placeholder="Amount" lay-verify="isEmpty"
+                 autocomplete="off" class="layui-input" v-model="amount">
+        </div>
+        <div class="layui-form-item">
+          <label class="from-label">Memo (optional): </label>
+          <input type="text" placeholder="Memo" lay-verify="isEmpty"
+                 autocomplete="off" class="layui-input" v-model="memo">
+        </div>
+        <div class="layui-form-item">
+          <button class="layui-btn" lay-submit type="button" @clik="submit">{{$t('message.send_submit_btn')}}</button>
+          <button type="button" class="layui-btn layui-btn-primary" @click="resetForm">{{$t('message.send_reset_btn')}}</button>
+        </div>
+      </form>
     </div>
   </div>
 </template>
@@ -80,6 +82,7 @@ export default {
     }
   }
   .layui-form-item{
+    padding: 4px;
     margin-bottom: 4px!important;
     .layui-btn{
       color: #fff;

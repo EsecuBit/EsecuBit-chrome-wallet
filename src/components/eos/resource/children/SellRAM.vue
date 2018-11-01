@@ -2,25 +2,55 @@
   <div class="layui-card">
     <div class="layui-card-header">Sell RAM</div>
     <div class="layui-card-body layui-row layui-col-space10">
-      <div class="layui-form-item">
-        <label class="from-label">RAM Owner:</label>
-        <input type="text" placeholder="Account that owns the RAM" autocomplete="off" class="layui-input">
-      </div>
-      <div class="layui-form-item">
-        <label class="from-label">Amount of RAM to Sell </label>
-        <input type="text" placeholder="Amount of RAM to sell in Bytes" autocomplete="off" class="layui-input">
-      </div>
-      <div class="layui-form-item">
-        <button class="layui-btn" >立即提交</button>
-        <button type="button" class="layui-btn layui-btn-primary">重置</button>
-      </div>
+      <form class="layui-form">
+        <div class="layui-form-item">
+          <label class="from-label">RAM Owner:</label>
+          <input type="text" placeholder="Account that owns the RAM"
+                 lay-verify="isEmpty" v-model="ownerUsername" autocomplete="off" class="layui-input">
+        </div>
+        <div class="layui-form-item">
+          <label class="from-label">Amount of RAM to Sell </label>
+          <input type="text" placeholder="Amount of RAM to sell in Bytes"
+                 lay-verify="isEmpty" v-model="sellAmount" autocomplete="off" class="layui-input">
+        </div>
+        <div class="layui-form-item">
+          <button class="layui-btn" lay-submit type="button">立即提交</button>
+          <button type="button" class="layui-btn layui-btn-primary" @click="resetForm">重置</button>
+        </div>
+      </form>
     </div>
   </div>
 </template>
 
 <script>
+const form = layui.form
 export default {
-  name: 'SellRAM'
+  name: 'SellRAM',
+  data () {
+    return {
+      ownerUsername: '',
+      sellAmount: ''
+    }
+  },
+  mounted () {
+    this.verifyForm()
+  },
+  methods: {
+    resetForm () {
+      this.ownerUsername = ''
+      this.sellAmount = ''
+    },
+    verifyForm () {
+      let that = this
+      form.verify({
+        isEmpty (value) {
+          if (!value) return that.$t('message.send_form_is_empty')
+        }
+      })
+    },
+    submit () {
+    }
+  }
 }
 </script>
 
@@ -39,6 +69,7 @@ export default {
   }
   .layui-form-item{
     margin-bottom: 4px!important;
+    padding: 4px;
     .layui-btn{
       color: #fff;
     }

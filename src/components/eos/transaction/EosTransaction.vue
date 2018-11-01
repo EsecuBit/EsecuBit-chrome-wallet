@@ -1,5 +1,5 @@
 <template>
-  <div class="vote-box-container height-scroll">
+  <div class="vote-box-container ">
     <TransferTokens></TransferTokens>
   </div>
 </template>
