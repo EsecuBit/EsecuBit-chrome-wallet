@@ -92,7 +92,7 @@
               <!-- Determine whether to resend -->
               <tr style="height: 39px;overflow-x: hidden" v-for="(table, trIndex) in tableData"
                   @mouseenter="reSendPrompt(table.canResend, table.shouldResend, trIndex)" @mouseleave="clearLayer" :class="'prompt_' + trIndex" >
-                <td>{{getFormatTime(table.time)}}</td>
+                <td>{{formatTableTime(table.time)}}</td>
                 <td>
                   <span :class ="[table.direction === 'in'?green:red]" class="text-opacity">{{toOrForm(table.direction)}}</span>
                   <span style="cursor: text;">{{getTableAddress(table)}}</span>
@@ -157,6 +157,7 @@
 <script>
 import { mapState, mapMutations, mapGetters } from 'vuex'
 import EosAccounts from '../../eos/accounts/EosAccounts'
+import utils from '../../../utils/utils'
 
 const $ = layui.jquery
 const layer = layui.layer
@@ -240,8 +241,7 @@ export default {
         if (this.errorCodeMsg[String(error)]) {
           this.displayErrorCode(error)
         }
-        if (this.currentAccount) return false
-        if (this.currentAccount.accountId !== txInfo.accountId) return false
+        if (!this.currentAccount || this.currentAccount.accountId !== txInfo.accountId) return false
         // Refresh transaction history
         this.clearCanvas()
         // table Repagination
@@ -257,6 +257,9 @@ export default {
           this.displayErrorCode(value)
         })
       })
+    },
+    formatTableTime (time) {
+      return utils.getFormatTime(time)
     },
     switchMenu (item) {
       item.active ? this.$set(item, 'active', false) : this.$set(item, 'active', true)
@@ -320,7 +323,7 @@ export default {
     toExchangeText (coinType, value) {
       let newValue = this.toTargetCoinUnit(coinType, value)
       let exchange = this.D.isBtc(coinType) ? this.esWallet.convertValue(coinType, newValue, this.currentUnitBtc, this.currentExchangeRate) : this.esWallet.convertValue(coinType, newValue, this.currentUnitEth, this.currentExchangeRate)
-      return this.formatNum(exchange)
+      return utils.formatNum(exchange)
     },
     weiToGwei (coinType, value) {
       return this.esWallet.convertValue(coinType, value, this.D.unit.eth.Wei, this.D.unit.eth.GWei) + '  '
@@ -516,32 +519,6 @@ export default {
     },
     switchTab (index) {
       this.setCurrentAccountIndex(index)
-    },
-    getFormatTime (time) {
-      let date = new Date(time)
-      let yyyy = date.getFullYear()
-      let moth = date.getMonth() + 1
-      let MM = parseInt(moth / 10) ? moth : '0' + moth
-      let dd = parseInt(date.getDate() / 10) ? date.getDate() : '0' + date.getDate()
-      let HH = parseInt(date.getHours() / 10) ? date.getHours() : '0' + date.getHours()
-      let mm = parseInt(date.getMinutes() / 10) ? date.getMinutes() : '0' + date.getMinutes()
-      let ss = parseInt(date.getSeconds() / 10) ? date.getSeconds() : '0' + date.getSeconds()
-      let arr = []
-      arr.push(yyyy)
-      arr.push('-')
-      arr.push(MM)
-      arr.push('-')
-      arr.push(dd)
-      arr.push(' ')
-      arr.push(HH)
-      arr.push(':')
-      arr.push(mm)
-      arr.push(':')
-      arr.push(ss)
-      return arr.join('')
-    },
-    formatNum (num) {
-      return parseFloat(num).toLocaleString()
     },
     closeAgainSendMsg () {
       this.isShowAgainSendMsg = false

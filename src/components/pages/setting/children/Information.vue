@@ -87,7 +87,7 @@ export default {
       } else return []
     },
     bitNetList () {
-      if (this.netInfo) {
+      if (this.netInfo[this.D.coin.test.btcTestNet3] || this.netInfo[this.D.coin.main.btc]) {
         let netString = this.netInfo[this.D.coin.test.btcTestNet3] ? this.D.coin.test.btcTestNet3 : this.D.coin.main.btc
         let exchangeNet = this.netInfo[netString].exchange
         let feeNet = this.netInfo[netString].fee
@@ -98,11 +98,12 @@ export default {
           {name: this.$t('message.setting_fee'), value: feeNet},
           {name: this.$t('message.setting_exchange'), value: exchangeNet}
         ]
+        console.log(this.netInfo, 'this.netInfo')
         return netList
       } else return []
     },
     etcNetList () {
-      if (this.netInfo) {
+      if (this.netInfo[this.D.coin.test.ethRinkeby] || this.netInfo[this.D.coin.main.eth]) {
         let netString = this.netInfo[this.D.coin.test.ethRinkeby] ? this.D.coin.test.ethRinkeby : this.D.coin.main.eth
         let exchangeNet = this.netInfo[netString].exchange
         let feeNet = this.netInfo[netString].fee

@@ -13,7 +13,7 @@ const state = {
   currentUnitEth: '',
   addAccountTimes: 0,
   currentExchangeRate: '',
-  netInfo: null,
+  netInfo: {},
   appVersion: '0.1.24',
   pageIndex: 0,
   isPreventSwitch: false,
@@ -26,7 +26,7 @@ const state = {
   autoFillTableData: {},
   isAddAccounts: true,
   isOfficial: false,
-  isTest: true
+  isTest: false
 }
 
 export default new Vuex.Store({
