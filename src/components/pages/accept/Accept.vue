@@ -72,13 +72,13 @@
 import Store from '../../../common/js/store'
 import Clipboard from 'clipboard'
 import { mapState, mapGetters } from 'vuex'
+import utils from '../../../utils/utils'
 
 const form = layui.form
 const layer = layui.layer
 
 export default {
   name: 'accept',
-  props: ['errorCodeMsg'],
   data () {
     return {
       isFirst: true,
@@ -147,15 +147,6 @@ export default {
         form.render('checkbox', 'form2')
       })
     },
-    displayErrorCode (value) {
-      layer.closeAll()
-      let errorKey = String(value)
-      if (this.errorCodeMsg[errorKey]) {
-        layer.msg(this.errorCodeMsg[errorKey], {icon: 2})
-      } else {
-        layer.msg(errorKey, {icon: 2, anim: 6})
-      }
-    },
     generateAddress () {
       // Prevent duplicate generation of verification codes
       if (this.isPreventClick) return false
@@ -174,8 +165,7 @@ export default {
           }).catch(value => {
             this.isPreventClick = false
             layer.close(layerIndex)
-            console.warn(value)
-            this.displayErrorCode(value)
+            utils.displayErrorCode(this, value)
           })
         }, 200)
       } else {
@@ -189,8 +179,7 @@ export default {
           }).catch(value => {
             this.isPreventClick = false
             layer.close(layerIndex)
-            console.warn(value)
-            this.displayErrorCode(value)
+            utils.displayErrorCode(this, value)
           })
         }, 200)
       }

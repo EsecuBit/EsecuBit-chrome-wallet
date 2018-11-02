@@ -14,7 +14,7 @@ const state = {
   addAccountTimes: 0,
   currentExchangeRate: '',
   netInfo: {},
-  appVersion: '0.1.24',
+  appVersion: '0.1.25',
   pageIndex: 0,
   isPreventSwitch: false,
   headColor: '',

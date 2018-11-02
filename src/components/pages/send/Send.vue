@@ -163,12 +163,12 @@
 
 <script>
 import { mapState, mapMutations } from 'vuex'
+import utils from '../../../utils/utils'
 
 const form = layui.form
 const layer = layui.layer
 export default {
   name: 'Sending',
-  props: ['errorCodeMsg'],
   data () {
     return {
       amountValue: null,
@@ -202,7 +202,11 @@ export default {
       isShowAllowAmountMsg: false,
       AllowAmountMsg: '',
       intervalId: null,
-      isFirst: true
+      isFirst: true,
+      btcFeePlaceHolder: 'Satoshi per byte',
+      ethFeePlaceHolder: 'Gwei per byte',
+      btcName: 'Bitcoin',
+      ethName: 'Ether'
     }
   },
   computed: {
@@ -226,11 +230,11 @@ export default {
         let nowUnit = this.currentDisplayUnit(this.coinType)
         let getMoney = this.amountValue ? this.amountValue : '0'
         let exchange = Number(this.esWallet.convertValue(this.coinType, String(getMoney), nowUnit, this.currentExchangeRate)).toFixed(2)
-        return this.formatNum(exchange) + ' ' + this.currentExchangeRate
+        return utils.formatNum(exchange) + ' ' + this.currentExchangeRate
       }
     },
     sendCoinTypeMsg () {
-      let coinTypeName = this.D.isBtc(this.coinType) ? 'Bitcoin' : 'Ether'
+      let coinTypeName = this.D.isBtc(this.coinType) ? this.btcName : this.ethName
       return this.$t('message.send_send_msg') + ' ' + coinTypeName
     },
     getBalance () {
@@ -242,8 +246,8 @@ export default {
         let nowUnit = this.currentDisplayUnit(this.coinType)
         let exchange = this.esWallet.convertValue(this.coinType, this.totalFee, nowUnit, this.currentExchangeRate)
         let feeExchange = this.esWallet.convertValue(this.coinType, this.transFee, nowUnit, this.currentExchangeRate)
-        const totalFeeDisplay = this.$t('message.send_total_fee') + ': ' + this.totalFee + ' ' + nowUnit + ' (' + this.formatNum(exchange) + ' ' + this.currentExchangeRate + ')' + '\n'
-        const transFeeDisplay = this.$t('message.send_transaction_fees') + ': ' + this.transFee + ' ' + nowUnit + ' (' + this.formatNum(feeExchange) + ' ' + this.currentExchangeRate + ')'
+        const totalFeeDisplay = this.$t('message.send_total_fee') + ': ' + this.totalFee + ' ' + nowUnit + ' (' + utils.formatNum(exchange) + ' ' + this.currentExchangeRate + ')' + '\n'
+        const transFeeDisplay = this.$t('message.send_transaction_fees') + ': ' + this.transFee + ' ' + nowUnit + ' (' + utils.formatNum(feeExchange) + ' ' + this.currentExchangeRate + ')'
         return totalFeeDisplay + transFeeDisplay
       } else {
         return ''
@@ -481,15 +485,6 @@ export default {
         })
       })
     },
-    displayErrorCode (value) {
-      layer.closeAll()
-      let errorKey = String(value)
-      if (this.errorCodeMsg[errorKey]) {
-        layer.msg(this.errorCodeMsg[errorKey], {icon: 2, anim: 6})
-      } else {
-        layer.msg(errorKey, {icon: 2, anim: 6})
-      }
-    },
     renderFeeForm (newValue) {
       if (newValue.getSuggestedFee) {
         let oldFeeList = newValue.getSuggestedFee()
@@ -554,15 +549,13 @@ export default {
     },
     selectedIndex (index) {
       if (this.currentSelectedIndex) return this.currentSelectedIndex
-      if (this.coinType) {
-        return this.D.isBtc(this.coinType) ? index === 1 : index === 2
-      }
+      if (this.coinType) return this.D.isBtc(this.coinType) ? index === 1 : index === 2
     },
     currentDisplayUnit (coinType) {
       return this.D.isBtc(coinType) ? this.currentUnitBtc : this.currentUnitEth
     },
     currentTransactionUnit (coinType) {
-      return this.D.isBtc(coinType) ? 'satoshi per byte' : 'Gwei per byte'
+      return this.D.isBtc(coinType) ? this.btcFeePlaceHolder : this.ethFeePlaceHolder
     },
     toTargetCoinUnit (value) {
       if (this.coinType) {
@@ -592,18 +585,15 @@ export default {
           }]
         }
         this.currentAccount.prepareTx(formData).then(result => {
-          console.log(result)
           if (result.deviceLimit) {
             if (this.intervalId !== null) clearInterval(this.intervalId)
             this.autoCloseAllowAmountMsg()
             this.isShowAllowAmountMsg = true
           }
           this.amountValue = this.toTargetCoinUnit(result.outputs[0].value)
+        }).catch(value => {
+          utils.displayErrorCode(this, value)
         })
-          .catch(value => {
-            console.warn(value)
-            this.displayErrorCode(value)
-          })
       } else {
         let gasPrice = String(this.gasPrice ? this.gasPrice : 0)
         let getGasPrice = this.gweiToWei(gasPrice)
@@ -619,13 +609,10 @@ export default {
           data: this.etcData
         }
         this.currentAccount.prepareTx(formData).then(result => {
-          console.log(result)
           this.amountValue = this.toTargetCoinUnit(result.output.value)
+        }).catch(value => {
+          utils.displayErrorCode(this, value)
         })
-          .catch(value => {
-            console.warn(value)
-            this.displayErrorCode(value)
-          })
       }
     },
     verifyAddress () {
@@ -634,8 +621,7 @@ export default {
         this.currentAccount.checkAddress(this.addressValue)
         layer.msg(this.$t('message.send_effective_address_mag'), { icon: 1, anim: 2, time: 1500 })
       } catch (e) {
-        console.warn(e)
-        this.displayErrorCode(e)
+        utils.displayErrorCode(this, e)
       }
     },
     verifySubmitAddress () {
@@ -647,8 +633,7 @@ export default {
         if (e === this.D.error.noAddressCheckSum) {
           return true
         } else {
-          console.warn(e)
-          this.displayErrorCode(e)
+          layer.msg(this.$t('message.send_invalid_address_mag'), { icon: 2, anim: 6 })
           document.getElementById('transactionAddress').focus()
           return false
         }
@@ -705,7 +690,6 @@ export default {
           data: this.etcData,
           oldTxId: this.oldTxId
         }
-        console.log(formData)
       }
       return formData
     },
@@ -730,14 +714,12 @@ export default {
       this.setIsPreventSwitch(true)
       setTimeout(() => {
         this.currentAccount.prepareTx(formData).then(value => {
-          console.log(value, 'prepareTx')
           return this.currentAccount.buildTx(value)
         })
           .then(value => {
             this.isPreventClick = false
             layer.closeAll('msg')
             layer.msg(this.$t('message.send_is_trading'), {time: 600000000})
-            console.log(value, 'buildTx')
             return this.currentAccount.sendTx(value)
           }).then(value => {
             // Empty retransmission status
@@ -751,17 +733,15 @@ export default {
             this.setPageIndex(0)
           }).catch(value => {
             this.isPreventClick = false
-            console.warn(value)
             this.setIsPreventSwitch(false)
             layer.closeAll('msg')
-            this.displayErrorCode(value)
+            utils.displayErrorCode(this, value)
           })
       }, 200)
     },
     calculateTotal () {
       let formData = this.getFormData()
       this.currentAccount.prepareTx(formData).then(value => {
-        console.log(value, 'prepareTx2')
         if (value.deviceLimit) {
           if (this.intervalId !== null) clearInterval(this.intervalId)
           this.autoCloseAllowAmountMsg()
@@ -774,14 +754,9 @@ export default {
             this.totalFee = this.toTargetCoinUnit(value.total)
           })
         }
+      }).catch(value => {
+        utils.displayErrorCode(this, value)
       })
-        .catch(value => {
-          console.warn(value)
-          this.displayErrorCode(value)
-        })
-    },
-    formatNum (num) {
-      return parseFloat(num).toLocaleString()
     },
     clearResendStatusAndData () {
       this.clearResendStatus()

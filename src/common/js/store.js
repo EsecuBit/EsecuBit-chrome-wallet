@@ -58,10 +58,10 @@ export default {
   },
   async getLang () {
     if (localStorage) {
-      return this.fetch('lang') ? this.fetch('lang') : navigator.language
+      return this.fetch('lang') ? this.fetch('lang') : (navigator.language === 'zh-CN' ? 'zh-CN' : 'en-US')
     } else {
       const lang = await this.setPromise('lang')
-      return lang['lang'] ? lang['lang'] : navigator.language
+      return lang['lang'] ? lang['lang'] : (navigator.language === 'zh-CN' ? 'zh-CN' : 'en-US')
     }
   },
   async init () {

@@ -12,7 +12,7 @@
       <v-breadcrumb></v-breadcrumb>
 
       <!-- main page -->
-      <v-content :error-code-msg="errorCodeMsg"></v-content>
+      <v-content></v-content>
     </div>
   </div>
 </template>
@@ -25,6 +25,7 @@ import Content from './components/content/Content'
 import Store from './common/js/store'
 import qs from 'qs'
 import { mapState, mapMutations } from 'vuex'
+import utils from './utils/utils'
 
 // Introducing layui plugin variables
 const layer = layui.layer
@@ -42,7 +43,8 @@ export default {
       isShowLogin: true,
       loginStatus: null,
       loginErrorMsg: '',
-      getNewAppUrl: 'http://39.106.201.178/app-update-server/getNewApp'
+      getNewAppUrl: 'http://39.106.201.178/app-update-server/getNewApp',
+      downloadUrl: 'https://www.esecubit.com/'
     }
   },
   computed: {
@@ -51,46 +53,7 @@ export default {
       'appVersion': 'appVersion',
       'pageIndex': 'pageIndex',
       'customizeColor': 'customizeColor'
-    }),
-    errorCodeMsg () {
-      // error code
-      return {
-        101: this.$t('message.error_noDevice'),
-        102: this.$t('message.error_deviceComm'),
-        103: this.$t('message.error_deviceConnectFailed'),
-        104: this.$t('message.error_deviceDeriveLargerThanN'),
-        105: this.$t('message.error_deviceProtocol'),
-        106: this.$t('message.error_handShake'),
-        107: this.$t('message.error_needPressKey'), // sleep after long time idle
-        108: this.$t('message.error_userCancel'),
-        109: this.$t('message.error_pinError'),
-        110: this.$t('message.error_operationTimeout'),
-        111: this.$t('message.error_deviceNotInit'),
-        112: this.$t('message.devicePressKeyTooEarly'),
-        201: this.$t('message.error_databaseOpenFailed'),
-        202: this.$t('message.error_databaseExecFailed'),
-        301: this.$t('message.error_lastAccountNoTransaction'),
-        302: this.$t('message.error_accountHasTransactions'),
-        401: this.$t('message.error_networkUnavailable'),
-        402: this.$t('message.error_networkNotInitialized'),
-        403: this.$t('message.error_networkProviderError'),
-        404: this.$t('message.error_networkTxNotFound'),
-        405: this.$t('message.error_networkFeeTooSmall'),
-        406: this.$t('message.error_networkTooManyPendingTx'),
-        407: this.$t('message.error_networkValueTooSmall'),
-        408: this.$t('message.error_networkGasTooLow'),
-        409: this.$t('message.error_networkGasPriceTooLow'),
-        501: this.$t('message.error_balanceNotEnough'),
-        601: this.$t('message.error_invalidAddress'),
-        602: this.$t('message.error_noAddressCheckSum'), // for eth
-        603: this.$t('message.error_invalidAddressChecksum'),
-        605: this.$t('message.error_invalidDataNotHex'),
-        604: this.$t('message.error_valueIsDecimal'),
-        10000: this.$t('message.error_notImplemented'),
-        10001: this.$t('message.error_unknown'),
-        10002: this.$t('message.error_coinNotSupported')
-      }
-    }
+    })
   },
   beforeMount () {
     this.init()
@@ -148,7 +111,7 @@ export default {
               title: title,
               btn: btn2
             }, (index) => {
-              window.open('https://www.esecubit.com/')
+              window.open(this.downloadUrl)
               layer.close(index)
             })
           } else {
@@ -157,7 +120,7 @@ export default {
               title: title,
               btn: btn1
             }, (index) => {
-              window.open('https://www.esecubit.com/')
+              window.open(this.downloadUrl)
               layer.close(index)
             }, () => {
               // user update
@@ -212,21 +175,13 @@ export default {
         this.setCustomizeColor(getCustomizeColor)
       }
     },
-    displayErrorCode (value) {
-      layer.closeAll()
-      let errorKey = String(value)
-      if (this.errorCodeMsg[errorKey]) {
-        layer.msg(this.errorCodeMsg[errorKey], {icon: 2, anim: 6})
-      } else {
-        layer.msg(errorKey, {icon: 2})
-      }
-    },
     listenLoginStatus () {
       // Monitor wallet status
       this.esWallet.listenStatus((errorNum, status) => {
         // some error occur
         if (errorNum !== 0) {
-          this.loginErrorMsg = this.errorCodeMsg[String(errorNum)]
+          let errorCodeMsg = utils.getErrorCodeMsg(this)
+          this.loginErrorMsg = errorCodeMsg[String(errorNum)]
           this.loginStatus = 404
           return false
         }
@@ -251,8 +206,7 @@ export default {
       this.esWallet.getWalletInfo().then(value => {
         this.setWalletInfo(value)
       }).catch(value => {
-        console.warn(value)
-        this.displayErrorCode(value)
+        utils.displayErrorCode(this, value)
       })
       this.esWallet.getAccounts().then(value => {
         if (value) this.setAccountList(value)

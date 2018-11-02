@@ -164,7 +164,6 @@ const layer = layui.layer
 const laypage = layui.laypage
 export default {
   name: 'accounts',
-  props: ['errorCodeMsg'],
   components: {
     EosAccounts
   },
@@ -178,14 +177,12 @@ export default {
         time: '',
         direction: ''
       },
-      menuActiveIndex: 0,
       loadingClass: {
         'layui-anim-rotate': false,
         'layui-anim-loop': false
       },
       renameValue: '',
-      walletGroup: [
-      ],
+      walletGroup: [],
       tableData: [],
       total: 0,
       active: 'active-count',
@@ -238,8 +235,9 @@ export default {
     }),
     listenTXInfo () {
       this.esWallet.listenTxInfo((error, txInfo) => {
-        if (this.errorCodeMsg[String(error)]) {
-          this.displayErrorCode(error)
+        let errorCodeMsg = utils.getErrorCodeMsg(this)
+        if (errorCodeMsg[String(error)]) {
+          utils.displayErrorCode(this, error)
         }
         if (!this.currentAccount || this.currentAccount.accountId !== txInfo.accountId) return false
         // Refresh transaction history
@@ -253,8 +251,7 @@ export default {
             this.pageList(value.total)
           })
         }).catch(value => {
-          console.warn(value)
-          this.displayErrorCode(value)
+          utils.displayErrorCode(this, value)
         })
       })
     },
@@ -281,19 +278,6 @@ export default {
     isEtcType () {
       return !this.D.isBtc(this.currentAccountType)
     },
-    displayErrorCode (value) {
-      layer.closeAll()
-      let errorKey = String(value)
-      if (this.errorCodeMsg[errorKey]) {
-        layer.msg(this.errorCodeMsg[errorKey], {icon: 2})
-      } else {
-        layer.msg(errorKey, {icon: 2, anim: 6})
-      }
-    },
-    toTwoPoint (num) {
-      // Keep two decimals
-      return Math.round(num * 100) / 100
-    },
     toOrForm (value) {
       return value === 'in' ? 'from' : 'to'
     },
@@ -314,8 +298,7 @@ export default {
       return this.toTargetCoinUnit(coinType, value)
     },
     tableBlockNumber (table) {
-      let newValue = this.toTargetCoinUnit(table.coinType, table.value)
-      return newValue + ' '
+      return this.toTargetCoinUnit(table.coinType, table.value) + ' '
     },
     currentDisplayUnit (coinType) {
       return this.D.isBtc(coinType) ? this.currentUnitBtc : this.currentUnitEth
@@ -401,8 +384,7 @@ export default {
       }).catch(value => {
         this.loadingClass['layui-anim-rotate'] = false
         this.loadingClass['layui-anim-loop'] = false
-        console.warn(value)
-        this.displayErrorCode(value)
+        utils.displayErrorCode(this, value)
       })
     },
     setMenuList (targetArray) {
@@ -453,11 +435,9 @@ export default {
           this.setMenuList(this.accountList)
           layer.closeAll('page')
           layer.msg(this.$t('message.accounts_update_msg'), { icon: 1 })
+        }).catch(value => {
+          utils.displayErrorCode(this, value)
         })
-          .catch(value => {
-            console.warn(value)
-            this.displayErrorCode(value)
-          })
       }
     },
     pageList (total) {
@@ -500,8 +480,7 @@ export default {
           this.tableCanvas()
         })
       }).catch(value => {
-        console.warn(value)
-        this.displayErrorCode(value)
+        utils.displayErrorCode(this, value)
       })
     },
     setTableData (startItem, endItem) {
@@ -513,8 +492,7 @@ export default {
           this.pageList(value.total)
         })
       }).catch(value => {
-        console.warn(value)
-        this.displayErrorCode(value)
+        utils.displayErrorCode(this, value)
       })
     },
     switchTab (index) {

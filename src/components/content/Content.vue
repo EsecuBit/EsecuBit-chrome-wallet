@@ -3,14 +3,14 @@
     <div class="layui-container main-content-wrapper">
       <div class="main-tab-content">
         <div class="main-tab-item" :class="{'layui-show': 0 === pageIndex}">
-          <Accounts :error-code-msg="errorCodeMsg"/>
+          <Accounts/>
         </div>
         <template v-if="!isTest">
           <div class="main-tab-item" :class="{'layui-show': 1 === pageIndex}">
-            <Send :error-code-msg="errorCodeMsg"/>
+            <Send/>
           </div>
           <div class="main-tab-item" :class="{'layui-show': 2 === pageIndex}">
-            <Accept :error-code-msg="errorCodeMsg"/>
+            <Accept/>
           </div>
           <div class="main-tab-item" :class="{'layui-show': 3 === pageIndex}">
             <Setting/>
@@ -18,13 +18,13 @@
         </template>
         <template v-if="isTest">
           <div class="main-tab-item" :class="{'layui-show': 1 === pageIndex}">
-            <EosTransaction :error-code-msg="errorCodeMsg"/>
+            <EosTransaction/>
           </div>
           <div class="main-tab-item" :class="{'layui-show': 2 === pageIndex}">
-            <Vote :error-code-msg="errorCodeMsg"/>
+            <Vote/>
           </div>
           <div class="main-tab-item" :class="{'layui-show': 3 === pageIndex}">
-            <ResourceManagement :error-code-msg="errorCodeMsg"/>
+            <ResourceManagement/>
           </div>
           <div class="main-tab-item" :class="{'layui-show': 4 === pageIndex}">
             <Setting/>
@@ -46,7 +46,6 @@ import Vote from '../eos/vote/Vote'
 import ResourceManagement from '../eos/resource/ResourceManagement'
 export default {
   name: 'Content',
-  props: ['errorCodeMsg'],
   components: {
     Accounts,
     Send,

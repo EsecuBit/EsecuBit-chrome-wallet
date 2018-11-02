@@ -1,3 +1,4 @@
+const layer = layui.layer
 export default {
   getFormatTime (time) {
     let date = new Date(time)
@@ -24,5 +25,54 @@ export default {
   },
   formatNum (num) {
     return parseFloat(num).toLocaleString()
+  },
+  toTwoPoint (num) {
+    // Keep two decimals
+    return Math.round(num * 100) / 100
+  },
+  getErrorCodeMsg (vm) {
+    return {
+      101: vm.$t('message.error_noDevice'),
+      102: vm.$t('message.error_deviceComm'),
+      103: vm.$t('message.error_deviceConnectFailed'),
+      104: vm.$t('message.error_deviceDeriveLargerThanN'),
+      105: vm.$t('message.error_deviceProtocol'),
+      106: vm.$t('message.error_handShake'),
+      107: vm.$t('message.error_needPressKey'), // sleep after long time idle
+      108: vm.$t('message.error_userCancel'),
+      109: vm.$t('message.error_pinError'),
+      110: vm.$t('message.error_operationTimeout'),
+      111: vm.$t('message.error_deviceNotInit'),
+      112: vm.$t('message.devicePressKeyTooEarly'),
+      201: vm.$t('message.error_databaseOpenFailed'),
+      202: vm.$t('message.error_databaseExecFailed'),
+      301: vm.$t('message.error_lastAccountNoTransaction'),
+      302: vm.$t('message.error_accountHasTransactions'),
+      401: vm.$t('message.error_networkUnavailable'),
+      402: vm.$t('message.error_networkNotInitialized'),
+      403: vm.$t('message.error_networkProviderError'),
+      404: vm.$t('message.error_networkTxNotFound'),
+      405: vm.$t('message.error_networkFeeTooSmall'),
+      406: vm.$t('message.error_networkTooManyPendingTx'),
+      407: vm.$t('message.error_networkValueTooSmall'),
+      408: vm.$t('message.error_networkGasTooLow'),
+      409: vm.$t('message.error_networkGasPriceTooLow'),
+      501: vm.$t('message.error_balanceNotEnough'),
+      601: vm.$t('message.error_invalidAddress'),
+      602: vm.$t('message.error_noAddressCheckSum'), // for eth
+      603: vm.$t('message.error_invalidAddressChecksum'),
+      605: vm.$t('message.error_invalidDataNotHex'),
+      604: vm.$t('message.error_valueIsDecimal'),
+      10000: vm.$t('message.error_notImplemented'),
+      10001: vm.$t('message.error_unknown'),
+      10002: vm.$t('message.error_coinNotSupported')
+    }
+  },
+  displayErrorCode (vm, value) {
+    console.warn(value)
+    let errorCodeMsg = this.getErrorCodeMsg(vm)
+    layer.closeAll()
+    let errorKey = String(value)
+    errorCodeMsg[errorKey] ? layer.msg(errorCodeMsg[errorKey], {icon: 2, anim: 6}) : layer.msg(errorKey, {icon: 2, anim: 6})
   }
 }
