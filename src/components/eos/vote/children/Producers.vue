@@ -3,13 +3,11 @@
     <form class="layui-form">
       <div class="layui-form-item">
         <label class="from-label">Producers</label>
-        <input type="text" placeholder="Account that owns the RAM"
-               v-model="producersName" autocomplete="off" class="layui-input">
+        <input type="text" placeholder="Account that owns the RAM" v-model="producersName" autocomplete="off" class="layui-input">
       </div>
       <div class="layui-form-item">
         <label class="from-label">Username </label>
-        <input type="text" placeholder="Enter EOS Username"
-               v-model="username" autocomplete="off" class="layui-input">
+        <input type="text" placeholder="Enter EOS Username" v-model="username" autocomplete="off" class="layui-input">
       </div>
       <div class="layui-form-item">
         <button class="layui-btn" lay-submit>Vote</button>

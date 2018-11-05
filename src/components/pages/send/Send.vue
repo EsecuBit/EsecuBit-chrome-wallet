@@ -1,5 +1,5 @@
 <template>
-  <div class="height-scroll">
+  <div>
     <!-- prompt message -->
     <blockquote class="site-text layui-elem-quote" style="margin-top: 20px">
       <i class="layui-icon" style="vertical-align: middle;">&#xe645;</i> {{$t('message.send_prompt_msg')}}

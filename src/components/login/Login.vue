@@ -14,9 +14,9 @@
       <div class="layadmin-user-login-box layadmin-user-login-header" >
         <div style="position: relative;">
           <div class="loader-anim">
-            <i class="icon iconfont swing-anim icon-bug"  style="font-size: 50px;" v-if="isShowError"> </i>
-            <i class="layui-icon layui-anim layui-anim-rotate layui-anim-loop" v-if="isLoadingIcon && !isShowError" style="font-size: 50px;"> </i>
-            <i class="icon iconfont icon-thumbDrive usb-blinking-anim" style="font-size: 50px" v-if="!isLoadingIcon && !isShowError"></i>
+            <i class="icon iconfont swing-anim icon-bug"  style="font-size: 50px;" v-show="isShowError"> </i>
+            <i class="layui-icon layui-anim layui-anim-rotate layui-anim-loop" v-show="isLoadingIcon && !isShowError" style="font-size: 50px;"> </i>
+            <i class="icon iconfont icon-thumbDrive usb-blinking-anim" style="font-size: 50px" v-show="!isLoadingIcon && !isShowError"></i>
           </div>
           <h3>{{promptMsg}}</h3>
         </div>
@@ -54,8 +54,6 @@ export default {
       }
     }
   },
-  mounted () {
-  },
   methods: {
     showErrorMsg () {
       this.promptMsg = this.loginErrorMsg
@@ -80,12 +78,6 @@ export default {
 </script>
 
 <style scoped>
-  body, html {
-    height: 100%;
-    font-size: 13px;
-    position:relative;
-    font-family: 'Open Sans','Helvetica Neue',Helvetica,Arial,sans-serif;
-  }
   .login-container{
     position: absolute;
     top: 0;

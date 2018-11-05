@@ -26,7 +26,7 @@
     </div>
 
     <!-- content -->
-    <div class="site-content height-scroll">
+    <div class="site-content">
       <div class="tab-content-2">
 
         <div class="tab-item" :class="{'layui-show': 0 === currentMenuIndex}">

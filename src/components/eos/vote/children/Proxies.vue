@@ -3,13 +3,11 @@
     <form class="layui-form">
       <div class="layui-form-item">
         <label class="from-label">Proxies</label>
-        <input type="text" placeholder="Account that owns the RAM" lay-verify="isEmpty"
-               v-model="proxiesName" autocomplete="off" class="layui-input">
+        <input type="text" placeholder="Account that owns the RAM" lay-verify="isEmpty" v-model="proxiesName" autocomplete="off" class="layui-input">
       </div>
       <div class="layui-form-item">
         <label class="from-label">Username </label>
-        <input type="text" placeholder="Enter Proxies EOS Username" lay-verify="isEmpty"
-               v-model="username" autocomplete="off" class="layui-input">
+        <input type="text" placeholder="Enter Proxies EOS Username" lay-verify="isEmpty" v-model="username" autocomplete="off" class="layui-input">
       </div>
       <div class="layui-form-item">
         <button class="layui-btn" lay-submit @click="submit">Vote</button>
