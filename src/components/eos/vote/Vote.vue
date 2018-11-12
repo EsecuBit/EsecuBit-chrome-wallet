@@ -1,5 +1,5 @@
 <template>
-  <div class="vote-box-container height-scroll">
+  <div class="vote-box-container">
     <div class="layui-card">
       <div class="layui-card-header">Vote</div>
       <div class="layui-card-header">

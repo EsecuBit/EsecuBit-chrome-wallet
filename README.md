@@ -1,4 +1,4 @@
-# EsecuBit wallet
+# Esecubit wallet
 
 # Introduction
 
@@ -10,7 +10,7 @@ You can also  build the application package yourself to use it without hardware 
 
 ## Main technology
 
-vue2 + layui + webpack + ES6/7 + less + flex
+vue2 + vuex + layui + webpack + ES6/7 + less + flex
 
 ## Development
 
@@ -39,7 +39,7 @@ npm run build
 ├── build                                       // webpack config file
 ├── chrome-config                               // chrome app config file
 ├── config                                      // package path
-├── screenshots                                 // screenshot
+├── screenshots                                 // screenshots
 ├── src                                         // source directory
 │   ├── common                                  // static common resource
 │   │   ├── css                                 // css files
@@ -47,14 +47,26 @@ npm run build
 │   │   ├── imgs                                // image files
 │   │   └── js                                  // js files
 │   ├── components                              // main vue components
-│   │   ├── index                               // index file include 4 components
-│   │   │   ├── Accept.vue                      // Accept components
-│   │   │   ├── Accounts.vue                    // Accounts components
-│   │   │   ├── Send.vue                        // Send components
-│   │   │   └── Setting.vue                     // Setting components
-│   │   └── Login.vue                           // Login components
+│   │   ├── breadcrumb                          // breadcrumb component
+│   │   ├── content                             // content component
+│   │   ├── eos                                 // includes eos components
+│   │   │   ├── accounts                        // eos accounts components
+│   │   │   ├── resource                        // eos resource components
+│   │   │   ├── transaction                     // eos transaction components
+│   │   │   └── vote                            // eos vote components
+│   │   ├── content                             // content component
+│   │   ├── header                              // header component
+│   │   ├── login                               // login page
+│   │   └── pages
+│   │       ├── accept                          // btc and eth Accept components
+│   │       ├── accounts                        // btc and eth Accounts components
+│   │       ├── send                            // btc and eth Send components
+│   │       └── setting                         // btc and eth Setting components
+│   ├── store                                   // vuex Plugin
+│   ├── utils                                   // utils package
 │   ├── App.vue                                 // App entry
 │   └── main.js                                 // the main js for loading components and import sdk
+├──  static                                     // static resource
 ├── .eslintignore                               // eslint ignore config
 ├── .eslintrc.js                                // eslint config file
 ├── .gitignore                                  // git ignore config

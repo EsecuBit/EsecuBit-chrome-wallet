@@ -6,7 +6,7 @@
         <div class="layui-form-item">
           <label class="from-label">Sender (tokens are auto-detected from this account)</label>
           <input type="text" placeholder="Username to send tokens from" lay-verify="isEmpty"
-                 autocomplete="off" class="layui-input" v-model="senderUsername">
+                 autocomplete="off" class="layui-input" v-model="senderUsername" readonly>
         </div>
         <div class="layui-form-item">
           <label class="from-label">Receiver </label>
@@ -24,7 +24,7 @@
                  autocomplete="off" class="layui-input" v-model="memo">
         </div>
         <div class="layui-form-item">
-          <button class="layui-btn" lay-submit type="button" @clik="submit">{{$t('message.send_submit_btn')}}</button>
+          <button class="layui-btn" lay-submit type="button" @click="submit">{{$t('message.send_submit_btn')}}</button>
           <button type="button" class="layui-btn layui-btn-primary" @click="resetForm">{{$t('message.send_reset_btn')}}</button>
         </div>
       </form>
@@ -33,12 +33,13 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
+
 const form = layui.form
 export default {
   name: 'TransferTokens',
   data () {
     return {
-      senderUsername: '',
       receiveUsername: '',
       amount: '',
       memo: ''
@@ -47,9 +48,19 @@ export default {
   mounted () {
     this.verifyForm()
   },
+  computed: {
+    ...mapGetters({
+      'currentAccount': 'currentAccount',
+      'currentAccountType': 'currentAccountType'
+    }),
+    senderUsername () {
+      if (this.currentAccount) {
+        return this.currentAccount.label
+      }
+    }
+  },
   methods: {
     resetForm () {
-      this.senderUsername = ''
       this.receiveUsername = ''
       this.amount = ''
       this.memo = ''
@@ -63,6 +74,27 @@ export default {
       })
     },
     submit () {
+      let formData = {
+        outputs: [{
+          account: this.receiveUsername,
+          value: this.amount
+        }],
+        token: 'EOS',
+        type: 'tokenTransfer',
+        comment: this.memo
+      }
+      this.currentAccount.prepareTx(formData).then(value => {
+        console.log(value, 'prepareTx')
+        return this.currentAccount.buildTx(value)
+      }).then(value => {
+        console.log(value, 'buildTx')
+        return this.currentAccount.sendTx(value)
+      }).then(value => {
+        // Empty retransmission status
+        console.log(value, '成功')
+      }).catch(value => {
+        console.warn(value)
+      })
     }
   }
 }
@@ -71,6 +103,9 @@ export default {
 <style scoped lang="less">
   ::-webkit-input-placeholder{
     color: #aaa;
+  }
+  .layui-input[readonly="readonly"]{
+    background: #f8f8f8;
   }
   .layui-card{
     border-radius: 8px;

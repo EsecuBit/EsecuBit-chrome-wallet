@@ -4,23 +4,11 @@
     <div class="site-tree">
       <ul class="layui-tree ">
         <li><h2>{{$t('message.app_setting')}}</h2></li>
-        <li :class="{'layui-this': 0 === currentMenuIndex}">
-          <a href="#" @click="switchMenu(0)">
-            <i class="layui-icon">&#xe632;</i>
-            <cite>{{$t('message.setting_display')}}</cite>
+        <li :class="{'layui-this': index === currentMenuIndex}" v-for="( item, index ) in sidebarList" v-if="!isOfficial || index !== 2">
+          <a href="#" @click="switchMenu(index)">
+            <i class="layui-icon " :class="item.icon"></i>
+            <cite>{{item.label}}</cite>
             </a>
-        </li>
-        <li :class="{'layui-this': 1 === currentMenuIndex}">
-          <a href="#" @click="switchMenu(1)">
-            <i class="layui-icon" >&#xe628;</i>
-            <cite>{{$t('message.setting_information')}}</cite>
-          </a>
-        </li>
-        <li v-if="!isOfficial" :class="{'layui-this': 2 === currentMenuIndex}">
-          <a href="#" @click="switchMenu(2)">
-            <i class="layui-icon">&#xe857;</i>
-            <cite>{{$t('message.setting_init')}}</cite>
-          </a>
         </li>
       </ul>
     </div>
@@ -52,7 +40,7 @@
 import Information from './children/Information'
 import Config from './children/Config'
 import Interface from './children/Interface'
-import { mapState } from 'vuex'
+import Store from '../../../common/js/store'
 
 export default{
   name: 'Setting',
@@ -63,13 +51,18 @@ export default{
   },
   data () {
     return {
-      currentMenuIndex: 0
+      currentMenuIndex: 0,
+      isOfficial: Store.isOfficial
     }
   },
   computed: {
-    ...mapState({
-      'isOfficial': 'isOfficial'
-    })
+    sidebarList () {
+      return [
+        {label: this.$t('message.setting_display'), icon: 'layui-icon-layouts'},
+        {label: this.$t('message.setting_information'), icon: 'layui-icon-form'},
+        {label: this.$t('message.setting_init'), icon: 'layui-icon-component'}
+      ]
+    }
   },
   methods: {
     switchMenu (index) {

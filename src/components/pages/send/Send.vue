@@ -498,10 +498,10 @@ export default {
           newFeeList.push({label: standardMsg + '(' + oldFeeList.normal + ' ' + this.D.unit.btc.satoshi + ')', value: oldFeeList.normal})
           newFeeList.push({label: slowMsg + '(' + oldFeeList.economic + ' ' + this.D.unit.btc.satoshi + ')', value: oldFeeList.economic})
         } else {
-          newFeeList.push({label: fastestMsg + '(' + this.WeiToGwei(oldFeeList.fastest) + ' ' + this.D.unit.eth.GWei + ')', value: oldFeeList.fastest})
-          newFeeList.push({label: fastMsg + '(' + this.WeiToGwei(oldFeeList.fast) + ' ' + this.D.unit.eth.GWei + ')', value: oldFeeList.fast})
-          newFeeList.push({label: standardMsg + '(' + this.WeiToGwei(oldFeeList.normal) + ' ' + this.D.unit.eth.GWei + ')', value: oldFeeList.normal})
-          newFeeList.push({label: slowMsg + '(' + this.WeiToGwei(oldFeeList.economic) + ' ' + this.D.unit.eth.GWei + ')', value: oldFeeList.economic})
+          newFeeList.push({label: fastestMsg + '(' + this.weiToGwei(oldFeeList.fastest) + ' ' + this.D.unit.eth.GWei + ')', value: oldFeeList.fastest})
+          newFeeList.push({label: fastMsg + '(' + this.weiToGwei(oldFeeList.fast) + ' ' + this.D.unit.eth.GWei + ')', value: oldFeeList.fast})
+          newFeeList.push({label: standardMsg + '(' + this.weiToGwei(oldFeeList.normal) + ' ' + this.D.unit.eth.GWei + ')', value: oldFeeList.normal})
+          newFeeList.push({label: slowMsg + '(' + this.weiToGwei(oldFeeList.economic) + ' ' + this.D.unit.eth.GWei + ')', value: oldFeeList.economic})
         }
         this.feeList = newFeeList
         this.selected = oldFeeList.normal
@@ -654,7 +654,7 @@ export default {
         this.gasPrice = null
       }
     },
-    WeiToGwei (value) {
+    weiToGwei (value) {
       return this.esWallet.convertValue(this.coinType, value, this.D.unit.eth.Wei, this.D.unit.eth.GWei)
     },
     gweiToWei (value) {
@@ -715,28 +715,27 @@ export default {
       setTimeout(() => {
         this.currentAccount.prepareTx(formData).then(value => {
           return this.currentAccount.buildTx(value)
+        }).then(value => {
+          this.isPreventClick = false
+          layer.closeAll('msg')
+          layer.msg(this.$t('message.send_is_trading'), {time: 600000000})
+          return this.currentAccount.sendTx(value)
+        }).then(value => {
+          // Empty retransmission status
+          if (this.oldTxId) this.clearResendStatus()
+          // Formatted form
+          this.isPreventClick = false
+          this.setIsPreventSwitch(false)
+          this.clearFormData()
+          layer.closeAll('msg')
+          layer.msg(this.$t('message.send_submit_success'), { icon: 1 })
+          this.setPageIndex(0)
+        }).catch(value => {
+          this.isPreventClick = false
+          this.setIsPreventSwitch(false)
+          layer.closeAll('msg')
+          utils.displayErrorCode(this, value)
         })
-          .then(value => {
-            this.isPreventClick = false
-            layer.closeAll('msg')
-            layer.msg(this.$t('message.send_is_trading'), {time: 600000000})
-            return this.currentAccount.sendTx(value)
-          }).then(value => {
-            // Empty retransmission status
-            if (this.oldTxId) this.clearResendStatus()
-            // Formatted form
-            this.isPreventClick = false
-            this.setIsPreventSwitch(false)
-            this.clearFormData()
-            layer.closeAll('msg')
-            layer.msg(this.$t('message.send_submit_success'), { icon: 1 })
-            this.setPageIndex(0)
-          }).catch(value => {
-            this.isPreventClick = false
-            this.setIsPreventSwitch(false)
-            layer.closeAll('msg')
-            utils.displayErrorCode(this, value)
-          })
       }, 200)
     },
     calculateTotal () {
@@ -787,7 +786,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style scoped lang="less">
   input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{  /* chrome */
     -webkit-appearance: none!important;
     margin: 0;
@@ -822,18 +821,12 @@ export default {
     height: 55px;
     font-size: 20px;
     float: right;
-  }
-  .amount-input:after {
-    content: "";
-    height: 0;
-    line-height: 0;
-    clear: both;
-  }
-  .unit-display:after {
-    content: "";
-    height: 0;
-    line-height: 0;
-    clear: both;
+    &:after{
+      content: "";
+      height: 0;
+      line-height: 0;
+      clear: both;
+    }
   }
   .unit-display {
     display: inline-block;
@@ -843,7 +836,13 @@ export default {
     color:#000;
     height: 55px;
     line-height: 55px;
-    opacity: 0.6
+    opacity: 0.6;
+    &:after{
+      content: "";
+      height: 0;
+      line-height: 0;
+      clear: both;
+    }
   }
   .transFee-unit{
     display: inline-block;

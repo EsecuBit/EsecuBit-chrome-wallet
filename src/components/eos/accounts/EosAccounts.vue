@@ -22,67 +22,86 @@
         <div class="account-msg">
           <div class="max-width-250">
             <span class="layui-badge-dot layui-bg-green"></span>
-            <span>EOS Staked: </span>
-            <span style="color: #e74c3c">200.2 EOS</span>
+            <span>CPU Staked: </span>
+            <span style="color: #e74c3c" v-if="currentAccount">{{currentAccount.resources.stake.total.cpu}}</span>
+          </div>
+        </div>
+        <div class="account-msg">
+          <div class="max-width-250">
+            <span class="layui-badge-dot layui-bg-green"></span>
+            <span>NET Staked: </span>
+            <span style="color: #e74c3c" v-if="currentAccount">{{currentAccount.resources.stake.total.net}}</span>
           </div>
         </div>
         <a :title="$t('message.icon_title_refresh')" href="#" class="refresh-data max-width-250" @click="refresh">
-          <i class="layui-icon layui-icon-refresh-2 layui-anim " :class="loadingClass"></i>
+          <i class="layui-icon layui-icon-refresh-1 layui-anim " :class="loadingClass"></i>
         </a>
       </div>
 
       <div class="resource-list-wrapper">
         <div class="resource-item">
           <div class="resource-item-circle">
-            <Progress :percent="percent.RAM" class="progress"></Progress>
+            <Progress :percent="percentRAM" class="progress"></Progress>
           </div>
           <div class="resource-item-description-wrapper">
             <div class="resource-item-description">
               <div class="resource-item-title">RAM</div>
-              <div class="resource-item-content">3.98 KiB/5.34 KiB</div>
+              <div class="resource-item-content">{{descriptionRAM}}</div>
             </div>
           </div>
         </div>
         <div class="resource-item">
           <div class="resource-item-circle">
-            <Progress :percent="percent.CPU"></Progress>
-          </div>
-          <div class="resource-item-description-wrapper">
-            <div class="resource-item-description">
-              <div class="resource-item-title">CPU</div>
-              <div class="resource-item-content">3.98 KiB/5.34 KiB</div>
-            </div>
-          </div>
-        </div>
-        <div class="resource-item">
-          <div class="resource-item-circle">
-            <Progress :percent="percent.NET"></Progress>
+            <Progress :percent="percentNet"></Progress>
           </div>
           <div class="resource-item-description-wrapper">
             <div class="resource-item-description">
               <div class="resource-item-title">NET</div>
-              <div class="resource-item-content">3.98 KiB/5.34 KiB</div>
+              <div class="resource-item-content">{{descriptionNet}}</div>
+            </div>
+          </div>
+        </div>
+        <div class="resource-item">
+          <div class="resource-item-circle">
+            <Progress :percent="percentCPU"></Progress>
+          </div>
+          <div class="resource-item-description-wrapper">
+            <div class="resource-item-description">
+              <div class="resource-item-title">CPU</div>
+              <div class="resource-item-content">{{descriptionCPU}}</div>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <h1 class="table-title"><i class="layui-icon">&#xe62d;</i> Account Transactions</h1>
-
+      <div class="table-title"><i class="layui-icon">&#xe62d;</i> <span>Account Transactions</span>
+      <form class="layui-form" lay-filter="form">
+        <div class="layui-form-item">
+          <label class="layui-form-label">Expand the form</label>
+          <div class="layui-input-block">
+            <input type="checkbox" name="switch" lay-skin="switch" lay-text="ON|OFF">
+          </div>
+        </div>
+      </form>
+    </div>
     <div class="layui-row">
       <div class="layui-col-xs12 ">
         <div class="layui-tab layui-tab-brief">
           <ul class="layui-tab-title">
-            <li class="layui-this">All transaction</li>
-            <li>Token Transfers</li>
+            <li class="layui-this">Token Transfers</li>
+            <li>Resource transaction</li>
+            <li>Vote</li>
           </ul>
           <div class="layui-tab-content">
             <div class="layui-tab-item layui-show">
-              <TransactionsTable></TransactionsTable>
+              <TokenTransfers></TokenTransfers>
             </div>
             <div class="layui-tab-item">
-              <TokenTransfers></TokenTransfers>
+              <ResourceTable></ResourceTable>
+            </div>
+            <div class="layui-tab-item">
+              <VoteTable></VoteTable>
             </div>
           </div>
         </div>
@@ -93,55 +112,112 @@
 
 <script>
 import Progress from './progress/Progress'
-import TransactionsTable from './children/TransactionsTable'
+import ResourceTable from './children/ResourceTable'
 import TokenTransfers from './children/TokenTransfers'
-import { mapState, mapGetters } from 'vuex'
+import VoteTable from './children/VoteTable'
+import { mapState, mapGetters, mapMutations } from 'vuex'
+import utils from '../../../utils/utils'
+const form = layui.form
 export default {
   name: 'EosAccounts',
   components: {
     Progress,
-    TransactionsTable,
-    TokenTransfers
-  },
-  computed: {
-    ...mapState({
-      'currentExchangeRate': 'currentExchangeRate'
-    }),
-    ...mapGetters({
-      'currentAccount': 'currentAccount'
-    }),
-    accountBalance () {
-      return this.currentAccount ? this.currentAccount.balance + ' EOS' : ''
-    },
-    displayExchangeRate () {
-      return this.currentExchangeRate ? `(100 ${this.currentExchangeRate})` : ''
-    }
+    ResourceTable,
+    TokenTransfers,
+    VoteTable
   },
   data () {
     return {
       loadingClass: {
         'layui-anim-rotate': false,
         'layui-anim-loop': false
-      },
-      percent: {
-        RAM: 0.45,
-        CPU: 0.23,
-        NET: 0.87
-      },
-      tableData: [
-        {time: '2018-10-29', direction: '', showAddresses: 'oxasjkdhkjasdhja', value: '12', memo: '这是一个demo', confirmations: '1'},
-        {time: '2018-10-28', direction: '', showAddresses: 'oxasjkdhkjasdhja', value: '2313', memo: '这是一个demo', confirmations: '2'},
-        {time: '2018-10-27', direction: '', showAddresses: 'oxasjkdhkjasdhja', value: '1231', memo: '这是一个demo', confirmations: '3'},
-        {time: '2018-10-26', direction: '', showAddresses: 'oxasjkdhkjasdhja', value: '123', memo: '这是一个demo', confirmations: '4'},
-        {time: '2018-10-26', direction: '', showAddresses: 'oxasjkdhkjasdhja', value: '1231', memo: '这是一个demo', confirmations: '5'}
-      ],
-      limit: 5,
-      pageStartIndex: 0,
-      pageEndIndex: 5,
-      total: 0
+      }
+    }
+  },
+  watch: {
+    currentAccount: {
+      handler () {
+        this.currentAccount.getTxInfos().then(value => {
+          this.setEosClassifyTx(utils.classifyTx(value.txInfos))
+        }).catch(value => {
+          utils.displayErrorCode(this, value)
+        })
+      }
+    }
+  },
+  mounted () {
+    form.render('checkbox', 'form')
+    form.on('checkbox(switch)', data => {
+    })
+    this.currentAccount.getTxInfos().then(value => {
+      this.setEosClassifyTx(utils.classifyTx(value.txInfos))
+    }).catch(value => {
+      utils.displayErrorCode(this, value)
+    })
+  },
+  computed: {
+    ...mapState({
+      'accountList': 'accountList',
+      'currentExchangeRate': 'currentExchangeRate'
+    }),
+    ...mapGetters({
+      'currentAccount': 'currentAccount',
+      'currentAccountType': 'currentAccountType'
+    }),
+    percentRAM () {
+      if (this.currentAccount) {
+        let percent = (this.currentAccount.resources.ram.used / this.currentAccount.resources.ram.total)
+        return (percent >= 1) ? 1 : utils.toTwoPoint(percent)
+      }
+    },
+    descriptionRAM () {
+      if (this.currentAccount) {
+        let usedRAM = utils.toTwoPoint(this.currentAccount.resources.ram.used / 1024)
+        let totalRAM = utils.toTwoPoint(this.currentAccount.resources.ram.total / 1024)
+        return `${usedRAM}KB / ${totalRAM}KB`
+      }
+    },
+    percentNet () {
+      if (this.currentAccount) {
+        let percent = (this.currentAccount.resources.net.used / this.currentAccount.resources.net.max)
+        return (percent >= 1) ? 1 : utils.toTwoPoint(percent)
+      }
+    },
+    descriptionNet () {
+      if (this.currentAccount) {
+        let usedRAM = utils.toTwoPoint(this.currentAccount.resources.net.used / 1024)
+        let totalRAM = utils.toTwoPoint(this.currentAccount.resources.net.max / 1024)
+        return `${usedRAM}KB / ${totalRAM}KB`
+      }
+    },
+    percentCPU () {
+      if (this.currentAccount) {
+        let percent = (this.currentAccount.resources.cpu.used / this.currentAccount.resources.cpu.max)
+        return (percent >= 1) ? 1 : utils.toTwoPoint(percent)
+      }
+    },
+    descriptionCPU () {
+      if (this.currentAccount) {
+        let usedRAM = this.currentAccount.resources.cpu.used / 1000
+        let totalRAM = this.currentAccount.resources.cpu.max / 1000
+        return `${usedRAM} ms / ${totalRAM} ms`
+      }
+    },
+    accountBalance () {
+      console.log(this.currentAccount, 'this.currentAccount')
+      return this.currentAccount ? this.currentAccount.balance + ' EOS' : ''
+    },
+    displayExchangeRate () {
+      if (this.currentAccount) {
+        let amount = utils.toTwoPoint(this.esWallet.convertValue(this.currentAccountType, this.currentAccount.balance, this.D.unit.eos.EOS, this.currentExchangeRate))
+        return this.currentExchangeRate ? `(${amount} ${this.currentExchangeRate})` : ''
+      }
     }
   },
   methods: {
+    ...mapMutations({
+      setEosClassifyTx: 'SET_EOS_CLASSIFY_TX'
+    }),
     refresh () {
       this.loadingClass['layui-anim-rotate'] = true
       this.loadingClass['layui-anim-loop'] = true
@@ -171,13 +247,13 @@ export default {
     /*account-information*/
     .account-information {
       display: block;
-      height: 52px;
-      padding: 18px 15px 16px 15px;
+      padding: 18px 15px 0 15px;
       border-radius: 5px;
       .account-msg {
         display: inline-block;
         max-height: 19px;
         margin-right: 20px;
+        margin-bottom: 8px;
         .exchange-rate{
           font-size: 12px;
           color:#666;
@@ -211,6 +287,7 @@ export default {
     .resource-list-wrapper{
       display: flex;
       align-items: center;
+      padding: 0 10px;
       .resource-item{
         display: flex;
         flex: 1;
@@ -246,6 +323,7 @@ export default {
     }
   }
   .table-title{
+    position: relative;
     margin-top: 10px;
     margin-bottom: 5px;
     color: #5e5d5d;
@@ -254,9 +332,20 @@ export default {
     .layui-icon{
       font-size: 20px;
     }
+    .layui-form{
+      position: absolute;
+      right: 10px;
+      top: 0;
+      .layui-form-label{
+        padding-right: 0;
+      }
+    }
   }
   .layui-tab{
     margin: 0;
+  }
+  .layui-icon-refresh-1{
+    vertical-align: top;
   }
 
 </style>

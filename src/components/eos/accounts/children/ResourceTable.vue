@@ -3,21 +3,19 @@
     <table class="layui-table" lay-skin="line">
       <colgroup>
         <col width="6%">
-        <col width="8%">
         <col width="10%">
         <col width="15%">
         <col width="10%">
-        <col width="10%">
+        <col width="30%">
         <col width="6%">
       </colgroup>
       <thead>
       <tr>
         <th>txId</th>
         <th>status</th>
-        <th>date</th>
-        <th>from/to</th>
-        <th>amount</th>
-        <th>memo</th>
+        <th>time</th>
+        <th>type</th>
+        <th>description</th>
         <th>detail</th>
       </tr>
       </thead>
@@ -27,13 +25,9 @@
         <td>{{item.txId}}</td>
         <td><span class="form-status" :class="[getStatus(item) === 'waiting'? 'waiting' :'executed']">{{getStatus(item)}}</span></td>
         <td>{{getFormatTime(item.time)}}</td>
-        <td>{{getAddressDirection(item)}}</td>
-        <td>{{getAmount(item)}}</td>
-        <td>{{getMemo(item)}}</td>
+        <td><span class="form-type">{{getType(item)}}</span></td>
+        <td style="text-overflow: clip;white-space: normal;">{{getDescription(item)}}</td>
         <td>
-          <!--<a title="detail" href="#"  @click="openDetail(item)">-->
-            <!--<i class="layui-icon layui-icon-form"></i>-->
-          <!--</a>-->
           <a title="link" :href="item.link"  target="_blank" >
             <i class="layui-icon layui-icon-search"></i>
           </a>
@@ -44,14 +38,14 @@
 
     <!-- Pagination -->
     <div class="page-wrapper">
-      <div class="page-content" id="pagination-2"></div>
+      <div class="page-content" id="pagination"></div>
       <div class="total-num-wrapper">
         <div class="total-num">
           <span>{{$t('message.accounts_total') + ' ' + total + ' ' + $t('message.accounts_items')}}</span>
         </div>
       </div>
     </div>
-    <!--<Detail :detail="detail" v-if="isShowDetail" @changeShowDetail = "changeShowDetail"></Detail>-->
+    <Detail :detail="detail" v-if="isShowDetail" @changeShowDetail = "changeShowDetail"></Detail>
   </div>
 </template>
 
@@ -77,6 +71,11 @@ export default {
       total: 0
     }
   },
+  computed: {
+    ...mapState({
+      'eosClassifyTx': 'eosClassifyTx'
+    })
+  },
   watch: {
     eosClassifyTx: {
       handler () {
@@ -84,36 +83,32 @@ export default {
       }
     }
   },
-  computed: {
-    ...mapState({
-      'eosClassifyTx': 'eosClassifyTx'
-    })
-  },
   methods: {
-    getAddressDirection (item) {
-      let formAddress = item.actions.data.from
-      let toAddress = item.actions.data.to
-      return `${formAddress} --> ${toAddress}`
+    getDescription (item) {
+      if (item.actions.name === 'delegatebw') {
+        return `${item.actions.data.from} delegated for ${item.actions.data.receiver}  ${item.actions.data.stake_cpu_quantity} in CPU and
+        ${item.actions.data.stake_net_quantity} in Net`
+      } else if (item.actions.name === 'undelegatebw') {
+        return `${item.actions.data.from} undelegated for ${item.actions.data.receiver}  ${item.actions.data.stake_cpu_quantity} in CPU and
+        ${item.actions.data.stake_net_quantity} in Net`
+      }
+    },
+    getType (item) {
+      return item.actions.name
     },
     getStatus (item) {
       let status = (item.confirmations === this.D.tx.confirmation.waiting && 'waiting') || (item.confirmations === this.D.tx.confirmation.executed && 'executed') || ''
       return status
     },
-    getAmount (item) {
-      return item.actions.data.quantity
-    },
     getFormatTime (time) {
       return utils.getFormatTime(time)
-    },
-    getMemo (item) {
-      return item.actions.data.memo
     },
     openDetail (item) {
       this.isShowDetail = true
       this.detail = item
     },
     changeShowDetail (...data) {
-      this.isShowDetail = data[ 0 ]
+      this.isShowDetail = data[0]
     },
     pageList () {
       let total = this.total
@@ -121,17 +116,14 @@ export default {
       let limit = this.limit
       let that = this
       laypage.render({
-        elem: 'pagination-2',
+        elem: 'pagination',
         count: total,
         limit: limit,
         curr: page,
         prev: '<',
         next: '>',
-        layout: [ 'first', 'prev', 'page', 'next', 'last' ],
+        layout: ['first', 'prev', 'page', 'next', 'last'],
         jump: function (obj, first) {
-          // obj包含了当前分页的所有参数，比如：
-          // console.log(obj.curr) // 得到当前页，以便向服务端请求对应页的数据。
-          // console.log(obj.limit) // 得到每页显示的条数
           // 首次不执行
           if (!first) {
             limit = obj.limit
@@ -142,28 +134,21 @@ export default {
       })
     },
     setTableData () {
-      this.tableData = this.eosClassifyTx.transferActionArray.slice(this.pageStartIndex, this.pageEndIndex)
-      this.total = this.eosClassifyTx.transferActionArray.length
+      this.tableData = this.eosClassifyTx.resourceActionArray.slice(this.pageStartIndex, this.pageEndIndex)
+      this.total = this.eosClassifyTx.resourceActionArray.length
       console.log(this.tableData, this.total)
       this.pageList()
     },
     changeTableData (limit, page) {
       const startItem = limit * (page - 1)
       const endItem = limit * (page - 1) + limit
-      this.tableData = this.eosClassifyTx.transferActionArray.slice(startItem, endItem)
+      this.tableData = this.eosClassifyTx.resourceActionArray.slice(startItem, endItem)
     }
   }
 }
 </script>
 
 <style scoped lang="less">
-  .layui-table td, .layui-table th {
-    padding: 9px 5px;
-  }
-  .layui-icon-form{
-    margin-right: 5px;
-    font-size: 18px;
-  }
   .form-status{
     color: #fff;
     padding: 3px 4px;

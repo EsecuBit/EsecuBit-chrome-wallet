@@ -6,7 +6,7 @@
           <a href="#" @click="toHomePage">{{$t('message.app_home')}}</a><span lay-separator="">&gt;</span>
           <a href="#" id="message" class="message" v-text="navTitle"></a>
           <div class="add-btn-wrapper clearfix" v-show="pageIndex === 0">
-            <a href="#" class="add-btn" @click="addAccountContent"><i class="layui-icon ">&#xe770;</i>{{$t('message.app_add_accounts')}}</a>
+            <a href="#" class="add-btn" @click="addAccountContent"><i class="layui-icon ">&#xe770;</i>&nbsp;<span>{{$t('message.app_add_accounts')}}</span></a>
           </div>
         </span>
       </p>
@@ -57,7 +57,8 @@
 </template>
 
 <script>
-import { mapState, mapMutations } from 'vuex'
+import utils from '../../utils/utils'
+import { mapState, mapMutations, mapGetters } from 'vuex'
 const $ = layui.jquery
 const layer = layui.layer
 const form = layui.form
@@ -72,17 +73,19 @@ export default {
   },
   computed: {
     ...mapState({
-      'isTest': 'isTest',
       'accountList': 'accountList',
       'appVersion': 'appVersion',
       'pageIndex': 'pageIndex',
       'customizeColor': 'customizeColor'
     }),
+    ...mapGetters({
+      'currentAccountType': 'currentAccountType'
+    }),
     navTitle () {
       // breadcrumb: get current page
       let defaultPageTitle = [this.$t('message.app_accounts'), this.$t('message.app_send'), this.$t('message.app_accept'), this.$t('message.app_setting')]
       let eosPageTitle = [this.$t('message.app_accounts'), this.$t('message.app_transaction'), this.$t('message.app_vote'), this.$t('message.app_resource'), this.$t('message.app_setting')]
-      return this.isTest ? eosPageTitle[this.pageIndex] : defaultPageTitle[this.pageIndex]
+      return this.D.isEos(this.currentAccountType) ? eosPageTitle[this.pageIndex] : defaultPageTitle[this.pageIndex]
     }
   },
   watch: {
@@ -102,15 +105,6 @@ export default {
     form.render('select', 'form1')
   },
   methods: {
-    displayErrorCode (value) {
-      layer.closeAll()
-      let errorKey = String(value)
-      if (this.errorCodeMsg[errorKey]) {
-        layer.msg(this.errorCodeMsg[errorKey], {icon: 2, anim: 6})
-      } else {
-        layer.msg(errorKey, {icon: 2})
-      }
-    },
     ...mapMutations({
       setPageIndex: 'SET_PAGE_INDEX',
       setAddAccountTimes: 'SET_ADD_ACCOUNT_TIMES',
@@ -160,8 +154,7 @@ export default {
           }
         })
       }).catch(value => {
-        console.warn(value)
-        this.displayErrorCode(value)
+        utils.displayErrorCode(this, value)
       })
     },
     toHomePage () {
@@ -172,6 +165,9 @@ export default {
 </script>
 
 <style scoped lang="less">
+  .fly-column{
+    border-bottom: 1px solid #eee;
+  }
   .layui-breadcrumb a:hover {
     color: #009688!important;
   }

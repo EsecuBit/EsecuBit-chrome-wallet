@@ -14,7 +14,7 @@
       <div class="layadmin-user-login-box layadmin-user-login-header" >
         <div style="position: relative;">
           <div class="loader-anim">
-            <i class="icon iconfont swing-anim icon-bug"  style="font-size: 50px;" v-show="isShowError"> </i>
+            <i class="icon iconfont swing-anim icon-bug"  style="font-size: 50px;" v-show="isShowError"></i>
             <i class="layui-icon layui-anim layui-anim-rotate layui-anim-loop" v-show="isLoadingIcon && !isShowError" style="font-size: 50px;"> </i>
             <i class="icon iconfont icon-thumbDrive usb-blinking-anim" style="font-size: 50px" v-show="!isLoadingIcon && !isShowError"></i>
           </div>

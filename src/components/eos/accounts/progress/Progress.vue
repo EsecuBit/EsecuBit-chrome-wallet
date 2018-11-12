@@ -5,7 +5,7 @@
       <circle class="progress-bar" r="50" cx="50" cy="50" fill="transparent" :stroke-dasharray="dashArray"  stroke-linecap="round" :stroke-dashoffset="dashOffset"/>
     </svg>
     <slot></slot>
-    <div class="progress-text">{{percent * 100 + '%'}}</div>
+    <div class="progress-text">{{Math.round(percent* 100)+ '%'}}</div>
   </div>
 </template>
 
@@ -29,7 +29,7 @@ export default {
   },
   computed: {
     dashOffset () {
-      return (1 - this.percent) * this.dashArray
+      return (1 - (this.percent)) * this.dashArray
     }
   }
 }

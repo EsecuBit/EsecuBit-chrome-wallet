@@ -21,7 +21,7 @@
         </tbody>
       </table>
     </div>
-    <div class="table-item">
+    <div class="table-item" v-if="bitNetList.length > 0">
       <h3>{{$t('message.setting_btc_net')}}</h3>
       <table class="layui-table" >
         <colgroup>
@@ -35,14 +35,14 @@
         </tr>
         </thead>
         <tbody >
-        <tr v-for="item in bitNetList" v-if="bitNetList.length > 0">
+        <tr v-for="item in bitNetList">
           <td>{{item.name}}</td>
           <td>{{item.value}}</td>
         </tr>
         </tbody>
       </table>
     </div>
-    <div class="table-item">
+    <div class="table-item" v-if="ethNetList.length > 0">
       <h3>{{$t('message.setting_etc_net')}}</h3>
       <table class="layui-table" >
         <colgroup>
@@ -56,7 +56,7 @@
         </tr>
         </thead>
         <tbody >
-        <tr v-for="item in etcNetList" v-if="etcNetList.length > 0">
+        <tr v-for="item in ethNetList">
           <td>{{item.name}}</td>
           <td>{{item.value}}</td>
         </tr>
@@ -102,7 +102,7 @@ export default {
         return netList
       } else return []
     },
-    etcNetList () {
+    ethNetList () {
       if (this.netInfo[this.D.coin.test.ethRinkeby] || this.netInfo[this.D.coin.main.eth]) {
         let netString = this.netInfo[this.D.coin.test.ethRinkeby] ? this.D.coin.test.ethRinkeby : this.D.coin.main.eth
         let exchangeNet = this.netInfo[netString].exchange

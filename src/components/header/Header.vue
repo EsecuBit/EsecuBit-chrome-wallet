@@ -13,7 +13,7 @@
 </template>
 
 <script>
-import { mapState, mapMutations } from 'vuex'
+import { mapState, mapMutations, mapGetters } from 'vuex'
 export default {
   name: 'breadcrumb',
   props: {
@@ -28,11 +28,13 @@ export default {
   },
   computed: {
     ...mapState({
-      'isTest': 'isTest',
       'pageIndex': 'pageIndex',
       'isPreventSwitch': 'isPreventSwitch',
       'headColor': 'headColor',
       'customizeColor': 'customizeColor'
+    }),
+    ...mapGetters({
+      'currentAccountType': 'currentAccountType'
     }),
     pageList () {
       // nav.menu label and icon
@@ -49,7 +51,7 @@ export default {
         {label: this.$t('message.app_resource'), icon: 'icon-huabanfuben'},
         {label: this.$t('message.app_setting'), icon: 'icon-shezhi2'}
       ]
-      return this.isTest ? eosPageList : defaultPageList
+      return this.D.isEos(this.currentAccountType) ? eosPageList : defaultPageList
     }
   },
   methods: {

@@ -1,5 +1,6 @@
 import {D} from 'esecubit-wallet-sdk'
 export default {
+  isOfficial: false,
   printLog () {
     document.getElementById('clear').onclick = function () {
       document.getElementById('log').innerHTML = ''
@@ -64,11 +65,13 @@ export default {
       return lang['lang'] ? lang['lang'] : (navigator.language === 'zh-CN' ? 'zh-CN' : 'en-US')
     }
   },
+  async setEosSeed (esWallet) {
+    await esWallet.setTestSeed('write your own seed')
+  },
   async init () {
     // this.printLog()
     let device = ''
     let net = ''
-
     if (localStorage) {
       device = this.fetch('device') ? this.fetch('device') : 'soft'
       net = this.fetch('net') ? this.fetch('net') : 'test'
@@ -84,6 +87,7 @@ export default {
     } else {
       D.test.jsWallet = (device === 'soft')
       D.test.coin = (net === 'test')
+      console.log(D.test.jsWallet, D.test.coin, 'D.test.coin')
     }
   }
 }

@@ -5,7 +5,7 @@
         <div class="main-tab-item" :class="{'layui-show': 0 === pageIndex}">
           <Accounts/>
         </div>
-        <template v-if="!isTest">
+        <template v-if="!isShowEosPages">
           <div class="main-tab-item" :class="{'layui-show': 1 === pageIndex}">
             <Send/>
           </div>
@@ -16,7 +16,7 @@
             <Setting/>
           </div>
         </template>
-        <template v-if="isTest">
+        <template v-if="isShowEosPages">
           <div class="main-tab-item" :class="{'layui-show': 1 === pageIndex}">
             <EosTransaction/>
           </div>
@@ -36,7 +36,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { mapState, mapGetters } from 'vuex'
 import Accounts from '../pages/accounts/Accounts'
 import Send from '../pages/send/Send'
 import Setting from '../pages/setting/Setting'
@@ -57,9 +57,14 @@ export default {
   },
   computed: {
     ...mapState({
-      'isTest': 'isTest',
       'pageIndex': 'pageIndex'
-    })
+    }),
+    ...mapGetters({
+      'currentAccountType': 'currentAccountType'
+    }),
+    isShowEosPages () {
+      return this.D.isEos(this.currentAccountType)
+    }
   }
 }
 </script>

@@ -103,19 +103,14 @@ export default {
       display: table;
       border: 1px solid #eee;
       border-radius: 4px;
-      td {
-        box-sizing: border-box;
-        overflow: hidden;
-        white-space: nowrap;
+      tbody {
+        display: table-row-group;
+        vertical-align: middle;
+        border-color: inherit;
       }
       thead {
         display: table-header-group;
         vertical-align: middle;
-        border-color: inherit;
-      }
-      tr {
-        display: table-row;
-        vertical-align: inherit;
         border-color: inherit;
       }
       th {
@@ -123,10 +118,15 @@ export default {
         display: table-cell;
         text-align: left;
       }
-      tbody {
-        display: table-row-group;
-        vertical-align: middle;
+      tr {
+        display: table-row;
+        vertical-align: inherit;
         border-color: inherit;
+      }
+      td {
+        box-sizing: border-box;
+        overflow: hidden;
+        white-space: nowrap;
       }
     }
     .table > thead > tr > th {

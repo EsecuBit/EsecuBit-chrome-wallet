@@ -88,6 +88,7 @@ export default {
     },
     async getCurrentSeed () {
       this.seedValue = await this.esWallet.getTestSeed()
+      console.log(this.seedValue, 'this.seedValue')
     },
     randomGenerate () {
       this.seedValue = this.D.test.generateSeed()

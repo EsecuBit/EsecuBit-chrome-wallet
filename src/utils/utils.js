@@ -74,5 +74,47 @@ export default {
     layer.closeAll()
     let errorKey = String(value)
     errorCodeMsg[errorKey] ? layer.msg(errorCodeMsg[errorKey], {icon: 2, anim: 6}) : layer.msg(errorKey, {icon: 2, anim: 6})
+  },
+  classifyTx (txArray) {
+    let transferActionArray = []
+    let voteActionArray = []
+    let resourceActionArray = []
+    txArray.forEach((item, index) => {
+      item.actions.forEach((action, index) => {
+        if (action.name === 'transfer' && action.data.from && action.data.quantity && action.data.to) {
+          transferActionArray.push({
+            time: item.time,
+            txId: item.txId,
+            confirmations: item.confirmations,
+            link: item.link,
+            actions: action
+          })
+        }
+        if ((action.name === 'delegatebw' || action.name === 'undelegatebw' || action.name === 'buyrambytes' ||
+          action.name === 'buyram' || action.name === 'sellrambytes' || action.name === 'sellram') && (action.account === 'eosio')) {
+          resourceActionArray.push({
+            time: item.time,
+            txId: item.txId,
+            confirmations: item.confirmations,
+            link: item.link,
+            actions: action
+          })
+        }
+        if (action.name === 'voteproducer' && action.account === 'eosio') {
+          voteActionArray.push({
+            time: item.time,
+            txId: item.txId,
+            confirmations: item.confirmations,
+            link: item.link,
+            actions: action
+          })
+        }
+      })
+    })
+    return {
+      transferActionArray: transferActionArray,
+      resourceActionArray: resourceActionArray,
+      voteActionArray: voteActionArray
+    }
   }
 }

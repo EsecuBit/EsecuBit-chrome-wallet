@@ -52,6 +52,12 @@ const mutations = {
   },
   SET_IS_Add_ACCOUNTS: (state, isAddAccounts) => {
     state.isAddAccounts = isAddAccounts
+  },
+  SET_WALLET_GROUP: (state, walletGroup) => {
+    state.walletGroup = walletGroup
+  },
+  SET_EOS_CLASSIFY_TX: (state, eosClassifyTx) => {
+    state.eosClassifyTx = eosClassifyTx
   }
 }
 export default mutations
