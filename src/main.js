@@ -9,9 +9,7 @@ import {D, EsWallet} from 'esecubit-wallet-sdk'
 import store from './store/'
 
 util.init().then(result => {
-  let esWallet
-  esWallet = Vue.prototype.esWallet = new EsWallet()
-  util.setEosSeed(esWallet)
+  Vue.prototype.esWallet = new EsWallet()
   Vue.prototype.D = D
   Vue.config.productionTip = false
   Vue.prototype.axios = axios

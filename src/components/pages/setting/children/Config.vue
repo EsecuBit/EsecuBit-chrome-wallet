@@ -63,6 +63,7 @@ export default {
   },
   mounted () {
     this.init()
+    this.getCurrentSeed()
   },
   methods: {
     async init () {

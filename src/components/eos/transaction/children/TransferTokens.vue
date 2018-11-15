@@ -8,10 +8,14 @@
           <input type="text" placeholder="Username to send tokens from" lay-verify="isEmpty"
                  autocomplete="off" class="layui-input" v-model="senderUsername" readonly>
         </div>
-        <div class="layui-form-item">
+        <div class="layui-form-item" style="position: relative">
           <label class="from-label">Receiver </label>
           <input type="text" placeholder="Username to receive tokens" lay-verify="isEmpty"
                  autocomplete="off" class="layui-input" v-model="receiveUsername">
+          <a href="#" class="verify-icon" v-if="isShowIcon">
+            <i class="layui-icon-close-fill layui-icon red" v-show="isVerifyPass" @click="clearReceiveUsername"></i>
+            <i class="layui-icon-ok-circle layui-icon green" v-show="!isVerifyPass" ></i>
+          </a>
         </div>
         <div class="layui-form-item">
           <label class="from-label">Amount</label>
@@ -34,15 +38,27 @@
 
 <script>
 import { mapGetters } from 'vuex'
+import utils from '../../../../utils/utils'
 
 const form = layui.form
+const layer = layui.layer
 export default {
   name: 'TransferTokens',
   data () {
     return {
       receiveUsername: '',
       amount: '',
-      memo: ''
+      isShowIcon: false,
+      isVerifyPass: true,
+      memo: '',
+      isPreventClick: false
+    }
+  },
+  watch: {
+    receiveUsername: {
+      handler (newValue, oldValue) {
+        if (newValue) this.isShowIcon = true
+      }
     }
   },
   mounted () {
@@ -73,7 +89,13 @@ export default {
         }
       })
     },
+    clearReceiveUsername () {
+      this.isShowIcon = false
+      this.receiveUsername = ''
+    },
     submit () {
+      if (this.isPreventClick) return
+      this.isPreventClick = true
       let formData = {
         outputs: [{
           account: this.receiveUsername,
@@ -91,8 +113,13 @@ export default {
         return this.currentAccount.sendTx(value)
       }).then(value => {
         // Empty retransmission status
+        this.isPreventClick = false
+        layer.closeAll('msg')
+        layer.msg(this.$t('message.send_submit_success'), { icon: 1 })
         console.log(value, '成功')
       }).catch(value => {
+        this.isPreventClick = false
+        utils.displayErrorCode(this, value)
         console.warn(value)
       })
     }
@@ -101,6 +128,14 @@ export default {
 </script>
 
 <style scoped lang="less">
+  @green: #009a61;
+  @red: #e74c3c;
+  .green{
+    color:@green;
+  }
+  .red{
+    color: @red;
+  }
   ::-webkit-input-placeholder{
     color: #aaa;
   }
@@ -126,6 +161,16 @@ export default {
       display: block;
       margin-bottom: 6px;
       font-weight: 600;
+    }
+  }
+  .verify-icon{
+    position: absolute;
+    bottom: 3px;
+    right: 15px;
+    height: 38px;
+    line-height: 38px;
+    .layui-icon{
+      font-size: 18px;
     }
   }
 </style>

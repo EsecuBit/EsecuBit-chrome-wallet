@@ -65,9 +65,6 @@ export default {
       return lang['lang'] ? lang['lang'] : (navigator.language === 'zh-CN' ? 'zh-CN' : 'en-US')
     }
   },
-  async setEosSeed (esWallet) {
-    await esWallet.setTestSeed('write your own seed')
-  },
   async init () {
     // this.printLog()
     let device = ''

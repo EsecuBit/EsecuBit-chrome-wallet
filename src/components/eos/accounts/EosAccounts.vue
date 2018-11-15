@@ -9,7 +9,7 @@
             <span  style="color: #e74c3c" v-if="currentAccount">{{currentAccount.label}}</span>
           </div>
         </div>
-        <div class="account-msg">
+        <div class="account-msg" v-if="currentAccount">
           <div class="max-width-400">
             <span class="layui-badge-dot layui-bg-green"></span>
             <span>{{$t('message.accounts_balance')}}</span>
@@ -19,18 +19,18 @@
           </span>
           </div>
         </div>
-        <div class="account-msg">
+        <div class="account-msg" v-if="currentAccount && currentAccount.resources">
           <div class="max-width-250">
             <span class="layui-badge-dot layui-bg-green"></span>
             <span>CPU Staked: </span>
-            <span style="color: #e74c3c" v-if="currentAccount">{{currentAccount.resources.stake.total.cpu}}</span>
+            <span style="color: #e74c3c" >{{currentAccount.resources.stake.total.cpu}}</span>
           </div>
         </div>
-        <div class="account-msg">
+        <div class="account-msg" v-if="currentAccount && currentAccount.resources">
           <div class="max-width-250">
             <span class="layui-badge-dot layui-bg-green"></span>
             <span>NET Staked: </span>
-            <span style="color: #e74c3c" v-if="currentAccount">{{currentAccount.resources.stake.total.net}}</span>
+            <span style="color: #e74c3c" >{{currentAccount.resources.stake.total.net}}</span>
           </div>
         </div>
         <a :title="$t('message.icon_title_refresh')" href="#" class="refresh-data max-width-250" @click="refresh">
@@ -38,7 +38,7 @@
         </a>
       </div>
 
-      <div class="resource-list-wrapper">
+      <div class="resource-list-wrapper" v-if="currentAccount && currentAccount.resources">
         <div class="resource-item">
           <div class="resource-item-circle">
             <Progress :percent="percentRAM" class="progress"></Progress>
@@ -107,6 +107,9 @@
         </div>
       </div>
     </div>
+    <div id="registration-code" style="display: none">
+      <RegistrationCode :owner-public-key="ownerPublicKey" :active-public-key="activePublicKey"></RegistrationCode>
+    </div>
   </div>
 </template>
 
@@ -115,33 +118,37 @@ import Progress from './progress/Progress'
 import ResourceTable from './children/ResourceTable'
 import TokenTransfers from './children/TokenTransfers'
 import VoteTable from './children/VoteTable'
+import RegistrationCode from './children/RegistrationCode'
 import { mapState, mapGetters, mapMutations } from 'vuex'
 import utils from '../../../utils/utils'
+
 const form = layui.form
+const layer = layui.layer
+const $ = layui.jquery
 export default {
   name: 'EosAccounts',
   components: {
     Progress,
     ResourceTable,
     TokenTransfers,
-    VoteTable
+    VoteTable,
+    RegistrationCode
   },
   data () {
     return {
       loadingClass: {
         'layui-anim-rotate': false,
         'layui-anim-loop': false
-      }
+      },
+      isFirst: true,
+      ownerPublicKey: '',
+      activePublicKey: ''
     }
   },
   watch: {
     currentAccount: {
-      handler () {
-        this.currentAccount.getTxInfos().then(value => {
-          this.setEosClassifyTx(utils.classifyTx(value.txInfos))
-        }).catch(value => {
-          utils.displayErrorCode(this, value)
-        })
+      handler (newValue, oldValue) {
+        this.initAccount()
       }
     }
   },
@@ -149,11 +156,7 @@ export default {
     form.render('checkbox', 'form')
     form.on('checkbox(switch)', data => {
     })
-    this.currentAccount.getTxInfos().then(value => {
-      this.setEosClassifyTx(utils.classifyTx(value.txInfos))
-    }).catch(value => {
-      utils.displayErrorCode(this, value)
-    })
+    this.initAccount()
   },
   computed: {
     ...mapState({
@@ -165,59 +168,74 @@ export default {
       'currentAccountType': 'currentAccountType'
     }),
     percentRAM () {
-      if (this.currentAccount) {
-        let percent = (this.currentAccount.resources.ram.used / this.currentAccount.resources.ram.total)
-        return (percent >= 1) ? 1 : utils.toTwoPoint(percent)
-      }
+      let percent = (this.currentAccount.resources.ram.used / this.currentAccount.resources.ram.total)
+      return (percent >= 1) ? 1 : utils.toTwoPoint(percent)
     },
     descriptionRAM () {
-      if (this.currentAccount) {
-        let usedRAM = utils.toTwoPoint(this.currentAccount.resources.ram.used / 1024)
-        let totalRAM = utils.toTwoPoint(this.currentAccount.resources.ram.total / 1024)
-        return `${usedRAM}KB / ${totalRAM}KB`
-      }
+      let usedRAM = utils.toTwoPoint(this.currentAccount.resources.ram.used / 1024)
+      let totalRAM = utils.toTwoPoint(this.currentAccount.resources.ram.total / 1024)
+      return `${usedRAM}KB / ${totalRAM}KB`
     },
     percentNet () {
-      if (this.currentAccount) {
-        let percent = (this.currentAccount.resources.net.used / this.currentAccount.resources.net.max)
-        return (percent >= 1) ? 1 : utils.toTwoPoint(percent)
-      }
+      let percent = (this.currentAccount.resources.net.used / this.currentAccount.resources.net.max)
+      return (percent >= 1) ? 1 : utils.toTwoPoint(percent)
     },
     descriptionNet () {
-      if (this.currentAccount) {
-        let usedRAM = utils.toTwoPoint(this.currentAccount.resources.net.used / 1024)
-        let totalRAM = utils.toTwoPoint(this.currentAccount.resources.net.max / 1024)
-        return `${usedRAM}KB / ${totalRAM}KB`
-      }
+      let usedRAM = utils.toTwoPoint(this.currentAccount.resources.net.used / 1024)
+      let totalRAM = utils.toTwoPoint(this.currentAccount.resources.net.max / 1024)
+      return `${usedRAM}KB / ${totalRAM}KB`
     },
     percentCPU () {
-      if (this.currentAccount) {
-        let percent = (this.currentAccount.resources.cpu.used / this.currentAccount.resources.cpu.max)
-        return (percent >= 1) ? 1 : utils.toTwoPoint(percent)
-      }
+      let percent = (this.currentAccount.resources.cpu.used / this.currentAccount.resources.cpu.max)
+      return (percent >= 1) ? 1 : utils.toTwoPoint(percent)
     },
     descriptionCPU () {
-      if (this.currentAccount) {
-        let usedRAM = this.currentAccount.resources.cpu.used / 1000
-        let totalRAM = this.currentAccount.resources.cpu.max / 1000
-        return `${usedRAM} ms / ${totalRAM} ms`
-      }
+      let usedRAM = this.currentAccount.resources.cpu.used / 1000
+      let totalRAM = this.currentAccount.resources.cpu.max / 1000
+      return `${usedRAM} ms / ${totalRAM} ms`
     },
     accountBalance () {
-      console.log(this.currentAccount, 'this.currentAccount')
+      console.log(this.currentAccount, 'currentAccount')
       return this.currentAccount ? this.currentAccount.balance + ' EOS' : ''
     },
     displayExchangeRate () {
-      if (this.currentAccount) {
-        let amount = utils.toTwoPoint(this.esWallet.convertValue(this.currentAccountType, this.currentAccount.balance, this.D.unit.eos.EOS, this.currentExchangeRate))
-        return this.currentExchangeRate ? `(${amount} ${this.currentExchangeRate})` : ''
-      }
+      let amount = utils.toTwoPoint(this.esWallet.convertValue(this.currentAccountType, this.currentAccount.balance, this.D.unit.eos.EOS, this.currentExchangeRate))
+      return this.currentExchangeRate ? `(${amount} ${this.currentExchangeRate})` : ''
     }
   },
   methods: {
     ...mapMutations({
       setEosClassifyTx: 'SET_EOS_CLASSIFY_TX'
     }),
+    initAccount () {
+      if (!this.currentAccount.isRegistered()) {
+        this.showRegistrationInfo()
+        this.currentAccount.getPermissions().then(value => {
+          this.ownerPublicKey = value.owner.keys[0].publicKey
+          this.activePublicKey = value.active.keys[0].publicKey
+        })
+      }
+      this.currentAccount.getTxInfos().then(value => {
+        this.setEosClassifyTx(utils.classifyTx(value.txInfos))
+      }).catch(value => {
+        utils.displayErrorCode(this, value)
+      })
+    },
+    showRegistrationInfo () {
+      let that = this
+      layer.open({
+        type: 1,
+        area: [ '600px', '350px' ],
+        shadeClose: false,
+        title: 'Account Info',
+        btn: [that.$t('message.accounts_cancel_btn')],
+        content: $('#registration-code'),
+        yes (index) {
+          // update account name
+          layer.close(index)
+        }
+      })
+    },
     refresh () {
       this.loadingClass['layui-anim-rotate'] = true
       this.loadingClass['layui-anim-loop'] = true
@@ -247,8 +265,8 @@ export default {
     /*account-information*/
     .account-information {
       display: block;
-      padding: 18px 15px 0 15px;
-      border-radius: 5px;
+      padding: 10px 15px 0 15px;
+      border-radius: 4px;
       .account-msg {
         display: inline-block;
         max-height: 19px;
@@ -308,7 +326,8 @@ export default {
             .resource-item-title{
               display: block;
               font-weight: lighter;
-              font-size: 20px;
+              font-size:18px;
+              color: #555;
               letter-spacing: 1px;
             }
             .resource-item-content{
