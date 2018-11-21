@@ -26,11 +26,7 @@
         <td><span class="form-status" :class="[getStatus(item) === 'waiting'? 'waiting' :'executed']">{{getStatus(item)}}</span></td>
         <td>{{getFormatTime(item.time)}}</td>
         <td><span class="form-type">{{getType(item)}}</span></td>
-        <td style="text-overflow: clip;white-space: normal;">
-          <span></span>
-          <span>{{getDescription(item)}}</span>
-          <span></span>
-        </td>
+        <td style="text-overflow: clip;white-space: normal;">{{getDescription(item)}}</td>
         <td>
           <a title="link" :href="item.link"  target="_blank" >
             <i class="layui-icon layui-icon-search"></i>
@@ -42,7 +38,7 @@
 
     <!-- Pagination -->
     <div class="page-wrapper">
-      <div class="page-content" id="pagination"></div>
+      <div class="page-content" id="pagination-other"></div>
       <div class="total-num-wrapper">
         <div class="total-num">
           <span>{{$t('message.accounts_total') + ' ' + total + ' ' + $t('message.accounts_items')}}</span>
@@ -60,7 +56,7 @@ import utils from '../../../../utils/utils'
 
 const laypage = layui.laypage
 export default {
-  name: 'TransactionsTable',
+  name: 'VoteTable',
   components: {
     Detail
   },
@@ -89,17 +85,8 @@ export default {
   },
   methods: {
     getDescription (item) {
-      console.log(item)
-      if (item.actions.name === 'delegatebw') {
-        return `${item.actions.data.from} delegated  ${item.actions.data.stake_cpu_quantity} in CPU and
-        ${item.actions.data.stake_net_quantity} in Net for ${item.actions.data.receiver}`
-      } else if (item.actions.name === 'undelegatebw') {
-        return `${item.actions.data.from} undelegated ${item.actions.data.unstake_cpu_quantity} in CPU and
-        ${item.actions.data.unstake_net_quantity} in Net for ${item.actions.data.receiver}`
-      } else if (item.actions.name === 'buyram' || item.actions.name === 'buyrambytes') {
-        return `${item.actions.data.payer} bought ${item.actions.data.quant} ram for ${item.actions.data.receiver}`
-      } else if (item.actions.name === 'sellrambytes' || item.actions.name === 'sellram') {
-        return `${item.actions.data.account} sold ${item.actions.data.bytes} bytes ram `
+      if (item.actions.name === 'voteproducer') {
+        return `${item.actions.data.voter} voted for ${item.actions.data.producers}`
       }
     },
     getType (item) {
@@ -117,7 +104,7 @@ export default {
       this.detail = item
     },
     changeShowDetail (...data) {
-      this.isShowDetail = data[0]
+      this.isShowDetail = data[ 0 ]
     },
     pageList () {
       let total = this.total
@@ -125,13 +112,13 @@ export default {
       let limit = this.limit
       let that = this
       laypage.render({
-        elem: 'pagination',
+        elem: 'pagination-other',
         count: total,
         limit: limit,
         curr: page,
         prev: '<',
         next: '>',
-        layout: ['first', 'prev', 'page', 'next', 'last'],
+        layout: [ 'first', 'prev', 'page', 'next', 'last' ],
         jump: function (obj, first) {
           // 首次不执行
           if (!first) {
@@ -143,15 +130,15 @@ export default {
       })
     },
     setTableData () {
-      this.tableData = this.eosClassifyTx.resourceActionArray.slice(this.pageStartIndex, this.pageEndIndex)
-      this.total = this.eosClassifyTx.resourceActionArray.length
+      this.tableData = this.eosClassifyTx.otherActionArray.slice(this.pageStartIndex, this.pageEndIndex)
+      this.total = this.eosClassifyTx.otherActionArray.length
       console.log(this.tableData, this.total)
       this.pageList()
     },
     changeTableData (limit, page) {
       const startItem = limit * (page - 1)
       const endItem = limit * (page - 1) + limit
-      this.tableData = this.eosClassifyTx.resourceActionArray.slice(startItem, endItem)
+      this.tableData = this.eosClassifyTx.otherActionArray.slice(startItem, endItem)
     }
   }
 }

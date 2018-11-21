@@ -94,6 +94,7 @@
             <li class="layui-this">Token Transfers</li>
             <li>Resource transaction</li>
             <li>Vote</li>
+            <li>Other</li>
           </ul>
           <div class="layui-tab-content">
             <div class="layui-tab-item layui-show">
@@ -104,6 +105,9 @@
             </div>
             <div class="layui-tab-item">
               <VoteTable></VoteTable>
+            </div>
+            <div class="layui-tab-item">
+              <OtherActionTable></OtherActionTable>
             </div>
           </div>
         </div>
@@ -120,6 +124,7 @@ import Progress from './progress/Progress'
 import ResourceTable from './children/ResourceTable'
 import TokenTransfers from './children/TokenTransfers'
 import VoteTable from './children/VoteTable'
+import OtherActionTable from './children/OtherActionTable'
 import RegistrationCode from './children/RegistrationCode'
 import { mapState, mapGetters, mapMutations } from 'vuex'
 import utils from '../../../utils/utils'
@@ -134,6 +139,7 @@ export default {
     ResourceTable,
     TokenTransfers,
     VoteTable,
+    OtherActionTable,
     RegistrationCode
   },
   data () {

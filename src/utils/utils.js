@@ -79,43 +79,34 @@ export default {
     let transferActionArray = []
     let voteActionArray = []
     let resourceActionArray = []
+    let otherActionArray = []
     txArray.forEach((item, index) => {
       item.actions.forEach((action, index) => {
+        let obj = {
+          time: item.time,
+          txId: item.txId,
+          confirmations: item.confirmations,
+          link: item.link,
+          actions: action
+        }
         if (action.name === 'transfer' && action.data.from && action.data.quantity && action.data.to) {
-          transferActionArray.push({
-            time: item.time,
-            txId: item.txId,
-            confirmations: item.confirmations,
-            link: item.link,
-            actions: action
-          })
-        }
-        if (((action.name === 'delegatebw' || action.name === 'undelegatebw' || action.name === 'buyrambytes') && (action.account === 'eosio.stake')) ||
-          ((action.name === 'buyram' || action.name === 'sellrambytes' || action.name === 'sellram') && (action.account === 'eosio'))) {
-          resourceActionArray.push({
-            time: item.time,
-            txId: item.txId,
-            confirmations: item.confirmations,
-            link: item.link,
-            actions: action
-          })
-        }
-        if (action.name === 'voteproducer' && action.account === 'eosio') {
-          voteActionArray.push({
-            time: item.time,
-            txId: item.txId,
-            confirmations: item.confirmations,
-            link: item.link,
-            actions: action
-          })
+          transferActionArray.push(obj)
+        } else if (((action.name === 'delegatebw' || action.name === 'undelegatebw') && (action.account === 'eosio.stake')) ||
+          ((action.name === 'buyram' || action.name === 'buyrambytes' || action.name === 'sellrambytes' || action.name === 'sellram') && (action.account === 'eosio'))) {
+          resourceActionArray.push(obj)
+        } else if (action.name === 'voteproducer' && action.account === 'eosio') {
+          voteActionArray.push(obj)
+        } else {
+          otherActionArray.push(obj)
         }
       })
     })
-    console.log(transferActionArray, 'transferActionArray')
+    console.log(otherActionArray, 'otherActionArray')
     return {
       transferActionArray: transferActionArray,
       resourceActionArray: resourceActionArray,
-      voteActionArray: voteActionArray
+      voteActionArray: voteActionArray,
+      otherActionArray: otherActionArray
     }
   }
 }
