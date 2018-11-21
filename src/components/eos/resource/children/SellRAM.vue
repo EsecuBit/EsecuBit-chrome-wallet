@@ -2,11 +2,11 @@
   <div class="layui-card">
     <div class="layui-card-header">Sell RAM</div>
     <div class="layui-card-body layui-row layui-col-space10">
-      <form class="layui-form">
+      <form class="layui-form" lay-filter="form">
         <div class="layui-form-item">
           <label class="from-label">RAM Owner:</label>
           <input type="text" placeholder="Account that owns the RAM"
-                 lay-verify="isEmpty" v-model="ownerUsername" autocomplete="off" class="layui-input">
+                 lay-verify="isEmpty" v-model="ownerUsername" autocomplete="off" class="layui-input" readonly>
         </div>
         <div class="layui-form-item">
           <label class="from-label">Amount of RAM to Sell </label>
@@ -14,7 +14,7 @@
                  lay-verify="isEmpty" v-model="sellAmount" autocomplete="off" class="layui-input">
         </div>
         <div class="layui-form-item">
-          <button class="layui-btn" lay-submit type="button">立即提交</button>
+          <button class="layui-btn" lay-submit type="button" @click="submit">立即提交</button>
           <button type="button" class="layui-btn layui-btn-primary" @click="resetForm">重置</button>
         </div>
       </form>
@@ -23,21 +23,33 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
+import utils from '../../../../utils/utils'
 const form = layui.form
+const layer = layui.layer
 export default {
   name: 'SellRAM',
   data () {
     return {
-      ownerUsername: '',
       sellAmount: ''
     }
   },
   mounted () {
     this.verifyForm()
   },
+  computed: {
+    ...mapGetters({
+      'currentAccount': 'currentAccount',
+      'currentAccountType': 'currentAccountType'
+    }),
+    ownerUsername () {
+      if (this.currentAccount) {
+        return this.currentAccount.label
+      }
+    }
+  },
   methods: {
     resetForm () {
-      this.ownerUsername = ''
       this.sellAmount = ''
     },
     verifyForm () {
@@ -49,6 +61,27 @@ export default {
       })
     },
     submit () {
+      let formData = {
+        buy: false,
+        ramBytes: this.sellAmount
+      }
+      console.log(formData, 'formData')
+      this.currentAccount.prepareBuyRam(formData).then(value => {
+        console.log(value, 'prepareTx')
+        return this.currentAccount.buildTx(value)
+      }).then(value => {
+        console.log(value, 'buildTx')
+        return this.currentAccount.sendTx(value)
+      }).then(value => {
+        // Empty retransmission status
+        this.isPreventClick = false
+        layer.closeAll('msg')
+        layer.msg(this.$t('message.send_submit_success'), { icon: 1 })
+        console.log(value, '成功')
+      }).catch(value => {
+        this.isPreventClick = false
+        utils.displayErrorCode(this, value)
+      })
     }
   }
 }

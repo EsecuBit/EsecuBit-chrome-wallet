@@ -102,10 +102,9 @@ export default {
           value: this.amount
         }],
         token: 'EOS',
-        type: 'tokenTransfer',
         comment: this.memo
       }
-      this.currentAccount.prepareTx(formData).then(value => {
+      this.currentAccount.prepareTransfer(formData).then(value => {
         console.log(value, 'prepareTx')
         return this.currentAccount.buildTx(value)
       }).then(value => {
@@ -120,7 +119,6 @@ export default {
       }).catch(value => {
         this.isPreventClick = false
         utils.displayErrorCode(this, value)
-        console.warn(value)
       })
     }
   }
@@ -138,9 +136,6 @@ export default {
   }
   ::-webkit-input-placeholder{
     color: #aaa;
-  }
-  .layui-input[readonly="readonly"]{
-    background: #f8f8f8;
   }
   .layui-card{
     border-radius: 8px;

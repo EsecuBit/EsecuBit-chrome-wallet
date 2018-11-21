@@ -26,7 +26,11 @@
         <td><span class="form-status" :class="[getStatus(item) === 'waiting'? 'waiting' :'executed']">{{getStatus(item)}}</span></td>
         <td>{{getFormatTime(item.time)}}</td>
         <td><span class="form-type">{{getType(item)}}</span></td>
-        <td style="text-overflow: clip;white-space: normal;">{{getDescription(item)}}</td>
+        <td style="text-overflow: clip;white-space: normal;">
+          <span></span>
+          <span>{{getDescription(item)}}</span>
+          <span></span>
+        </td>
         <td>
           <a title="link" :href="item.link"  target="_blank" >
             <i class="layui-icon layui-icon-search"></i>
@@ -85,12 +89,17 @@ export default {
   },
   methods: {
     getDescription (item) {
+      console.log(item)
       if (item.actions.name === 'delegatebw') {
-        return `${item.actions.data.from} delegated for ${item.actions.data.receiver}  ${item.actions.data.stake_cpu_quantity} in CPU and
-        ${item.actions.data.stake_net_quantity} in Net`
+        return `${item.actions.data.from} delegated  ${item.actions.data.stake_cpu_quantity} in CPU and
+        ${item.actions.data.stake_net_quantity} in Net for ${item.actions.data.receiver}`
       } else if (item.actions.name === 'undelegatebw') {
-        return `${item.actions.data.from} undelegated for ${item.actions.data.receiver}  ${item.actions.data.stake_cpu_quantity} in CPU and
-        ${item.actions.data.stake_net_quantity} in Net`
+        return `${item.actions.data.from} undelegated ${item.actions.data.unstake_cpu_quantity} in CPU and
+        ${item.actions.data.unstake_net_quantity} in Net for ${item.actions.data.receiver}`
+      } else if (item.actions.name === 'buyram') {
+        return `${item.actions.data.payer} bought ${item.actions.data.quant} ram for ${item.actions.data.receiver}`
+      } else if (item.actions.name === 'sellrambytes' || item.actions.name === 'sellram') {
+        return `${item.actions.data.account} sold ${item.actions.data.bytes} bytes ram `
       }
     },
     getType (item) {

@@ -7,8 +7,8 @@
           <div class="layui-form-item">
             <label class="layui-form-label"> Select category</label>
             <div class="layui-input-block">
-              <input type="radio" name="category" lay-filter="category" value="producers" title="Block Producers">
-              <input type="radio" name="category" lay-filter="category" value="proxies" title="Proxies" checked>
+              <input type="radio" name="category" lay-filter="category" value="producers" title="Block Producers" checked>
+              <input type="radio" name="category" lay-filter="category" value="proxies" title="Proxies" >
             </div>
           </div>
         </form>

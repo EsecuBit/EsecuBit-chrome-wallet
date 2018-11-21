@@ -5,8 +5,7 @@
       <form class="layui-form" lay-filter="form">
         <div class="layui-form-item">
           <label class="from-label">RAM Payer</label>
-          <input type="text" placeholder="Account paying for RAM" lay-verify="isEmpty"
-                 v-model="payerUsername" autocomplete="off" class="layui-input">
+          <input type="text" placeholder="Account paying for RAM" v-model="payerUsername" autocomplete="off" class="layui-input" readonly>
         </div>
         <div class="layui-form-item">
           <label class="from-label">RAM Receiver: </label>
@@ -24,7 +23,7 @@
                  v-model="amount" lay-verify="isEmpty" autocomplete="off" class="layui-input">
         </div>
         <div class="layui-form-item">
-          <button class="layui-btn" lay-submit type="button">立即提交</button>
+          <button class="layui-btn" lay-submit type="button" @click="submit">立即提交</button>
           <button type="button" class="layui-btn layui-btn-primary" @click="resetForm">重置</button>
         </div>
       </form>
@@ -33,12 +32,14 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
+import utils from '../../../../utils/utils'
 const form = layui.form
+const layer = layui.layer
 export default {
   name: 'BuyRAM',
   data () {
     return {
-      payerUsername: '',
       ReceiverUsername: '',
       amount: '',
       unitChecked: 'eos'
@@ -48,9 +49,19 @@ export default {
     this.renderForm()
     this.verifyForm()
   },
+  computed: {
+    ...mapGetters({
+      'currentAccount': 'currentAccount',
+      'currentAccountType': 'currentAccountType'
+    }),
+    payerUsername () {
+      if (this.currentAccount) {
+        return this.currentAccount.label
+      }
+    }
+  },
   methods: {
     resetForm () {
-      this.payerUsername = ''
       this.ReceiverUsername = ''
       this.amount = ''
       this.unitChecked = 'eos'
@@ -73,6 +84,28 @@ export default {
       })
     },
     submit () {
+      let formData = {
+        buy: true,
+        receiver: this.ReceiverUsername
+      }
+      this.unitChecked === 'eos' ? (formData.quant = this.amount) : (formData.ramBytes = this.amount)
+      console.log(formData)
+      this.currentAccount.prepareBuyRam(formData).then(value => {
+        console.log(value, 'prepareTx')
+        return this.currentAccount.buildTx(value)
+      }).then(value => {
+        console.log(value, 'buildTx')
+        return this.currentAccount.sendTx(value)
+      }).then(value => {
+        // Empty retransmission status
+        this.isPreventClick = false
+        layer.closeAll('msg')
+        layer.msg(this.$t('message.send_submit_success'), { icon: 1 })
+        console.log(value, '成功')
+      }).catch(value => {
+        this.isPreventClick = false
+        utils.displayErrorCode(this, value)
+      })
     }
   }
 }

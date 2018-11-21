@@ -2,12 +2,12 @@
   <div class="layui-card-body layui-row layui-col-space10">
     <form class="layui-form">
       <div class="layui-form-item">
-        <label class="from-label">Proxies</label>
-        <input type="text" placeholder="Account that owns the RAM" lay-verify="isEmpty" v-model="proxiesName" autocomplete="off" class="layui-input">
+        <label class="from-label">Username </label>
+        <input type="text" placeholder="Enter Proxy EOS Username" lay-verify="isEmpty" v-model="username" autocomplete="off" class="layui-input" readonly>
       </div>
       <div class="layui-form-item">
-        <label class="from-label">Username </label>
-        <input type="text" placeholder="Enter Proxies EOS Username" lay-verify="isEmpty" v-model="username" autocomplete="off" class="layui-input">
+        <label class="from-label">Proxy</label>
+        <input type="text" placeholder="Account that owns the RAM" lay-verify="isEmpty" v-model="ProxyName" autocomplete="off" class="layui-input">
       </div>
       <div class="layui-form-item">
         <button class="layui-btn" lay-submit @click="submit">Vote</button>
@@ -18,22 +18,35 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
+import utils from '../../../../utils/utils'
 const form = layui.form
+const layer = layui.layer
 export default {
-  name: 'Proxies',
+  name: 'Proxy',
   data () {
     return {
-      proxiesName: '',
-      username: ''
+      ProxyName: '',
+      isPreventClick: false
     }
   },
   mounted () {
     this.verifyForm()
   },
+  computed: {
+    ...mapGetters({
+      'currentAccount': 'currentAccount',
+      'currentAccountType': 'currentAccountType'
+    }),
+    username () {
+      if (this.currentAccount) {
+        return this.currentAccount.label
+      }
+    }
+  },
   methods: {
     resetForm () {
-      this.proxiesName = ''
-      this.username = ''
+      this.ProxyName = ''
     },
     verifyForm () {
       let that = this
@@ -44,6 +57,25 @@ export default {
       })
     },
     submit () {
+      let formData = {
+        proxy: this.ProxyName
+      }
+      this.currentAccount.prepareVote(formData).then(value => {
+        console.log(value, 'prepareTx')
+        return this.currentAccount.buildTx(value)
+      }).then(value => {
+        console.log(value, 'buildTx')
+        return this.currentAccount.sendTx(value)
+      }).then(value => {
+        // Empty retransmission status
+        this.isPreventClick = false
+        layer.closeAll('msg')
+        layer.msg(this.$t('message.send_submit_success'), { icon: 1 })
+        console.log(value, '成功')
+      }).catch(value => {
+        this.isPreventClick = false
+        utils.displayErrorCode(this, value)
+      })
     }
   }
 }

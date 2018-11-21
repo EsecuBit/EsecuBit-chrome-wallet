@@ -90,8 +90,8 @@ export default {
             actions: action
           })
         }
-        if ((action.name === 'delegatebw' || action.name === 'undelegatebw' || action.name === 'buyrambytes' ||
-          action.name === 'buyram' || action.name === 'sellrambytes' || action.name === 'sellram') && (action.account === 'eosio')) {
+        if (((action.name === 'delegatebw' || action.name === 'undelegatebw' || action.name === 'buyrambytes') && (action.account === 'eosio.stake')) ||
+          ((action.name === 'buyram' || action.name === 'sellrambytes' || action.name === 'sellram') && (action.account === 'eosio'))) {
           resourceActionArray.push({
             time: item.time,
             txId: item.txId,
@@ -111,6 +111,7 @@ export default {
         }
       })
     })
+    console.log(transferActionArray, 'transferActionArray')
     return {
       transferActionArray: transferActionArray,
       resourceActionArray: resourceActionArray,

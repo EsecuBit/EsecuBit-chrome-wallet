@@ -41,6 +41,9 @@ a:hover {
   color: #999;
 }
 
+.layui-input[readonly="readonly"]{
+  background: #f8f8f8;
+}
 label{
   margin: 0;
 }

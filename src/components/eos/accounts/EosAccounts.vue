@@ -33,9 +33,11 @@
             <span style="color: #e74c3c" >{{currentAccount.resources.stake.total.net}}</span>
           </div>
         </div>
-        <a :title="$t('message.icon_title_refresh')" href="#" class="refresh-data max-width-250" @click="refresh">
-          <i class="layui-icon layui-icon-refresh-1 layui-anim " :class="loadingClass"></i>
-        </a>
+        <div class="account-msg">
+          <a :title="$t('message.icon_title_refresh')" href="#" class="refresh-data max-width-250" @click="refresh">
+            <i class="layui-icon layui-icon-refresh-1 layui-anim " :class="loadingClass"></i>
+          </a>
+        </div>
       </div>
 
       <div class="resource-list-wrapper" v-if="currentAccount && currentAccount.resources">
@@ -76,14 +78,14 @@
     </div>
 
       <div class="table-title"><i class="layui-icon">&#xe62d;</i> <span>Account Transactions</span>
-      <form class="layui-form" lay-filter="form">
-        <div class="layui-form-item">
-          <label class="layui-form-label">Expand the form</label>
-          <div class="layui-input-block">
-            <input type="checkbox" name="switch" lay-skin="switch" lay-text="ON|OFF">
-          </div>
-        </div>
-      </form>
+      <!--<form class="layui-form" lay-filter="form">-->
+        <!--<div class="layui-form-item">-->
+          <!--<label class="layui-form-label">Expand the form</label>-->
+          <!--<div class="layui-input-block">-->
+            <!--<input type="checkbox" name="switch" lay-skin="switch" lay-text="ON|OFF">-->
+          <!--</div>-->
+        <!--</div>-->
+      <!--</form>-->
     </div>
     <div class="layui-row">
       <div class="layui-col-xs12 ">
@@ -157,6 +159,7 @@ export default {
     form.on('checkbox(switch)', data => {
     })
     this.initAccount()
+    this.listenTXInfo()
   },
   computed: {
     ...mapState({
@@ -236,13 +239,37 @@ export default {
         }
       })
     },
+    listenTXInfo () {
+      this.esWallet.listenTxInfo((error, txInfo) => {
+        let errorCodeMsg = utils.getErrorCodeMsg(this)
+        if (errorCodeMsg[ String(error) ]) {
+          utils.displayErrorCode(this, error)
+        }
+        if (!this.currentAccount || this.currentAccount.accountId !== txInfo.accountId) return false
+        // table Repagination
+        this.currentAccount.getTxInfos().then(value => {
+          this.setEosClassifyTx(utils.classifyTx(value.txInfos))
+        }).catch(value => {
+          utils.displayErrorCode(this, value)
+        })
+      })
+    },
     refresh () {
       this.loadingClass['layui-anim-rotate'] = true
       this.loadingClass['layui-anim-loop'] = true
-      setTimeout(() => {
-        this.loadingClass['layui-anim-rotate'] = false
-        this.loadingClass['layui-anim-loop'] = false
-      }, 2000)
+      this.currentAccount.sync(false).then(value => {
+        this.currentAccount.getTxInfos().then(value => {
+          this.setEosClassifyTx(utils.classifyTx(value.txInfos))
+          console.log(value.txInfos, '同步交易')
+          this.loadingClass['layui-anim-rotate'] = false
+          this.loadingClass['layui-anim-loop'] = false
+          layer.msg(this.$t('message.accounts_sync_success'), { icon: 1 })
+        }).catch(value => {
+          utils.displayErrorCode(this, value)
+          this.loadingClass['layui-anim-rotate'] = false
+          this.loadingClass['layui-anim-loop'] = false
+        })
+      })
     }
   }
 }
@@ -363,8 +390,4 @@ export default {
   .layui-tab{
     margin: 0;
   }
-  .layui-icon-refresh-1{
-    vertical-align: top;
-  }
-
 </style>
