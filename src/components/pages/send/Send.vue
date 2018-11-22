@@ -195,7 +195,6 @@ export default {
       gasPrice: 0,
       isShowData: false,
       etcData: '',
-      isPreventClick: false,
       groupingAccounts: null,
       oldTxId: '',
       isReSendStatus: false,
@@ -220,7 +219,8 @@ export default {
       'renameTimes': 'renameTimes',
       'switchLangTimes': 'switchLangTimes',
       'fillTableTimes': 'fillTableTimes',
-      'autoFillTableData': 'autoFillTableData'
+      'autoFillTableData': 'autoFillTableData',
+      'isPreventClick': 'isPreventClick'
     }),
     isBtc () {
       return this.D.isBtc(this.coinType)
@@ -441,7 +441,7 @@ export default {
   methods: {
     ...mapMutations({
       setPageIndex: 'SET_PAGE_INDEX',
-      setIsPreventSwitch: 'SET_IS_PREVENT_SWITCH'
+      setIsPreventClick: 'SET_IS_PREVENT_CLICK'
     }),
     switchCurrentAccount (index) {
       this.currentSelectedAccountIndex = index
@@ -710,13 +710,11 @@ export default {
       layer.msg(this.$t('message.send_is_click'), {time: 600000000})
       let formData = this.getFormData()
       if (this.isPreventClick) return
-      this.isPreventClick = true
-      this.setIsPreventSwitch(true)
+      this.setIsPreventClick(true)
       setTimeout(() => {
         this.currentAccount.prepareTx(formData).then(value => {
           return this.currentAccount.buildTx(value)
         }).then(value => {
-          this.isPreventClick = false
           layer.closeAll('msg')
           layer.msg(this.$t('message.send_is_trading'), {time: 600000000})
           return this.currentAccount.sendTx(value)
@@ -724,16 +722,13 @@ export default {
           // Empty retransmission status
           if (this.oldTxId) this.clearResendStatus()
           // Formatted form
-          this.isPreventClick = false
-          this.setIsPreventSwitch(false)
+          this.setIsPreventClick(false)
           this.clearFormData()
           layer.closeAll('msg')
           layer.msg(this.$t('message.send_submit_success'), { icon: 1 })
           this.setPageIndex(0)
         }).catch(value => {
-          this.isPreventClick = false
-          this.setIsPreventSwitch(false)
-          layer.closeAll('msg')
+          this.isPreventClick(false)
           utils.displayErrorCode(this, value)
         })
       }, 200)

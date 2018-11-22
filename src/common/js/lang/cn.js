@@ -4,7 +4,7 @@ export const message = {
   app_send: '发送',
   app_accept: '接收',
   app_home: '首页',
-  app_transaction: '交易',
+  app_transaction: '转账',
   app_vote: '投票',
   app_resource: '资源管理',
   app_add_accounts: ' 添加账户',
@@ -187,6 +187,8 @@ export const message = {
   error_noAddressCheckSum: 'ETH地址没有校验格式',
   error_invalidAddressChecksum: '地址校验错误（没有用到）',
   error_invalidDataNotHex: 'Data字段应为hex字符串',
+  error_invalidParams: '参数不合法',
+  error_permissionNotFound: '没有权限',
   error_valueIsDecimal: '交易的最小单位不能是小数',
   error_notImplemented: '功能未实现',
   error_unknown: '未知错误',
@@ -194,5 +196,7 @@ export const message = {
 
   icon_title_edit: '修改',
   icon_title_refresh: '刷新',
-  icon_title_copy: '复制'
+  icon_title_copy: '复制',
+
+  eos_transfer_verify_username: '用户名不存在，请重新输入'
 }

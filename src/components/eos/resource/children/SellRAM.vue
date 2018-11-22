@@ -10,7 +10,7 @@
         </div>
         <div class="layui-form-item">
           <label class="from-label">Amount of RAM to Sell </label>
-          <input type="text" placeholder="Amount of RAM to sell in Bytes"
+          <input type="number" placeholder="Amount of RAM to sell in Bytes"
                  lay-verify="isEmpty" v-model="sellAmount" autocomplete="off" class="layui-input">
         </div>
         <div class="layui-form-item">
@@ -23,7 +23,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapState, mapGetters, mapMutations } from 'vuex'
 import utils from '../../../../utils/utils'
 const form = layui.form
 const layer = layui.layer
@@ -38,6 +38,9 @@ export default {
     this.verifyForm()
   },
   computed: {
+    ...mapState({
+      'isPreventClick': 'isPreventClick'
+    }),
     ...mapGetters({
       'currentAccount': 'currentAccount',
       'currentAccountType': 'currentAccountType'
@@ -49,6 +52,9 @@ export default {
     }
   },
   methods: {
+    ...mapMutations({
+      setIsPreventClick: 'SET_IS_PREVENT_CLICK'
+    }),
     resetForm () {
       this.sellAmount = ''
     },
@@ -61,25 +67,25 @@ export default {
       })
     },
     submit () {
+      if (this.isPreventClick || !this.sellAmount) return
+      this.setIsPreventClick(true)
       let formData = {
         buy: false,
         ramBytes: this.sellAmount
       }
-      console.log(formData, 'formData')
+      layer.msg(this.$t('message.send_is_trading'), {icon: 0, time: 600000000})
       this.currentAccount.prepareBuyRam(formData).then(value => {
-        console.log(value, 'prepareTx')
         return this.currentAccount.buildTx(value)
       }).then(value => {
-        console.log(value, 'buildTx')
         return this.currentAccount.sendTx(value)
       }).then(value => {
         // Empty retransmission status
-        this.isPreventClick = false
+        this.setIsPreventClick(false)
         layer.closeAll('msg')
         layer.msg(this.$t('message.send_submit_success'), { icon: 1 })
         console.log(value, '成功')
       }).catch(value => {
-        this.isPreventClick = false
+        this.setIsPreventClick(false)
         utils.displayErrorCode(this, value)
       })
     }

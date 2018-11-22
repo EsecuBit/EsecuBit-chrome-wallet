@@ -10,11 +10,11 @@
         </div>
         <div class="layui-form-item" style="position: relative">
           <label class="from-label">Receiver </label>
-          <input type="text" placeholder="Username to receive tokens" lay-verify="isEmpty"
-                 autocomplete="off" class="layui-input" v-model="receiveUsername">
+          <input type="text" placeholder="Username to receive tokens" lay-verify="isEmpty" id="receiverUsername"
+                 autocomplete="off" class="layui-input" v-model="receiverUsername">
           <a href="#" class="verify-icon" v-if="isShowIcon">
-            <i class="layui-icon-close-fill layui-icon red" v-show="isVerifyPass" @click="clearReceiveUsername"></i>
-            <i class="layui-icon-ok-circle layui-icon green" v-show="!isVerifyPass" ></i>
+            <i class="layui-icon-close-fill layui-icon red" v-show="!isVerifyPass" @click="clearReceiverUsername"></i>
+            <i class="layui-icon-ok-circle layui-icon green" v-show="isVerifyPass" ></i>
           </a>
         </div>
         <div class="layui-form-item">
@@ -24,8 +24,7 @@
         </div>
         <div class="layui-form-item">
           <label class="from-label">Memo (optional): </label>
-          <input type="text" placeholder="Memo" lay-verify="isEmpty"
-                 autocomplete="off" class="layui-input" v-model="memo">
+          <input type="text" placeholder="Memo" autocomplete="off" class="layui-input" v-model="memo">
         </div>
         <div class="layui-form-item">
           <button class="layui-btn" lay-submit type="button" @click="submit">{{$t('message.send_submit_btn')}}</button>
@@ -37,7 +36,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapState, mapGetters, mapMutations } from 'vuex'
 import utils from '../../../../utils/utils'
 
 const form = layui.form
@@ -46,18 +45,23 @@ export default {
   name: 'TransferTokens',
   data () {
     return {
-      receiveUsername: '',
+      receiverUsername: '',
       amount: '',
       isShowIcon: false,
       isVerifyPass: true,
-      memo: '',
-      isPreventClick: false
+      memo: ''
     }
   },
   watch: {
-    receiveUsername: {
+    receiverUsername: {
       handler (newValue, oldValue) {
-        if (newValue) this.isShowIcon = true
+        this.isShowIcon = true
+        try {
+          this.currentAccount.checkAddress(newValue)
+          this.isVerifyPass = true
+        } catch (e) {
+          this.isVerifyPass = false
+        }
       }
     }
   },
@@ -65,6 +69,9 @@ export default {
     this.verifyForm()
   },
   computed: {
+    ...mapState({
+      'isPreventClick': 'isPreventClick'
+    }),
     ...mapGetters({
       'currentAccount': 'currentAccount',
       'currentAccountType': 'currentAccountType'
@@ -76,8 +83,11 @@ export default {
     }
   },
   methods: {
+    ...mapMutations({
+      setIsPreventClick: 'SET_IS_PREVENT_CLICK'
+    }),
     resetForm () {
-      this.receiveUsername = ''
+      this.receiverUsername = ''
       this.amount = ''
       this.memo = ''
     },
@@ -89,35 +99,41 @@ export default {
         }
       })
     },
-    clearReceiveUsername () {
+    clearReceiverUsername () {
       this.isShowIcon = false
-      this.receiveUsername = ''
+      this.receiverUsername = ''
     },
     submit () {
-      if (this.isPreventClick) return
-      this.isPreventClick = true
+      if (!this.receiverUsername || !this.amount || this.isPreventClick) return
+      // verify address
+      try {
+        this.currentAccount.checkAddress(this.receiverUsername)
+      } catch (e) {
+        layer.msg(this.$t('message.eos_transfer_verify_username'), { icon: 2, anim: 6 })
+        document.getElementById('receiverUsername').focus()
+      }
+      this.setIsPreventClick(true)
       let formData = {
         outputs: [{
-          account: this.receiveUsername,
+          account: this.receiverUsername,
           value: this.amount
         }],
         token: 'EOS',
         comment: this.memo
       }
+      layer.closeAll('msg')
+      layer.msg(this.$t('message.send_is_trading'), {icon: 0, time: 600000000})
       this.currentAccount.prepareTransfer(formData).then(value => {
-        console.log(value, 'prepareTx')
         return this.currentAccount.buildTx(value)
       }).then(value => {
-        console.log(value, 'buildTx')
         return this.currentAccount.sendTx(value)
       }).then(value => {
         // Empty retransmission status
-        this.isPreventClick = false
+        this.setIsPreventClick(false)
         layer.closeAll('msg')
         layer.msg(this.$t('message.send_submit_success'), { icon: 1 })
-        console.log(value, '成功')
       }).catch(value => {
-        this.isPreventClick = false
+        this.setIsPreventClick(false)
         utils.displayErrorCode(this, value)
       })
     }

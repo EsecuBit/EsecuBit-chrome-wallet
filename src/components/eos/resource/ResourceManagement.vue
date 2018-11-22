@@ -45,6 +45,7 @@
 </template>
 
 <script>
+import { mapState } from 'vuex'
 import BuyRAM from './children/BuyRAM'
 import SellRAM from './children/SellRAM'
 import Unstake from './children/Unstake'
@@ -70,8 +71,14 @@ export default {
       currentMenuIndex: 0
     }
   },
+  computed: {
+    ...mapState({
+      'isPreventClick': 'isPreventClick'
+    })
+  },
   methods: {
     switchMenu (index) {
+      if (this.isPreventClick) return
       this.currentMenuIndex = index
     }
   }

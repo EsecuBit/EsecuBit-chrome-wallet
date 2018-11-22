@@ -29,7 +29,7 @@ export default {
   computed: {
     ...mapState({
       'pageIndex': 'pageIndex',
-      'isPreventSwitch': 'isPreventSwitch',
+      'isPreventClick': 'isPreventClick',
       'headColor': 'headColor',
       'customizeColor': 'customizeColor'
     }),
@@ -47,8 +47,8 @@ export default {
       let eosPageList = [
         {label: this.$t('message.app_accounts'), icon: 'icon-zhanghu1'},
         {label: this.$t('message.app_transaction'), icon: 'icon-jiaoyi'},
-        {label: this.$t('message.app_vote'), icon: 'icon-toupiao'},
         {label: this.$t('message.app_resource'), icon: 'icon-huabanfuben'},
+        {label: this.$t('message.app_vote'), icon: 'icon-toupiao'},
         {label: this.$t('message.app_setting'), icon: 'icon-shezhi2'}
       ]
       return this.D.isEos(this.currentAccountType) ? eosPageList : defaultPageList
@@ -63,7 +63,7 @@ export default {
       this.$emit('addAccountContent')
     },
     switchPage (index) {
-      if (!this.isPreventSwitch) {
+      if (!this.isPreventClick) {
         this.setPageIndex(index)
         let isAddAccounts = index === 0
         this.setIsAddAccounts(isAddAccounts)

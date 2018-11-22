@@ -71,7 +71,7 @@
 <script>
 import Store from '../../../common/js/store'
 import Clipboard from 'clipboard'
-import { mapState, mapGetters } from 'vuex'
+import { mapState, mapGetters, mapMutations } from 'vuex'
 import utils from '../../../utils/utils'
 
 const form = layui.form
@@ -86,14 +86,14 @@ export default {
       accountQrcode: null,
       showAddress: false,
       isInitDisplay: true,
-      isSetAddress: null,
-      isPreventClick: false
+      isSetAddress: null
     }
   },
   computed: {
     ...mapState({
       'currentAccountIndex': 'currentAccountIndex',
-      'switchLangTimes': 'switchLangTimes'
+      'switchLangTimes': 'switchLangTimes',
+      'isPreventClick': 'isPreventClick'
     }),
     ...mapGetters({
       'currentAccountType': 'currentAccountType',
@@ -136,6 +136,9 @@ export default {
     })
   },
   methods: {
+    ...mapMutations({
+      setIsPreventClick: 'SET_IS_PREVENT_CLICK'
+    }),
     async init () {
       if (localStorage) {
         this.isSetAddress = typeof Store.fetch('isSetAddress') === 'boolean' ? Store.fetch('isSetAddress') : true
@@ -150,7 +153,7 @@ export default {
     generateAddress () {
       // Prevent duplicate generation of verification codes
       if (this.isPreventClick) return false
-      this.isPreventClick = true
+      this.setIsPreventClick(true)
       let layerIndex = (this.isSetAddress && this.D.isBtc(this.currentAccountType)) ? layer.msg(this.$t('message.accept_confirm'), { time: 1000000 }) : layer.msg(this.$t('message.accept_loading'), { time: 1000000 })
       let param = this.D.isBtc(this.currentAccountType) ? this.isSetAddress : false
       if (this.isFirst) {
@@ -161,9 +164,9 @@ export default {
             this.qrAddress = value.address
             this.switchDisplay()
             this.isFirst = false
-            this.isPreventClick = false
+            this.setIsPreventClick(false)
           }).catch(value => {
-            this.isPreventClick = false
+            this.setIsPreventClick(false)
             layer.close(layerIndex)
             utils.displayErrorCode(this, value)
           })
@@ -175,9 +178,9 @@ export default {
             this.changeQRCode(value.qrAddress)
             this.qrAddress = value.address
             this.switchDisplay()
-            this.isPreventClick = false
+            this.setIsPreventClick(false)
           }).catch(value => {
-            this.isPreventClick = false
+            this.setIsPreventClick(false)
             layer.close(layerIndex)
             utils.displayErrorCode(this, value)
           })

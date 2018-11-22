@@ -4,7 +4,7 @@ export const message = {
   app_send: 'Send',
   app_accept: 'Receive',
   app_home: 'Home',
-  app_transaction: 'Transaction',
+  app_transaction: 'Transfer Token',
   app_vote: 'Vote',
   app_resource: 'Resource',
   app_add_accounts: 'Add Accounts',
@@ -186,6 +186,8 @@ export const message = {
   error_noAddressCheckSum: 'ETH address has no check format',
   error_invalidAddressChecksum: 'Address verification error (not used)',
   error_invalidDataNotHex: 'The Data field should be a hex string',
+  error_invalidParams: 'The parameter is invalid',
+  error_permissionNotFound: 'Permission denied',
   error_valueIsDecimal: 'The smallest unit of the transaction cannot be a decimal',
   error_notImplemented: 'Function not implemented',
   error_unknown: 'Unknown mistake',
@@ -193,5 +195,7 @@ export const message = {
 
   icon_title_edit: 'edit',
   icon_title_refresh: 'refresh',
-  icon_title_copy: 'copy'
+  icon_title_copy: 'copy',
+
+  eos_transfer_verify_username: 'The username does not exist. Please enter again'
 }

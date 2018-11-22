@@ -76,7 +76,7 @@ export default {
       setCurrentExchangeRate: 'SET_CURRENT_EXCHANGE_RATE',
       setNetInfo: 'SET_NET_INFO',
       setPageIndex: 'SET_PAGE_INDEX',
-      setIsPreventSwitch: 'SET_IS_PREVENT_SWITCH',
+      setIsPreventClick: 'SET_IS_PREVENT_CLICK',
       setHeadColor: 'SET_HEAD_COLOR',
       setCustomizeColor: 'SET_CUSTOMIZE_COLOR',
       setCurrentAccountIndex: 'SET_CURRENT_ACCOUNT_INDEX'
@@ -196,7 +196,7 @@ export default {
           this.isShowLogin = true
           this.setCurrentAccountIndex(0)
           this.setPageIndex(0)
-          this.setIsPreventSwitch(false)
+          this.setIsPreventClick(false)
           layer.msg(this.$t('message.app_plug_out'))
         }
       })

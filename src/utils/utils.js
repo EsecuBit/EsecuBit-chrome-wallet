@@ -61,8 +61,10 @@ export default {
       601: vm.$t('message.error_invalidAddress'),
       602: vm.$t('message.error_noAddressCheckSum'), // for eth
       603: vm.$t('message.error_invalidAddressChecksum'),
-      605: vm.$t('message.error_invalidDataNotHex'),
       604: vm.$t('message.error_valueIsDecimal'),
+      605: vm.$t('message.error_invalidDataNotHex'),
+      607: vm.$t('message.error_invalidParams'),
+      608: vm.$t('message.error_permissionNotFound'),
       10000: vm.$t('message.error_notImplemented'),
       10001: vm.$t('message.error_unknown'),
       10002: vm.$t('message.error_coinNotSupported')

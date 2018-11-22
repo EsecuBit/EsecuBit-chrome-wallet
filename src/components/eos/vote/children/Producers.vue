@@ -8,11 +8,14 @@
       <div class="layui-form-item">
         <label class="from-label">Producers</label>
           <input type="text" placeholder="Producers name" v-model="producersNameArr[index]" autocomplete="off" class="layui-input producer-input"
-                 v-for="(item, index) in producersNameArr">
+                 v-for="(item, index) in producersNameArr" lay-verify="isEmpty">
       </div>
       <div class="layui-form-item">
         <a class="add-data" @click="addProducerInput" href="#">
           <i class="layui-icon">&#xe654;</i> add Producers
+        </a>
+        <a class="delete-data" @click="deleteProducerInput" href="#" v-if="producersNameArr.length > 1">
+          <i class="layui-icon layui-icon-close-fill"></i> delete Producer
         </a>
       </div>
       <div class="layui-form-item" style="margin-top: 10px">
@@ -24,7 +27,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapState, mapGetters, mapMutations } from 'vuex'
 import utils from '../../../../utils/utils'
 
 const form = layui.form
@@ -33,14 +36,16 @@ export default {
   name: 'Producers',
   data () {
     return {
-      producersNameArr: [''],
-      isPreventClick: false
+      producersNameArr: ['']
     }
   },
   mounted () {
     this.verifyForm()
   },
   computed: {
+    ...mapState({
+      'isPreventClick': 'isPreventClick'
+    }),
     ...mapGetters({
       'currentAccount': 'currentAccount',
       'currentAccountType': 'currentAccountType'
@@ -52,6 +57,9 @@ export default {
     }
   },
   methods: {
+    ...mapMutations({
+      setIsPreventClick: 'SET_IS_PREVENT_CLICK'
+    }),
     resetForm () {
       this.producersNameArr = ['']
     },
@@ -66,25 +74,30 @@ export default {
     addProducerInput () {
       this.producersNameArr.push('')
     },
+    deleteProducerInput () {
+      this.producersNameArr.pop()
+    },
     submit () {
+      if (this.isPreventClick) return
+      for (let i = 0; i < this.producersNameArr.length; i++) {
+        if (!this.producersNameArr[i]) return
+      }
+      this.setIsPreventClick(true)
       let formData = {
         producers: this.producersNameArr
       }
-      console.log(formData)
+      layer.msg(this.$t('message.send_is_trading'), {icon: 0, time: 600000000})
       this.currentAccount.prepareVote(formData).then(value => {
-        console.log(value, 'prepareTx')
         return this.currentAccount.buildTx(value)
       }).then(value => {
-        console.log(value, 'buildTx')
         return this.currentAccount.sendTx(value)
       }).then(value => {
         // Empty retransmission status
-        this.isPreventClick = false
+        this.setIsPreventClick(false)
         layer.closeAll('msg')
         layer.msg(this.$t('message.send_submit_success'), { icon: 1 })
-        console.log(value, '成功')
       }).catch(value => {
-        this.isPreventClick = false
+        this.setIsPreventClick(false)
         utils.displayErrorCode(this, value)
       })
     }
@@ -123,6 +136,17 @@ export default {
   }
   .add-data{
     color: #009a61;
+    margin-right: 15px;
+    &:hover{
+      opacity: .75;
+    }
+  }
+  .delete-data{
+    color: #e74c3c;
+    .layui-icon{
+      display: inline-block;
+      vertical-align: middle;
+    }
     &:hover{
       opacity: .75;
     }

@@ -21,10 +21,10 @@
             <EosTransaction/>
           </div>
           <div class="main-tab-item" :class="{'layui-show': 2 === pageIndex}">
-            <Vote/>
+            <ResourceManagement/>
           </div>
           <div class="main-tab-item" :class="{'layui-show': 3 === pageIndex}">
-            <ResourceManagement/>
+            <Vote/>
           </div>
           <div class="main-tab-item" :class="{'layui-show': 4 === pageIndex}">
             <Setting/>

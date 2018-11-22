@@ -33,7 +33,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapState, mapGetters, mapMutations } from 'vuex'
 import utils from '../../../../utils/utils'
 const form = layui.form
 const layer = layui.layer
@@ -50,6 +50,9 @@ export default {
     this.verifyForm()
   },
   computed: {
+    ...mapState({
+      'isPreventClick': 'isPreventClick'
+    }),
     ...mapGetters({
       'currentAccount': 'currentAccount',
       'currentAccountType': 'currentAccountType'
@@ -61,6 +64,9 @@ export default {
     }
   },
   methods: {
+    ...mapMutations({
+      setIsPreventClick: 'SET_IS_PREVENT_CLICK'
+    }),
     resetForm () {
       this.receiverUsername = ''
       this.CPUStakeAmount = ''
@@ -75,13 +81,15 @@ export default {
       })
     },
     submit () {
+      if (this.isPreventClick || !this.receiverUsername || !this.CPUStakeAmount || !this.NETStakeAmount) return
+      this.setIsPreventClick(true)
       let formData = {
         delegate: true,
         network: this.NETStakeAmount,
         cpu: this.CPUStakeAmount,
         receiver: this.receiverUsername
       }
-      console.log(formData)
+      layer.msg(this.$t('message.send_is_trading'), {icon: 0, time: 600000000})
       this.currentAccount.prepareDelegate(formData).then(value => {
         console.log(value, 'prepareTx')
         return this.currentAccount.buildTx(value)
@@ -90,12 +98,11 @@ export default {
         return this.currentAccount.sendTx(value)
       }).then(value => {
         // Empty retransmission status
-        this.isPreventClick = false
         layer.closeAll('msg')
         layer.msg(this.$t('message.send_submit_success'), { icon: 1 })
-        console.log(value, '成功')
+        this.setIsPreventClick(false)
       }).catch(value => {
-        this.isPreventClick = false
+        this.setIsPreventClick(false)
         utils.displayErrorCode(this, value)
       })
     }

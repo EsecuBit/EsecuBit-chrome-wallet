@@ -16,7 +16,7 @@ const state = {
   netInfo: {},
   appVersion: '0.1.25',
   pageIndex: 0,
-  isPreventSwitch: false,
+  isPreventClick: false,
   headColor: '',
   customizeColor: '',
   currentAccountIndex: 0,

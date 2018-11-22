@@ -26,8 +26,8 @@ const mutations = {
   SET_PAGE_INDEX: (state, pageIndex) => {
     state.pageIndex = pageIndex
   },
-  SET_IS_PREVENT_SWITCH: (state, isPreventSwitch) => {
-    state.isPreventSwitch = isPreventSwitch
+  SET_IS_PREVENT_CLICK: (state, isPreventClick) => {
+    state.isPreventClick = isPreventClick
   },
   SET_HEAD_COLOR: (state, headColor) => {
     state.headColor = headColor
