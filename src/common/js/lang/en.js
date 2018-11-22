@@ -151,6 +151,7 @@ export const message = {
   setting_network: 'Network',
   setting_btc_net: 'Bitcoin Network Information',
   setting_etc_net: 'Ether Network Information',
+  setting_eos_net: 'EOS Network Information',
   setting_exchange: 'Exchange Provider',
   setting_fee: 'Transaction Fee Suggestion Provider',
   setting_btc_info: 'Network Access Provider',

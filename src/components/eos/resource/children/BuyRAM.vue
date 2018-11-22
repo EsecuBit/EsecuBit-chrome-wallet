@@ -9,7 +9,7 @@
         </div>
         <div class="layui-form-item" style="position: relative">
           <label class="from-label">RAM Receiver: </label>
-          <input type="text" placeholder="Account receiving RAM (may be same as payer to buy for yourself)"
+          <input type="text" placeholder="Account receiving RAM (may be same as payer to buy for yourself)" id="receiverBuyRAM"
                  v-model="receiverUsername" lay-verify="isEmpty" autocomplete="off" class="layui-input">
           <a href="#" class="verify-icon" v-if="isShowIcon">
             <i class="layui-icon-close-fill layui-icon red" v-show="!isVerifyPass" @click="clearReceiverUsername"></i>
@@ -119,7 +119,8 @@ export default {
         this.currentAccount.checkAddress(this.receiverUsername)
       } catch (e) {
         layer.msg(this.$t('message.eos_transfer_verify_username'), { icon: 2, anim: 6 })
-        document.getElementById('receiverUsername').focus()
+        this.receiverUsername = ''
+        document.getElementById('receiverBuyRAM').focus()
         return
       }
       this.setIsPreventClick(true)

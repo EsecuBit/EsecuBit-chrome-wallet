@@ -110,6 +110,7 @@ export default {
         this.currentAccount.checkAddress(this.receiverUsername)
       } catch (e) {
         layer.msg(this.$t('message.eos_transfer_verify_username'), { icon: 2, anim: 6 })
+        this.receiverUsername = ''
         document.getElementById('receiverUsername').focus()
       }
       this.setIsPreventClick(true)

@@ -63,6 +63,27 @@
         </tbody>
       </table>
     </div>
+    <div class="table-item" v-if="eosNetList.length > 0">
+      <h3>{{$t('message.setting_eos_net')}}</h3>
+      <table class="layui-table" >
+        <colgroup>
+          <col width="100">
+          <col width="200">
+        </colgroup>
+        <thead>
+        <tr>
+          <th>{{$t('message.setting_name')}}</th>
+          <th>{{$t('message.setting_network')}}</th>
+        </tr>
+        </thead>
+        <tbody >
+        <tr v-for="item in eosNetList">
+          <td>{{item.name}}</td>
+          <td>{{item.value}}</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </template>
 
@@ -78,12 +99,11 @@ export default {
     }),
     hardwareList () {
       if (this.walletInfo) {
-        let hardwareArr = [
+        return [
           {name: this.$t('message.setting_sdk_version'), value: this.walletInfo.sdk_version},
           {name: this.$t('message.setting_cos_version'), value: this.walletInfo.cos_version},
           {name: this.$t('message.setting_app_version'), value: this.appVersion}
         ]
-        return hardwareArr
       } else return []
     },
     bitNetList () {
@@ -92,14 +112,11 @@ export default {
         let exchangeNet = this.netInfo[netString].exchange
         let feeNet = this.netInfo[netString].fee
         let btcNet = this.netInfo[netString].network
-
-        let netList = [
+        return [
           {name: this.$t('message.setting_btc_info'), value: btcNet},
           {name: this.$t('message.setting_fee'), value: feeNet},
           {name: this.$t('message.setting_exchange'), value: exchangeNet}
         ]
-        console.log(this.netInfo, 'this.netInfo')
-        return netList
       } else return []
     },
     ethNetList () {
@@ -108,12 +125,22 @@ export default {
         let exchangeNet = this.netInfo[netString].exchange
         let feeNet = this.netInfo[netString].fee
         let btcNet = this.netInfo[netString].network
-        let netList = [
+        return [
           {name: this.$t('message.setting_btc_info'), value: btcNet},
           {name: this.$t('message.setting_fee'), value: feeNet},
           {name: this.$t('message.setting_exchange'), value: exchangeNet}
         ]
-        return netList
+      } else return []
+    },
+    eosNetList () {
+      if (this.netInfo[this.D.coin.test.eosJungle] || this.netInfo[this.D.coin.main.eos]) {
+        let netString = this.netInfo[this.D.coin.test.eosJungle] ? this.D.coin.test.eosJungle : this.D.coin.main.eos
+        let exchangeNet = this.netInfo[netString].exchange
+        let btcNet = this.netInfo[netString].network
+        return [
+          {name: this.$t('message.setting_btc_info'), value: btcNet},
+          {name: this.$t('message.setting_exchange'), value: exchangeNet}
+        ]
       } else return []
     }
   }

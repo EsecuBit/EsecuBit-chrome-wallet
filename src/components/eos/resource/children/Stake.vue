@@ -8,10 +8,14 @@
           <input type="text" placeholder="Username which owns the EOS"
                  v-model="ownerUsername" lay-verify="isEmpty" autocomplete="off" class="layui-input" readonly>
         </div>
-        <div class="layui-form-item">
+        <div class="layui-form-item" style="position: relative">
           <label class="from-label">Receiver of Stake: </label>
-          <input type="text" placeholder="Username to receive NET/CPU"
+          <input type="text" placeholder="Username to receive NET/CPU" id="receiverStake"
                  v-model="receiverUsername" lay-verify="isEmpty" autocomplete="off" class="layui-input">
+          <a href="#" class="verify-icon" v-if="isShowIcon">
+            <i class="layui-icon-close-fill layui-icon red" v-show="!isVerifyPass" @click="clearReceiverUsername"></i>
+            <i class="layui-icon-ok-circle layui-icon green" v-show="isVerifyPass" ></i>
+          </a>
         </div>
         <div class="layui-form-item">
           <label class="from-label">Amount of CPU to Stake (in EOS)</label>
@@ -43,7 +47,22 @@ export default {
     return {
       receiverUsername: '',
       CPUStakeAmount: '',
+      isVerifyPass: true,
+      isShowIcon: false,
       NETStakeAmount: ''
+    }
+  },
+  watch: {
+    receiverUsername: {
+      handler (newValue, oldValue) {
+        this.isShowIcon = true
+        try {
+          this.currentAccount.checkAddress(newValue)
+          this.isVerifyPass = true
+        } catch (e) {
+          this.isVerifyPass = false
+        }
+      }
     }
   },
   mounted () {
@@ -80,8 +99,21 @@ export default {
         }
       })
     },
+    clearReceiverUsername () {
+      this.isShowIcon = false
+      this.receiverUsername = ''
+    },
     submit () {
       if (this.isPreventClick || !this.receiverUsername || !this.CPUStakeAmount || !this.NETStakeAmount) return
+      // verify address
+      try {
+        this.currentAccount.checkAddress(this.receiverUsername)
+      } catch (e) {
+        layer.msg(this.$t('message.eos_transfer_verify_username'), { icon: 2, anim: 6 })
+        this.receiverUsername = ''
+        document.getElementById('receiverStake').focus()
+        return
+      }
       this.setIsPreventClick(true)
       let formData = {
         delegate: true,
@@ -133,6 +165,16 @@ export default {
       display: block;
       margin-bottom: 6px;
       font-weight: 600;
+    }
+  }
+  .verify-icon{
+    position: absolute;
+    bottom: 3px;
+    right: 15px;
+    height: 38px;
+    line-height: 38px;
+    .layui-icon{
+      font-size: 18px;
     }
   }
 </style>

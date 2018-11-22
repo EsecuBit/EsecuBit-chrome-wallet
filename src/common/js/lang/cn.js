@@ -152,6 +152,7 @@ export const message = {
   setting_network: '网址',
   setting_btc_net: '比特币网络信息',
   setting_etc_net: '以太币网络信息',
+  setting_eos_net: '柚子币网络信息',
   setting_exchange: '汇率网站',
   setting_fee: '交易费用网站',
   setting_btc_info: '网络访问提供商',

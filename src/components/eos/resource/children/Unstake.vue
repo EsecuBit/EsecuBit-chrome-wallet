@@ -9,8 +9,12 @@
         </div>
         <div class="layui-form-item">
           <label class="from-label">Account name of who currently holds stake </label>
-          <input type="text" placeholder="Account with stake"
+          <input type="text" placeholder="Account with stake" id="receiverUnStake"
                  v-model="receiverUsername" lay-verify="isEmpty" autocomplete="off" class="layui-input">
+          <a href="#" class="verify-icon" v-if="isShowIcon">
+            <i class="layui-icon-close-fill layui-icon red" v-show="!isVerifyPass" @click="clearReceiverUsername"></i>
+            <i class="layui-icon-ok-circle layui-icon green" v-show="isVerifyPass" ></i>
+          </a>
         </div>
         <div class="layui-form-item">
           <label class="from-label">Amount of CPU to Unstake (in EOS)</label>
@@ -42,11 +46,26 @@ export default {
     return {
       receiverUsername: '',
       CPUUnStakeAmount: '',
+      isVerifyPass: true,
+      isShowIcon: false,
       NETUnStakeAmount: ''
     }
   },
   mounted () {
     this.verifyForm()
+  },
+  watch: {
+    receiverUsername: {
+      handler (newValue, oldValue) {
+        this.isShowIcon = true
+        try {
+          this.currentAccount.checkAddress(newValue)
+          this.isVerifyPass = true
+        } catch (e) {
+          this.isVerifyPass = false
+        }
+      }
+    }
   },
   computed: {
     ...mapState({
@@ -79,8 +98,21 @@ export default {
         }
       })
     },
+    clearReceiverUsername () {
+      this.isShowIcon = false
+      this.receiverUsername = ''
+    },
     submit () {
       if (this.isPreventClick || !this.receiverUsername || !this.CPUStakeAmount || !this.NETStakeAmount) return
+      // verify address
+      try {
+        this.currentAccount.checkAddress(this.receiverUsername)
+      } catch (e) {
+        layer.msg(this.$t('message.eos_transfer_verify_username'), { icon: 2, anim: 6 })
+        this.receiverUsername = ''
+        document.getElementById('receiverUnStake').focus()
+        return
+      }
       this.setIsPreventClick(true)
       let formData = {
         delegate: false,
