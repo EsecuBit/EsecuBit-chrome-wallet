@@ -9,13 +9,13 @@
           </select>
         </div>
       </div>
-      <div class="layui-form-item" >
+      <div class="layui-form-item" v-if="isSupportedBtc">
         <label class="layui-form-label">{{$t('message.setting_btc_units')}}</label>
         <div class="layui-input-block" >
           <input type="radio" lay-filter="bitUnit" name="bitUnit" :value="item.value" :title="item.label" :checked="item.value === unitBitChecked" v-for="item in bitUnitValueList">
         </div>
       </div>
-      <div class="layui-form-item" >
+      <div class="layui-form-item" v-if="isSupportedEth">
         <label class="layui-form-label">{{$t('message.setting_etc_units')}}</label>
         <div class="layui-input-block" >
           <input type="radio" lay-filter="ethUnit" name="ethUnit" :value="item.value" :title="item.label" :checked="item.value === unitEthChecked" v-for="item in ethUnitValueList">
@@ -72,6 +72,20 @@ export default{
         { name: this.$t('message.setting_green'), colorClass: 'green-skin', id: 'green' },
         { name: this.$t('message.setting_gray'), colorClass: 'gray-skin', id: 'gray' }
       ]
+    },
+    isSupportedBtc () {
+      let isSupportedBtc = false
+      this.D.supportedCoinTypes().forEach(item => {
+        if (this.D.isBtc(item)) isSupportedBtc = true
+      })
+      return isSupportedBtc
+    },
+    isSupportedEth () {
+      let isSupportedBtc = false
+      this.D.supportedCoinTypes().forEach(item => {
+        if (this.D.isEth(item)) isSupportedBtc = true
+      })
+      return isSupportedBtc
     }
   },
   mounted () {
