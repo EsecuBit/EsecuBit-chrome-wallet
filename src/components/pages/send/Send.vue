@@ -728,7 +728,7 @@ export default {
           layer.msg(this.$t('message.send_submit_success'), { icon: 1 })
           this.setPageIndex(0)
         }).catch(value => {
-          this.isPreventClick(false)
+          this.setIsPreventClick(false)
           utils.displayErrorCode(this, value)
         })
       }, 200)
