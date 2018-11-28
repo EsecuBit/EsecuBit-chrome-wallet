@@ -790,6 +790,9 @@ export default {
     background-color: #fff;
       -webkit-box-shadow: 0 0 0 1000px white inset;
   }
+  ::-webkit-input-placeholder{
+    color: #999;
+  }
   .account-msg {
     display: inline-block;
     height: 38px;
@@ -814,7 +817,7 @@ export default {
     max-width: 210px;
     text-align: end;
     height: 55px;
-    font-size: 20px;
+    font-size: 16px;
     float: right;
     &:after{
       content: "";
