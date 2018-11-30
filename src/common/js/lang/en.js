@@ -81,7 +81,7 @@ export const message = {
   send_custom_fee: 'Custom fees',
   send_select_fee: 'Select fees',
   send_transaction_fees: 'Transaction Fees',
-  send_data: 'Data',
+  send_data: 'Data (Optional)',
   send_total_fee: 'Total cost',
   send_fee: 'Cost',
   send_advance: 'Advanced: Add Data',

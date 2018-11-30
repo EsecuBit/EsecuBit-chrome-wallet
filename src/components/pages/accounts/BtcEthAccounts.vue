@@ -28,7 +28,7 @@
       </div>
     </div>
 
-    <h1 class="table-title"><i class="layui-icon layui-icon-table"></i>{{$t('message.accounts_recent_operations')}}</h1>
+    <h1 class="table-title"><i class="layui-icon layui-icon-table"></i> {{$t('message.accounts_recent_operations')}}</h1>
 
     <div class="layui-row">
       <div class="layui-col-xs12 ">
@@ -235,7 +235,7 @@ export default {
       if (table.showAddresses) {
         let address = ''
         if (table.showAddresses.length === 1) {
-          address = table.showAddresses[ 0 ]
+          address = table.showAddresses[0]
         } else if (table.showAddresses.length > 1) {
           for (let item of table.showAddresses) {
             address += item + '; '

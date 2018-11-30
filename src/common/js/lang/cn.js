@@ -81,7 +81,7 @@ export const message = {
   send_custom_fee: '自定义费用',
   send_select_fee: '选择费用',
   send_transaction_fees: '交易费用',
-  send_data: 'Data',
+  send_data: 'Data (可选)',
   send_total_fee: '总费用',
   send_fee: '费用',
   send_advance: '高级选项：添加Data',

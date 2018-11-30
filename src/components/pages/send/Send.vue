@@ -51,7 +51,7 @@
           <div class="layui-input-block input-width" style="position: relative;height: 55px">
             <div style="width: 300px">
               <div v-if="coinType" class="unit-display" >{{currentDisplayUnit(currentAccount.coinType)}}</div>
-              <input type="number" v-model="amountValue" name="money" id="money" lay-verify="isEmpty" v-if="coinType"
+              <input type="number" v-model="amountValue" name="money" id="money" lay-verify="isEmpty" v-if="coinType" step="0.00000001"
                      :placeholder="$t('message.send_amount')" autocomplete="off" class="layui-input amount-input">
             </div>
             <button class="layui-btn layui-btn-radius layui-btn-sm max-btn" type="button" @click="maxAmount">MAX</button>
@@ -89,7 +89,8 @@
           <div class="layui-input-block input-width" style="position: relative;">
             <div style="width: 300px">
               <div v-if="coinType" class="transFee-unit" >{{currentTransactionUnit(coinType)}}</div>
-              <input type="number"  lay-verify="isEmpty" v-model="customFees" :placeholder="$t('message.send_amount')" autocomplete="off" class="layui-input transFee-input">
+              <input type="number"  lay-verify="isEmpty" v-model="customFees" step="0.00000001"
+                     :placeholder="$t('message.send_amount')" autocomplete="off" class="layui-input transFee-input">
             </div>
             <button class="layui-btn layui-btn-sm layui-btn-radius transFee-btn" type="button" @click="switchSelectButton">{{$t('message.send_select_fee')}}</button>
           </div>
@@ -264,7 +265,7 @@ export default {
           let getValue = table.outputs[0].value
           this.amountValue = this.toTargetCoinUnit(String(getValue))
           this.addressValue = table.outputs[0].address
-          this.etcData = table.data ? table.data : ''
+          this.etcData = table.data === '0x' ? '' : table.data.substr(2)
           this.isShowData = !!table.data
           this.oldTxId = table.txId
         })
