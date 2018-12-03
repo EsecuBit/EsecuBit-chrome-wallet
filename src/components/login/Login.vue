@@ -60,14 +60,14 @@ export default {
     },
     init () {
       this.promptMsg = this.$t('message.login_prompt_msg2')
-      this.isLoadingIcon = !this.isLoadingIcon
+      this.isLoadingIcon = true
     },
     sync () {
       this.promptMsg = this.$t('message.login_prompt_msg3')
     },
     quitLoading () {
       this.promptMsg = this.$t('message.login_prompt_msg1')
-      this.isLoadingIcon = !this.isLoadingIcon
+      this.isLoadingIcon = false
     }
   }
 }

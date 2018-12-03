@@ -67,10 +67,10 @@ export default{
   computed: {
     skinColor () {
       return [
+        { name: this.$t('message.setting_gray'), colorClass: 'gray-skin', id: 'gray' },
         { name: this.$t('message.setting_black'), colorClass: 'black-skin', id: 'black' },
         { name: this.$t('message.setting_dark_blue'), colorClass: 'blue-skin', id: 'blue' },
-        { name: this.$t('message.setting_green'), colorClass: 'green-skin', id: 'green' },
-        { name: this.$t('message.setting_gray'), colorClass: 'gray-skin', id: 'gray' }
+        { name: this.$t('message.setting_green'), colorClass: 'green-skin', id: 'green' }
       ]
     },
     isSupportedBtc () {
