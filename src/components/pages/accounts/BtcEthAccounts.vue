@@ -466,6 +466,7 @@ export default {
   @white: #fff;
   @cyan-blue: #009688;
   @red: #e74c3c;
+  @gray: #f2f2f2;
   @green: #009a61;
   .max-width(@width){
     display: inline-block;
@@ -476,7 +477,7 @@ export default {
   }
   /*rewrite sidebar css*/
   .layui-nav{
-    background: #fff;
+    background: @white;
     color: @font-color;
     .layui-nav-itemed>a{
       color: @font-color;
@@ -497,7 +498,7 @@ export default {
     height: 52px;
     margin-bottom: 15px;
     padding: 18px 15px 16px 15px;
-    background-color: #f2f2f2;
+    background-color: @gray;
     border-radius: 5px;
     border: 1px solid #f0f0f0;
     box-shadow: 1px 4px 8px 0 rgba(0,0,0,0.15);
@@ -571,7 +572,7 @@ export default {
     height: 36px;
     line-height: 36px;
     color: @font-color;
-    background-color: #f2f2f2;
+    background-color: @gray;
     border-radius: 6px;
     margin: 0 20px 20px;
   }

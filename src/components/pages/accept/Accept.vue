@@ -152,7 +152,7 @@ export default {
     },
     generateAddress () {
       // Prevent duplicate generation of verification codes
-      if (this.isPreventClick) return false
+      if (this.isPreventClick) return
       this.setIsPreventClick(true)
       let layerIndex = (this.isSetAddress && this.D.isBtc(this.currentAccountType)) ? layer.msg(this.$t('message.accept_confirm'), { time: 1000000 }) : layer.msg(this.$t('message.accept_loading'), { time: 1000000 })
       let param = this.D.isBtc(this.currentAccountType) ? this.isSetAddress : false

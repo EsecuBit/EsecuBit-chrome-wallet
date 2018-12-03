@@ -350,7 +350,7 @@ export default {
         if (/[eE]/.test(newValue)) {
           this.customFees = null
           layer.msg(this.$t('message.send_scientific_count'), { icon: 2, anim: 6 })
-          return false
+          return
         }
         if (Number(newValue) < 0) {
           this.customFees = null
@@ -541,10 +541,10 @@ export default {
       })
     },
     verifyForm () {
-      let that = this
+      let isEmptyMsg = this.$t('message.send_form_is_empty')
       form.verify({
         isEmpty (value) {
-          if (!value) return that.$t('message.send_form_is_empty')
+          if (!value) return isEmptyMsg
         }
       })
     },

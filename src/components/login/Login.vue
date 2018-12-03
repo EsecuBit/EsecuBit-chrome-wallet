@@ -35,7 +35,7 @@ export default {
   data () {
     return {
       isLoadingIcon: false,
-      promptMsg: this.$t('message.login_prompt_msg'),
+      promptMsg: this.$t('message.login_prompt_msg1'),
       isShowError: false
     }
   },
@@ -58,10 +58,6 @@ export default {
     showErrorMsg () {
       this.promptMsg = this.loginErrorMsg
     },
-    loading () {
-      this.promptMsg = this.$t('message.login_prompt_msg2')
-      this.isLoadingIcon = !this.isLoadingIcon
-    },
     init () {
       this.promptMsg = this.$t('message.login_prompt_msg2')
       this.isLoadingIcon = !this.isLoadingIcon
@@ -77,7 +73,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style scoped lang="less">
   .login-container{
     position: absolute;
     top: 0;
@@ -89,31 +85,29 @@ export default {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    .layadmin-user-login {
+      flex: 1;
+      display: flex;
+      width: 100%;
+      .layadmin-user-login-main {
+        width: 375px;
+        margin: auto;
+        height: 200px;
+        box-sizing: border-box
+      }
+      .img {
+        margin-bottom: 25px;
+      }
+    }
+    .layadmin-center{
+      flex: 1;
+      display: flex;
+      margin: auto;
+      width: 100%;
+      padding: 0 ;
+      background-color: #F2F2F2;
+    }
   }
-  .layadmin-user-login {
-    flex: 1;
-    display: flex;
-    width: 100%;
-  }
-  .img {
-    margin-bottom: 25px;
-  }
-  .layadmin-center{
-    flex: 1;
-    display: flex;
-    margin: auto;
-    width: 100%;
-    padding: 0 ;
-    background-color: #F2F2F2;
-  }
-
-  .layadmin-user-login-main {
-    width: 375px;
-    margin: auto;
-    height: 200px;
-    box-sizing: border-box
-  }
-
   .layadmin-user-login-box {
     padding: 20px
   }
@@ -121,14 +115,22 @@ export default {
   .layadmin-user-login-header {
     text-align: center;
     margin: auto;
-  }
-  .layadmin-user-login-header h2 {
-    margin-bottom: 10px;
     font-weight: 300;
-    height: 30px;
-    line-height: 30px;
-    font-size: 30px;
-    color: #000
+    h2 {
+      margin-bottom: 10px;
+      height: 30px;
+      line-height: 30px;
+      font-size: 30px;
+      color: #000
+    }
+    h3 {
+      margin-bottom: 10px;
+      font-size: 20px;
+      color: #000
+    }
+    p {
+      color: #999
+    }
   }
   .loader-anim {
     margin-bottom: 20px;
@@ -138,31 +140,19 @@ export default {
     font-size: 30px;
     color: #000
   }
-  .layadmin-user-login-header h3 {
-    margin-bottom: 10px;
-    font-weight: 300;
-    font-size: 20px;
-    color: #000
-  }
-
-  .layadmin-user-login-header p {
-    font-weight: 300;
-    color: #999
-  }
   .contact-us {
     flex: 1;
     display: flex;
     width: 100%;
     text-align: center;
-  }
-  .contact-us a{
-    margin: auto;
-    font-weight: 300;
-    color: #999;
-  }
-  .contact-us a:hover {
-    font-weight: 300;
-    color: #555;
+    a{
+      margin: auto;
+      font-weight: 300;
+      color: #999;
+      &:hover {
+        color: #555;
+      }
+    }
   }
   @media screen and (max-width: 768px) {
     .layadmin-user-login {

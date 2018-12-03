@@ -103,7 +103,6 @@ export default {
         }
       })
     })
-    console.log(otherActionArray, 'otherActionArray')
     return {
       transferActionArray: transferActionArray,
       resourceActionArray: resourceActionArray,

@@ -60,18 +60,11 @@ export default {
       let formData = {
         proxy: this.ProxyName
       }
-      this.currentAccount.prepareVote(formData).then(value => {
-        console.log(value, 'prepareTx')
-        return this.currentAccount.buildTx(value)
-      }).then(value => {
-        console.log(value, 'buildTx')
-        return this.currentAccount.sendTx(value)
-      }).then(value => {
+      this.currentAccount.prepareVote(formData).then(value => this.currentAccount.buildTx(value)).then(value => this.currentAccount.sendTx(value)).then(value => {
         // Empty retransmission status
         this.isPreventClick = false
         layer.closeAll('msg')
         layer.msg(this.$t('message.send_submit_success'), { icon: 1 })
-        console.log(value, '成功')
       }).catch(value => {
         this.isPreventClick = false
         utils.displayErrorCode(this, value)

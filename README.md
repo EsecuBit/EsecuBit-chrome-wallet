@@ -10,7 +10,7 @@ You can also  build the application package yourself to use it without hardware 
 
 ## Main technology
 
-vue2 + vuex + layui + webpack + ES6/7 + less + flex
+vue2 + vuex + vue-i18n + layui + webpack + ES6/7 + less + flex
 
 ## Development
 
@@ -63,6 +63,10 @@ npm run build
 │   │       ├── send                            // btc and eth Send components
 │   │       └── setting                         // btc and eth Setting components
 │   ├── store                                   // vuex Plugin
+│   │     ├── actions                           // actions
+│   │     ├── getters                           // getters
+│   │     ├── index                             // index
+│   │     └── mutations                         // mutations
 │   ├── utils                                   // utils package
 │   ├── App.vue                                 // App entry
 │   └── main.js                                 // the main js for loading components and import sdk
@@ -110,4 +114,4 @@ npm run build
 
 # License
 
-[License](https://github.com/EsecuBit/EsecuBit-chrome-wallet/blob/master/LICENSE)
+[LGPL-3.0 ](https://github.com/EsecuBit/EsecuBit-chrome-wallet/blob/master/LICENSE)

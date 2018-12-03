@@ -1,11 +1,9 @@
 const getters = {
   currentAccountType: (state) => {
-    let currentAccountType = state.accountList.length > 0 ? state.accountList[state.currentAccountIndex].coinType : ''
-    return currentAccountType
+    return state.accountList.length > 0 ? state.accountList[state.currentAccountIndex].coinType : ''
   },
   currentAccount: (state) => {
-    let currentAccount = state.accountList.length > 0 ? state.accountList[state.currentAccountIndex] : null
-    return currentAccount
+    return state.accountList.length > 0 ? state.accountList[state.currentAccountIndex] : null
   }
 }
 export default getters
