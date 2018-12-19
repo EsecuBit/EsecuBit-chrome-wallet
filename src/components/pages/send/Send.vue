@@ -265,7 +265,7 @@ export default {
           let getValue = table.outputs[0].value
           this.amountValue = this.toTargetCoinUnit(String(getValue))
           this.addressValue = table.outputs[0].address
-          this.etcData = table.data === '0x' ? '' : table.data.substr(2)
+          this.etcData = (table.data === '0x' || !table.data) ? '' : table.data.substr(2)
           this.isShowData = !!table.data
           this.oldTxId = table.txId
         })

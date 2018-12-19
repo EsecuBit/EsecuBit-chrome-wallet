@@ -59,9 +59,6 @@ export default {
       setIsAddAccounts: 'SET_IS_Add_ACCOUNTS',
       setPageIndex: 'SET_PAGE_INDEX'
     }),
-    addAccountContent () {
-      this.$emit('addAccountContent')
-    },
     switchPage (index) {
       if (!this.isPreventClick) {
         this.setPageIndex(index)

@@ -109,7 +109,7 @@ export default {
     color: #fff;
   }
   .layui-btn-normal {
-    .color-skin(#4898d5);
+    .color-skin(#4898d5)!important;
   }
 
 </style>

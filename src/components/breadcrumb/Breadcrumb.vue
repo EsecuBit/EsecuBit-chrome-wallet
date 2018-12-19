@@ -35,9 +35,7 @@
           <div class="msg-content">
             <p class="error-msg">
               <i class="layui-icon" style="color: #dd4b39;font-size: 26px">&#xe702;</i>&nbsp;
-              <span>
-                    {{$t('message.app_error_prompt_msg')}}
-                  </span>
+              <span>{{$t('message.app_error_prompt_msg')}}</span>
             </p>
           </div>
         </div>
